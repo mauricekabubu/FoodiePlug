@@ -1,9 +1,105 @@
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, ROUND_FLOOR
 
 from django.db import models
 
 from apps.pantry.models import PantryItem
+
+
+UNIT_ALIASES = {
+    "gram": "g",
+    "grams": "g",
+    "kilogram": "kg",
+    "kilograms": "kg",
+    "litre": "l",
+    "litres": "l",
+    "liter": "l",
+    "liters": "l",
+    "millilitre": "ml",
+    "millilitres": "ml",
+    "milliliter": "ml",
+    "milliliters": "ml",
+}
+
+UNIT_FACTORS = {
+    "kg": ("mass", Decimal("1000")),
+    "g": ("mass", Decimal("1")),
+    "l": ("volume", Decimal("1000")),
+    "ml": ("volume", Decimal("1")),
+}
+
+
+def normalize_unit(unit):
+    """Normalize only common, unambiguous spelling aliases."""
+    normalized = (unit or "").strip().lower()
+    return UNIT_ALIASES.get(normalized, normalized)
+
+
+def unit_measure(unit):
+    """Return a compatible dimension and factor into its base unit."""
+    normalized = normalize_unit(unit)
+    return UNIT_FACTORS.get(normalized, (f"unit:{normalized}", Decimal("1")))
+
+
+def convert_quantity(quantity, from_unit, to_unit):
+    """Convert mass or volume, or identical units; reject unlike dimensions."""
+    source = normalize_unit(from_unit)
+    target = normalize_unit(to_unit)
+    source_dimension, source_factor = unit_measure(source)
+    target_dimension, target_factor = unit_measure(target)
+    if source_dimension != target_dimension:
+        raise ValueError(f"Cannot convert {from_unit} to {to_unit}.")
+    return Decimal(quantity) * source_factor / target_factor
+
+
+def quantity_precision(quantity, decimal_places=2):
+    """Whether a Decimal can be stored without rounding at the given precision."""
+    value = Decimal(quantity)
+    quantum = Decimal(1).scaleb(-decimal_places)
+    try:
+        return value.quantize(quantum) == value
+    except InvalidOperation:
+        return False
+
+
+def allocate_consumption(required_base, pantry_rows, base_unit):
+    """
+    Allocate exact consumption across rows, preferring coarser units first.
+
+    PantryItem quantities have two decimal places. Allocation is performed in
+    base units, so no quantity is rounded or deducted beyond the requirement.
+    """
+    remaining = Decimal(required_base)
+    allocations = []
+    candidates = []
+
+    for item in pantry_rows:
+        dimension, factor = unit_measure(item.unit)
+        expected_dimension, _ = unit_measure(base_unit)
+        if dimension != expected_dimension or item.quantity <= 0:
+            continue
+        candidates.append((factor, item))
+
+    candidates.sort(key=lambda candidate: candidate[0], reverse=True)
+    for factor, item in candidates:
+        step = factor * Decimal("0.01")
+        available_base = item.quantity * factor
+        representable = (remaining / step).to_integral_value(rounding=ROUND_FLOOR) * step
+        consumed_base = min(available_base, representable)
+        if consumed_base <= 0:
+            continue
+
+        consumed_quantity = consumed_base / factor
+        if not quantity_precision(consumed_quantity, 2):
+            continue
+        new_quantity = item.quantity - consumed_quantity
+        if new_quantity < 0 or not quantity_precision(new_quantity, 2):
+            continue
+
+        allocations.append((item, consumed_quantity, new_quantity))
+        remaining -= consumed_base
+
+    return allocations, remaining
 
 
 # =========================================================
