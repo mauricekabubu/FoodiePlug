@@ -1,15 +1,12 @@
 from datetime import date, timedelta
 
+from apps.meals.models import MealSchedule
 
 # =========================================================
 # TIMETABLE CONSTANTS
 # =========================================================
 
-MEAL_TYPES = (
-    "breakfast",
-    "lunch",
-    "supper",
-)
+MEAL_TYPES = tuple(MealSchedule.MealType.values)
 
 
 # =========================================================
@@ -255,15 +252,18 @@ def create_daily_timetable(
         "supper": [
             "Chapati and beans",
             "Rice and vegetables"
+        ],
+        "snack": [
+            "Fruit",
+            "Yogurt"
         ]
     }
     """
 
     timetable = {
         target_date: {
-            "breakfast": None,
-            "lunch": None,
-            "supper": None,
+            meal_type: None
+            for meal_type in MEAL_TYPES
         }
     }
 
@@ -305,91 +305,17 @@ def create_weekly_timetable(
 
     for current_date in dates:
 
-        # ---------------------------------------------
-        # BREAKFAST
-        # ---------------------------------------------
+        for meal_type in MEAL_TYPES:
+            if meal_type == "supper" and reuse_lunch:
+                lunch = timetable[current_date].get("lunch")
+                if lunch is not None:
+                    assign_meal(timetable, current_date, meal_type, lunch)
+                continue
 
-        breakfast_options = meal_options.get(
-            "breakfast",
-            []
-        )
-
-        if breakfast_options:
-
-            breakfast = select_meal(
-                breakfast_options,
-                timetable
-            )
-
-            assign_meal(
-                timetable,
-                current_date,
-                "breakfast",
-                breakfast
-            )
-
-        # ---------------------------------------------
-        # LUNCH
-        # ---------------------------------------------
-
-        lunch_options = meal_options.get(
-            "lunch",
-            []
-        )
-
-        if lunch_options:
-
-            lunch = select_meal(
-                lunch_options,
-                timetable
-            )
-
-            assign_meal(
-                timetable,
-                current_date,
-                "lunch",
-                lunch
-            )
-
-        # ---------------------------------------------
-        # SUPPER
-        # ---------------------------------------------
-
-        if reuse_lunch:
-
-            lunch = timetable[
-                current_date
-            ].get("lunch")
-
-            if lunch is not None:
-
-                assign_meal(
-                    timetable,
-                    current_date,
-                    "supper",
-                    lunch
-                )
-
-        else:
-
-            supper_options = meal_options.get(
-                "supper",
-                []
-            )
-
-            if supper_options:
-
-                supper = select_meal(
-                    supper_options,
-                    timetable
-                )
-
-                assign_meal(
-                    timetable,
-                    current_date,
-                    "supper",
-                    supper
-                )
+            options = meal_options.get(meal_type, [])
+            if options:
+                selected = select_meal(options, timetable)
+                assign_meal(timetable, current_date, meal_type, selected)
 
     return timetable
 
@@ -419,6 +345,12 @@ def validate_timetable(timetable):
             raise ValueError(
                 f"Invalid meal structure for "
                 f"{meal_date}."
+            )
+
+        invalid_types = set(meals) - set(MEAL_TYPES)
+        if invalid_types:
+            raise ValueError(
+                f"Invalid meal type for {meal_date}: {', '.join(sorted(invalid_types))}."
             )
 
         for meal_type in MEAL_TYPES:
