@@ -1,7 +1,10 @@
 from datetime import date as date_type
 from decimal import Decimal, InvalidOperation
+import logging
+import random
+import time
 
-from django.db import IntegrityError, OperationalError, transaction
+from django.db import IntegrityError, OperationalError, connection, transaction
 from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 
@@ -15,6 +18,9 @@ from apps.meals.models import (
 )
 from apps.pantry.models import PantryItem
 from services.pantry import allocate_consumption, normalize_unit, unit_measure
+
+
+logger = logging.getLogger(__name__)
 
 
 def _whole_number(value, label):
@@ -496,15 +502,13 @@ def _allocate_cooking_requirements(requirements, pantry_rows):
     return allocations, errors
 
 
-def mark_scheduled_meal_cooked(user, schedule_id):
+def _mark_scheduled_meal_cooked_once(user, schedule_id):
     """
     Atomically consume a scheduled recipe and record its one-time cooking event.
 
     Recipe ingredient quantities are treated as per-serving quantities because
     the meal model defines no recipe yield; requirements multiply by servings.
     The unique consumption relation prevents duplicate commits on every backend.
-    SQLite does not provide row-level select_for_update locks, so concurrent lock
-    failures are returned as retryable errors instead of being treated as success.
     """
     try:
         with transaction.atomic():
@@ -577,8 +581,27 @@ def mark_scheduled_meal_cooked(user, schedule_id):
             schedule.save(update_fields=["is_cooked", "cooked_at", "updated_at"])
             return schedule
     except OperationalError as error:
-        if "locked" in str(error).lower() or "busy" in str(error).lower():
+        raise
+
+
+def mark_scheduled_meal_cooked(user, schedule_id):
+    """Retry transient SQLite locks, then surface a retryable message."""
+    max_attempts = 6
+    for attempt in range(max_attempts):
+        try:
+            return _mark_scheduled_meal_cooked_once(user, schedule_id)
+        except OperationalError as error:
+            is_lock_error = "locked" in str(error).lower() or "busy" in str(error).lower()
+            if not is_lock_error:
+                raise
+            if connection.vendor == "sqlite" and attempt < max_attempts - 1:
+                logger.info(
+                    "Retrying cooking transaction after SQLite lock (attempt %s): %s",
+                    attempt + 1,
+                    error,
+                )
+                time.sleep(0.02 * (2 ** attempt) + random.uniform(0, 0.03))
+                continue
             raise ValueError(
                 "Another pantry update is in progress. Please retry cooking this meal."
             ) from error
-        raise
