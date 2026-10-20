@@ -1,20 +1,20 @@
+from datetime import date as date_type
+from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 
-from apps.meals.models import Meal, MealIngredient, MealSchedule
-
-
-# =========================================================
-# MEAL SERVICES
-# =========================================================
+from apps.meals.models import Meal, MealIngredient, MealSchedule, UserMealPreference
 
 
-
-from apps.meals.models import (
-    Meal,
-    MealIngredient,
-    MealSchedule,
-    UserMealPreference,
-)
+def _whole_number(value, label):
+    try:
+        number = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        raise ValueError(f"{label} must be a whole number.")
+    if not number.is_finite() or number != number.to_integral_value():
+        raise ValueError(f"{label} must be a whole number.")
+    return int(number)
 
 
 def get_user_available_meals(user):
@@ -24,10 +24,24 @@ def get_user_available_meals(user):
     if user is None or not getattr(user, "is_authenticated", False):
         return meals
 
-    return meals.exclude(
-        user_preferences__user=user,
-        user_preferences__is_archived=True,
-    ).distinct()
+    archived = UserMealPreference.objects.filter(
+        user=user,
+        meal_id=OuterRef("pk"),
+        is_archived=True,
+    )
+    favorites = UserMealPreference.objects.filter(
+        user=user,
+        meal_id=OuterRef("pk"),
+        is_favorite=True,
+        is_archived=False,
+    )
+    return (
+        meals.annotate(
+            is_favorite=Exists(favorites),
+        )
+        .annotate(is_archived=Exists(archived))
+        .filter(is_archived=False)
+    )
 
 
 def get_user_available_meal(user, meal_id):
@@ -47,6 +61,41 @@ def search_user_available_meals(user, query):
     return get_user_available_meals(user).filter(
         name__icontains=query
     )
+
+
+def get_user_archived_meals(user):
+    """Return meals archived for this user, without changing the global catalogue."""
+    return Meal.objects.filter(
+        is_active=True,
+        user_preferences__user=user,
+        user_preferences__is_archived=True,
+    ).order_by("name")
+
+
+def get_user_favorite_meals(user):
+    """Return this user's favorites that are not archived."""
+    return get_user_available_meals(user).filter(
+        user_preferences__user=user,
+        user_preferences__is_favorite=True,
+    ).order_by("name")
+
+
+def get_user_meal_preference(user, meal):
+    """Get or create this user's preference for a meal."""
+    preference, _ = UserMealPreference.objects.get_or_create(
+        user=user,
+        meal=meal,
+    )
+    return preference
+
+
+def is_user_favorite(user, meal):
+    """Check favorite state without creating a preference row."""
+    return UserMealPreference.objects.filter(
+        user=user,
+        meal=meal,
+        is_favorite=True,
+    ).exists()
 
 
 
@@ -106,6 +155,21 @@ def create_meal(
 ):
     """Create a new meal, including an optional uploaded image."""
 
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Meal name is required.")
+    if len(name) > 150:
+        raise ValueError("Meal name must be 150 characters or fewer.")
+    for label, value in (("Prep time", prep_time), ("Cook time", cook_time)):
+        if value is not None:
+            value = _whole_number(value, f"{label} in minutes")
+            if value < 0:
+                raise ValueError(f"{label} cannot be negative.")
+            if label == "Prep time":
+                prep_time = value
+            else:
+                cook_time = value
+
     meal = Meal.objects.create(
         name=name,
         description=description,
@@ -128,6 +192,22 @@ def add_meal_ingredient(
 ):
     """Add an ingredient to a meal."""
 
+    try:
+        quantity = Decimal(quantity)
+        rounded_quantity = quantity.quantize(Decimal("0.01"))
+    except (InvalidOperation, TypeError, ValueError):
+        raise ValueError("Enter a valid ingredient quantity.")
+
+    if not quantity.is_finite() or quantity <= 0:
+        raise ValueError("Ingredient quantity must be greater than zero.")
+    if quantity != rounded_quantity:
+        raise ValueError("Ingredient quantities can have at most two decimal places.")
+    if rounded_quantity >= Decimal("100000000"):
+        raise ValueError("Ingredient quantity is too large.")
+    if not isinstance(unit, str) or not unit.strip() or len(unit.strip()) > 20:
+        raise ValueError("Enter a valid ingredient unit.")
+    unit = unit.strip()
+
     ingredient, created = MealIngredient.objects.get_or_create(
         meal=meal,
         food=food,
@@ -138,7 +218,10 @@ def add_meal_ingredient(
     )
 
     if not created:
-        ingredient.quantity += quantity
+        updated_quantity = ingredient.quantity + rounded_quantity
+        if updated_quantity >= Decimal("100000000"):
+            raise ValueError("Ingredient quantity is too large.")
+        ingredient.quantity = updated_quantity
 
         ingredient.save(
             update_fields=["quantity"]
@@ -217,6 +300,22 @@ def schedule_meal(
     date and meal type, update it.
     """
 
+    if not isinstance(date, date_type):
+        raise ValueError("Choose a valid date.")
+    if meal_type not in MealSchedule.MealType.values:
+        raise ValueError("Choose a valid meal type.")
+    if not meal or not Meal.objects.filter(pk=meal.pk, is_active=True).exists():
+        raise ValueError("Selected meal is not available.")
+    servings = _whole_number(servings, "Servings")
+    if servings <= 0:
+        raise ValueError("Servings must be greater than zero.")
+    if UserMealPreference.objects.filter(
+        user=user,
+        meal=meal,
+        is_archived=True,
+    ).exists():
+        raise ValueError("That meal is archived and cannot be scheduled.")
+
     schedule, created = MealSchedule.objects.update_or_create(
         user=user,
         date=date,
@@ -227,6 +326,31 @@ def schedule_meal(
         }
     )
 
+    return schedule
+
+
+@transaction.atomic
+def move_scheduled_meal(user, schedule_id, target_date, target_meal_type):
+    """Move a user's scheduled meal without replacing an occupied slot."""
+    schedule = get_scheduled_meal(user, schedule_id)
+    if schedule is None:
+        return None
+    if not isinstance(target_date, date_type):
+        raise ValueError("Choose a valid date.")
+    if target_meal_type not in MealSchedule.MealType.values:
+        raise ValueError("Choose a valid meal type.")
+    if schedule.date == target_date and schedule.meal_type == target_meal_type:
+        return schedule
+    if MealSchedule.objects.filter(
+        user=user,
+        date=target_date,
+        meal_type=target_meal_type,
+    ).exists():
+        raise ValueError("That meal-planner slot is already occupied.")
+
+    schedule.date = target_date
+    schedule.meal_type = target_meal_type
+    schedule.save(update_fields=["date", "meal_type", "updated_at"])
     return schedule
 
 
@@ -246,6 +370,7 @@ def update_servings(
     if schedule is None:
         return None
 
+    servings = _whole_number(servings, "Servings")
     if servings <= 0:
         raise ValueError(
             "Servings must be greater than zero."
