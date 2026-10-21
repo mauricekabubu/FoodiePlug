@@ -460,6 +460,11 @@ def _cooking_requirements(ingredients, servings):
     return requirements
 
 
+def _format_quantity(quantity):
+    value = format(Decimal(quantity).normalize(), "f")
+    return value.rstrip("0").rstrip(".") if "." in value else value
+
+
 def _allocate_cooking_requirements(requirements, pantry_rows):
     allocations = []
     errors = []
@@ -474,16 +479,29 @@ def _allocate_cooking_requirements(requirements, pantry_rows):
             requirement["base_unit"],
         )
         if remaining > 0:
+            available = sum(
+                (item.quantity * unit_measure(item.unit)[1] for item in compatible_rows),
+                Decimal("0"),
+            )
+            required_text = (
+                f"{_format_quantity(requirement['quantity'])} "
+                f"{requirement['base_unit']}"
+            )
+            available_text = f"{_format_quantity(available)} {requirement['base_unit']}"
             incompatible = sorted({
                 item.unit for item in pantry_rows
                 if item.food_id == food_id and unit_measure(item.unit)[0] != dimension
             })
-            need_text = f"{remaining.normalize()} {requirement['base_unit']}"
             if incompatible and not compatible_rows:
                 errors.append(
                     f"{requirement['food'].name}: needs "
-                    f"{requirement['quantity'].normalize()} {requirement['base_unit']}, "
+                    f"{required_text}, "
                     f"but pantry stock uses incompatible units ({', '.join(incompatible)})."
+                )
+            elif available == 0:
+                errors.append(
+                    f"Missing pantry ingredient: {requirement['food'].name} requires "
+                    f"{required_text}; available 0 {requirement['base_unit']}."
                 )
             elif sum(
                 item.quantity * unit_measure(item.unit)[1]
@@ -491,12 +509,15 @@ def _allocate_cooking_requirements(requirements, pantry_rows):
             ) >= requirement["quantity"]:
                 errors.append(
                     f"{requirement['food'].name}: available stock cannot represent "
-                    "the required quantity exactly at the pantry's two-decimal precision."
+                    "the required quantity exactly "
+                    f"({required_text}) at the pantry's two-decimal precision "
+                    f"(available {available_text})."
                 )
             else:
                 errors.append(
                     f"{requirement['food'].name}: insufficient compatible stock; "
-                    f"still needs {need_text}."
+                    f"requires {required_text}, available {available_text}, "
+                    f"short {_format_quantity(remaining)} {requirement['base_unit']}."
                 )
         allocations.extend((requirement["food"], *allocation) for allocation in rows)
     return allocations, errors
