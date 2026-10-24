@@ -1,0 +1,75 @@
+.foodieplug-logo-trace-loader {
+    display: inline-block;
+    line-height: 0;
+    pointer-events: none;
+    vertical-align: middle;
+}
+
+.foodieplug-logo-trace-loader__svg {
+    display: block;
+    max-width: none;
+    overflow: visible;
+}
+
+.foodieplug-logo-trace-loader__outline,
+.foodieplug-logo-trace-loader__trace {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--foodieplug-logo-stroke-width, 2.5);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.foodieplug-logo-trace-loader__outline {
+    opacity: 0.18;
+}
+
+.foodieplug-logo-trace-loader__trace {
+    stroke-dasharray: 0.14 0.86;
+    stroke-dashoffset: 0;
+}
+
+.foodieplug-logo-trace-loader.is-looping
+.foodieplug-logo-trace-loader__trace {
+    animation: foodieplug-logo-trace-loader-trace
+        var(--foodieplug-logo-loop-duration, 1.8s) linear infinite;
+}
+
+.foodieplug-logo-trace-loader.is-closing-outline
+.foodieplug-logo-trace-loader__trace {
+    stroke-dasharray: 1 0;
+    stroke-dashoffset: 0;
+    transition:
+        stroke-dasharray var(--foodieplug-logo-outline-duration, 520ms) linear,
+        stroke-dashoffset var(--foodieplug-logo-outline-duration, 520ms) linear;
+}
+
+.foodieplug-logo-trace-loader__fill {
+    fill: currentColor;
+    opacity: 0;
+}
+
+.foodieplug-logo-trace-loader.is-fading-fill
+.foodieplug-logo-trace-loader__fill {
+    opacity: 1;
+    transition: opacity var(--foodieplug-logo-fill-duration, 450ms) ease;
+}
+
+.foodieplug-logo-trace-loader.is-done
+.foodieplug-logo-trace-loader__fill {
+    opacity: 1;
+}
+
+@keyframes foodieplug-logo-trace-loader-trace {
+    to {
+        stroke-dashoffset: -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .foodieplug-logo-trace-loader__trace,
+    .foodieplug-logo-trace-loader__fill {
+        animation: none;
+        transition: none;
+    }
+}

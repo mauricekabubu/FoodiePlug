@@ -1,0 +1,491 @@
+/* =====================================================================
+   FoodiePlug — My Meals
+   static/css/meals.css — all selectors are scoped with the ml- prefix.
+   Dark mode follows [data-theme="dark"] (set by the existing theme script).
+   ===================================================================== */
+
+.ml-page,
+.ml-dialog {
+  --ml-surface: #ffffff;
+  --ml-surface-2: #f7f4ec;
+  --ml-text: #23211c;
+  --ml-muted: #6e6a5e;
+  --ml-border: #e8e2d4;
+  --ml-border-strong: #d9d2c0;
+  --ml-green: #16794b;
+  --ml-green-dark: #0f5c39;
+  --ml-green-soft: rgba(22, 121, 75, 0.1);
+  --ml-amber: #f5a623;
+  --ml-tomato: #e5533d;
+  --ml-shadow: 0 1px 2px rgba(35, 33, 28, 0.05), 0 4px 14px rgba(35, 33, 28, 0.06);
+  --ml-fb-bg: #eaf4ed;
+  --ml-fb-plate: #ffffff;
+  --ml-fb-shadow: rgba(22, 121, 75, 0.14);
+  color: var(--ml-text);
+}
+
+[data-theme="dark"] .ml-page,
+[data-theme="dark"] .ml-dialog {
+  --ml-surface: #211e1a;
+  --ml-surface-2: #2a2721;
+  --ml-text: #ede8dc;
+  --ml-muted: #a79f8e;
+  --ml-border: #38332b;
+  --ml-border-strong: #4a443a;
+  --ml-green: #3fae7a;
+  --ml-green-dark: #3fae7a;
+  --ml-green-soft: rgba(63, 174, 122, 0.14);
+  --ml-tomato: #ee7a66;
+  --ml-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3);
+  --ml-fb-bg: #1f2e26;
+  --ml-fb-plate: #2d2a24;
+  --ml-fb-shadow: rgba(0, 0, 0, 0.35);
+}
+
+.ml-page { max-width: 1240px; margin: 0 auto; }
+
+.ml-sr {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.ml-page a:focus-visible, .ml-page button:focus-visible,
+.ml-page input:focus-visible, .ml-page select:focus-visible, .ml-page textarea:focus-visible,
+.ml-dialog button:focus-visible, .ml-dialog input:focus-visible, .ml-dialog select:focus-visible {
+  outline: 2px solid var(--ml-green);
+  outline-offset: 2px;
+}
+
+/* ---------- header ---------- */
+.ml-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.ml-header h1 {
+  margin: 0; font-family: "Fraunces", Georgia, serif;
+  font-size: 30px; font-weight: 560; letter-spacing: -0.01em;
+}
+.ml-header p { margin: 6px 0 0; max-width: 560px; color: var(--ml-muted); }
+.ml-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- buttons ---------- */
+.ml-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600;
+  line-height: 1; text-decoration: none; cursor: pointer;
+  border: 1px solid transparent; border-radius: 8px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.ml-btn:hover { text-decoration: none; }
+.ml-btn-primary { background: var(--ml-amber); color: #3d2803; }
+.ml-btn-primary:hover { background: #e69a13; }
+.ml-btn-secondary { background: var(--ml-surface); color: var(--ml-text); border-color: var(--ml-border-strong); }
+.ml-btn-secondary:hover { background: var(--ml-surface-2); }
+.ml-btn-quiet { background: transparent; color: var(--ml-green-dark); }
+.ml-btn-quiet:hover { background: var(--ml-green-soft); }
+.ml-btn-sm { min-height: 38px; padding: 0 12px; font-size: 13px; }
+.ml-btn-block { width: 100%; }
+.ml-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ml-back {
+  display: inline-block; margin-bottom: 14px; font-size: 14px; font-weight: 600;
+  color: var(--ml-green-dark); text-decoration: none;
+}
+.ml-back:hover { text-decoration: underline; }
+
+/* ---------- cards ---------- */
+.ml-card {
+  background: var(--ml-surface); border: 1px solid var(--ml-border);
+  border-radius: 14px; box-shadow: var(--ml-shadow); min-width: 0;
+}
+.ml-card-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--ml-muted); }
+.ml-section { padding: 20px; margin-top: 18px; }
+.ml-muted, .ml-hint { margin: 0; font-size: 13.5px; color: var(--ml-muted); }
+.ml-hint a { color: var(--ml-green-dark); font-weight: 600; }
+.ml-rule { margin: 16px 0; border: 0; border-top: 1px solid var(--ml-border); }
+
+/* ---------- toolbar ---------- */
+.ml-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.ml-search {
+  position: relative; display: flex; align-items: center; gap: 8px;
+  flex: 1 1 360px; max-width: 560px;
+}
+.ml-search svg { position: absolute; left: 12px; color: var(--ml-muted); pointer-events: none; }
+.ml-search input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0 14px 0 38px; font: inherit; font-size: 14px;
+  color: var(--ml-text); background: var(--ml-surface);
+  border: 1px solid var(--ml-border-strong); border-radius: 8px;
+}
+.ml-sort { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ml-muted); }
+.ml-sort select {
+  min-height: 44px; padding: 0 10px; font: inherit; font-size: 14px;
+  color: var(--ml-text); background: var(--ml-surface);
+  border: 1px solid var(--ml-border-strong); border-radius: 8px;
+}
+.ml-count { margin: 6px 0 14px; font-size: 13px; color: var(--ml-muted); }
+
+/* ---------- grid ---------- */
+.ml-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem; list-style: none; margin: 0; padding: 0;
+}
+@media (max-width: 1280px) { .ml-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 960px)  { .ml-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px)  { .ml-grid { gap: 0.75rem; } }
+
+.ml-meal { display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
+
+/* ---------- media (image + fallback) ---------- */
+.ml-media {
+  position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden;
+  background: var(--ml-fb-bg); border-radius: 10px;
+}
+.ml-media .ml-fallback {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  padding: 14%; box-sizing: border-box;
+}
+.ml-media .ml-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.ml-media-lg { border-radius: 14px; }
+.ml-media-lg .ml-fallback { padding: 18%; }
+
+/* ---------- card body ---------- */
+.ml-body { display: flex; flex-direction: column; flex: 1; padding: 12px 4px 4px; }
+.ml-name { margin: 0; font-size: 15.5px; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; }
+.ml-name a { color: inherit; text-decoration: none; }
+.ml-name a:hover { text-decoration: underline; }
+.ml-desc {
+  margin: 6px 0 0; font-size: 13px; color: var(--ml-muted);
+  display: -webkit-box; /*-webkit-line-clamp: 2;*/ -webkit-box-orient: vertical; overflow: hidden;
+}
+.ml-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 8px 0 0; font-size: 12.5px; color: var(--ml-muted); }
+.ml-card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 12px; }
+
+/* ---------- detail ---------- */
+.ml-detail { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.ml-title { margin: 16px 0 0; font-family: "Fraunces", Georgia, serif; font-size: 30px; font-weight: 560; }
+.ml-desc-full { margin: 12px 0 0; font-size: 15px; }
+.ml-detail-side .ml-card { padding: 20px; }
+.ml-prose p { margin: 0 0 10px; }
+
+.ml-ingredients { list-style: none; margin: 0; padding: 0; }
+.ml-ingredients li {
+  display: flex; align-items: center; gap: 10px; padding: 9px 0;
+  border-bottom: 1px solid var(--ml-border); font-size: 14px;
+}
+.ml-ingredients li:last-child { border-bottom: 0; }
+.ml-ing-name { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.ml-ing-qty { color: var(--ml-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ml-ingredients form { margin: 0; }
+.ml-link-danger {
+  min-height: 36px; padding: 0 8px; font: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--ml-tomato); background: none; border: 0; border-radius: 6px; cursor: pointer;
+}
+.ml-link-danger:hover { background: rgba(229, 83, 61, 0.1); }
+
+/* ---------- forms ---------- */
+.ml-form-card { max-width: 620px; margin: 0 auto; padding: 24px; }
+.ml-form-title { margin: 0 0 4px; font-family: "Fraunces", Georgia, serif; font-size: 26px; font-weight: 560; }
+.ml-sub { margin: 0 0 18px; font-size: 14px; color: var(--ml-muted); }
+.ml-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; min-width: 0; }
+.ml-field label { font-size: 13px; font-weight: 600; }
+.ml-field label small { font-weight: 400; color: var(--ml-muted); }
+.ml-field input, .ml-field select, .ml-field textarea {
+  width: 100%; min-height: 44px; padding: 10px 12px; font: inherit; font-size: 14px;
+  color: var(--ml-text); background: var(--ml-surface);
+  border: 1px solid var(--ml-border-strong); border-radius: 8px;
+}
+.ml-field textarea { resize: vertical; }
+.ml-field input:focus, .ml-field select:focus, .ml-field textarea:focus { border-color: var(--ml-green); }
+.ml-field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ml-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.ml-actions-center { justify-content: center; }
+
+/* ---------- empty state ---------- */
+.ml-empty { padding: 44px 24px; text-align: center; }
+.ml-empty-art { width: 120px; height: 120px; margin-bottom: 14px; background: var(--ml-fb-bg); border-radius: 50%; padding: 14px; box-sizing: border-box; }
+.ml-empty h2 { margin: 0 0 8px; font-family: "Fraunces", Georgia, serif; font-size: 24px; font-weight: 560; }
+.ml-empty p { max-width: 440px; margin: 0 auto 20px; color: var(--ml-muted); }
+
+/* ---------- dialog ---------- */
+.ml-dialog {
+  width: min(460px, calc(100vw - 32px)); padding: 20px; color: var(--ml-text);
+  background: var(--ml-surface); border: 1px solid var(--ml-border); border-radius: 16px;
+}
+.ml-dialog::backdrop { background: rgba(23, 21, 18, 0.5); }
+.ml-dialog-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.ml-dialog-head h2 { margin: 0; font-size: 18px; }
+.ml-x {
+  width: 44px; height: 44px; margin: -6px -8px 0 0; font-size: 16px; color: var(--ml-muted);
+  background: transparent; border: 0; border-radius: 50%; cursor: pointer;
+}
+.ml-x:hover { background: var(--ml-surface-2); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 860px) {
+  .ml-detail { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .ml-header-actions { width: 100%; }
+  .ml-header-actions .ml-btn { flex: 1 1 auto; }
+  .ml-sort { width: 100%; }
+  .ml-sort select { flex: 1; }
+  .ml-field-row { grid-template-columns: minmax(0, 1fr); }
+  .ml-card-actions .ml-btn { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) { .ml-btn { transition: none; } }
+
+
+
+/* Modal tokens: always resolve to the global theme tokens */
+.mp-page,
+.mp-modal,
+[data-theme="dark"] .mp-page,
+[data-theme="dark"] .mp-modal {
+  --mp-surface: var(--surface, #fff);
+  --mp-surface-alt: var(--surface-2, #fbf3e4);
+  --mp-border: var(--border, #e9e1d3);
+}
+
+.mp-panel { background: var(--surface, #fff); }
+
+
+
+/* ---------- meal image upload ---------- */
+
+.ml-image-upload {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    background: var(--ml-surface-2);
+    border: 1px dashed var(--ml-border-strong);
+    border-radius: 12px;
+    min-width: 0;
+}
+
+.ml-image-preview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 112px;
+    width: 112px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    color: var(--ml-green-dark);
+    background: var(--ml-fb-bg);
+    border-radius: 10px;
+}
+
+.ml-image-preview svg {
+    width: 42px;
+    height: 42px;
+}
+
+.ml-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ml-image-preview img[hidden],
+#ml-image-remove[hidden] {
+    display: none;
+}
+
+.ml-image-upload-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+}
+
+.ml-image-upload-info .ml-hint {
+    overflow-wrap: anywhere;
+}
+
+.ml-image-upload-info label.ml-btn {
+    cursor: pointer;
+}
+
+.ml-image-upload-info .ml-btn-quiet {
+    padding-left: 0;
+}
+
+@media (max-width: 480px) {
+    .ml-image-upload {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ml-image-preview {
+        width: 100%;
+        max-width: 220px;
+        flex-basis: auto;
+        aspect-ratio: 4 / 3;
+    }
+
+    .ml-image-upload-info {
+        width: 100%;
+    }
+}
+
+
+/* ---------- ingredients section ---------- */
+.ml-ingredients-card { scroll-margin-top: 80px; border-top: 3px solid var(--ml-green); }
+.ml-section-title {
+  margin: 0 0 4px; font-family: "Fraunces", Georgia, serif;
+  font-size: 22px; font-weight: 560;
+}
+.ml-empty-ing { padding: 4px 0 8px; }
+.ml-ingredients-card .ml-actions { margin-top: 18px; }
+.ml-add-ing select:invalid { color: var(--ml-muted); }
+
+
+/* Editing meals in meals.html */
+/* ---------- edit meal (append to static/css/meals.css) ---------- */
+
+/* `hidden` on an inline <svg> is not honoured by default */
+.ml-image-preview svg[hidden] { display: none; }
+
+.ml-form-card-wide { max-width: 720px; }
+
+/* validation */
+.ml-error { margin: 4px 0 0; font-size: 12.5px; font-weight: 500; color: var(--ml-tomato); }
+.ml-field.has-error input,
+.ml-field.has-error textarea,
+.ml-edit-ing.has-error input[type="number"],
+.ml-new-ing.has-error select,
+.ml-new-ing.has-error input { border-color: var(--ml-tomato); }
+
+.ml-error-summary {
+  margin: 0 0 18px; padding: 12px 14px; font-size: 13.5px;
+  color: var(--ml-text); background: rgba(229, 83, 61, 0.08);
+  border: 1px solid var(--ml-tomato); border-radius: 10px;
+}
+.ml-error-summary ul { margin: 6px 0 0; padding-left: 18px; }
+.ml-error-summary:focus { outline: 2px solid var(--ml-tomato); outline-offset: 2px; }
+
+/* ingredients block */
+.ml-edit-section {
+  min-width: 0; margin: 22px 0 6px; padding: 16px;
+  background: var(--ml-surface-2); border: 1px solid var(--ml-border); border-radius: 12px;
+}
+.ml-edit-section legend {
+  padding: 0 6px; font-family: "Fraunces", Georgia, serif; font-size: 18px; font-weight: 560;
+}
+
+.ml-edit-ings { list-style: none; margin: 0 0 14px; padding: 0; }
+.ml-edit-ing {
+  display: grid; align-items: center; gap: 8px; padding: 10px 0;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 96px) minmax(0, 112px) auto;
+  border-bottom: 1px solid var(--ml-border);
+}
+.ml-edit-ing:last-child { border-bottom: 0; }
+.ml-edit-ing .ml-error { grid-column: 1 / -1; margin: 0; }
+
+.ml-edit-ing input[type="number"],
+.ml-edit-ing select,
+.ml-new-ing input,
+.ml-new-ing select {
+  width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; font: inherit; font-size: 14px;
+  color: var(--ml-text); background: var(--ml-surface);
+  border: 1px solid var(--ml-border-strong); border-radius: 8px;
+}
+.ml-edit-ing input:focus, .ml-edit-ing select:focus,
+.ml-new-ing input:focus, .ml-new-ing select:focus { border-color: var(--ml-green); }
+
+.ml-remove-toggle {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
+  font-size: 13px; font-weight: 600; color: var(--ml-tomato); cursor: pointer;
+}
+.ml-remove-toggle input { width: 18px; height: 18px; accent-color: var(--ml-tomato); }
+
+.ml-edit-ing.is-removed .ml-ing-name { text-decoration: line-through; opacity: 0.55; }
+.ml-edit-ing.is-removed input[type="number"],
+.ml-edit-ing.is-removed select { opacity: 0.45; }
+
+.ml-new-ing {
+  display: grid; gap: 8px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 96px) minmax(0, 112px);
+}
+
+@media (max-width: 640px) {
+  .ml-edit-ing { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .ml-edit-ing .ml-ing-name { grid-column: 1 / -1; }
+  .ml-edit-ing .ml-remove-toggle { grid-column: 1 / -1; }
+  .ml-new-ing { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .ml-new-ing select:first-child { grid-column: 1 / -1; }
+}
+
+
+/* ---------- archive (append to static/css/meals.css) ---------- */
+
+/* a <form> that sits in a button row without breaking the row's layout */
+.ml-inline-form { display: contents; margin: 0; }
+
+.ml-btn-archive { color: var(--ml-tomato); }
+.ml-btn-archive:hover { background: rgba(229, 83, 61, 0.1); }
+.ml-btn svg { flex: none; }
+
+/* confirmation dialog reuses .ml-dialog; this just styles its note + danger button */
+.ml-dialog-note { margin: 0 0 4px; font-size: 13.5px; color: var(--ml-muted); }
+.ml-btn-danger { background: var(--ml-tomato); color: #fff; }
+.ml-btn-danger:hover { background: #cf4631; }
+
+/* archive page */
+.ml-meal-archived .ml-media { filter: grayscale(0.35); opacity: 0.85; }
+.ml-archive-note { margin: 14px 0 0; font-size: 13px; color: var(--ml-muted); }
+.ml-archive-note a { color: var(--ml-green-dark); font-weight: 600; }
+
+
+/* ---------- favorites (append to static/css/meals.css) ---------- */
+
+/* the card is the positioning context for the heart (a <form> can't live inside the image <a>) */
+.ml-meal { position: relative; }
+
+.ml-fav-form {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  margin: 0;
+}
+
+.ml-fav {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--ml-muted);
+  background: var(--ml-surface);
+  border: 1px solid var(--ml-border);
+  border-radius: 50%;
+  box-shadow: var(--ml-shadow);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.ml-fav:hover { color: var(--ml-tomato); border-color: var(--ml-tomato); }
+.ml-fav.is-on,
+.ml-fav[aria-pressed="true"] { color: var(--ml-tomato); }
+.ml-fav:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* favorite button on the meal detail page */
+.ml-btn-fav { color: var(--ml-muted); }
+.ml-btn-fav:hover { color: var(--ml-tomato); background: rgba(229, 83, 61, 0.1); }
+.ml-btn-fav.is-on { color: var(--ml-tomato); }
+
+/* empty-state icons for favorites / archive */
+.ml-empty-art.is-heart   { color: var(--ml-tomato);     background: rgba(229, 83, 61, 0.1); }
+.ml-empty-art.is-archive { color: var(--ml-green-dark); background: var(--ml-green-soft); }
+
+@media (prefers-reduced-motion: reduce) { .ml-fav { transition: none; } }
