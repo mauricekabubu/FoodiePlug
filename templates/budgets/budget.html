@@ -1,0 +1,617 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Budget · FoodiePlug</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+
+  {# dashboard.css owns the app shell (grid, sidebar, topbar, theme toggle). budget.css only styles the Budget page. #}
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  <link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/budget.css' %}">
+
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('foodieplug-theme') || 'system';
+        var resolved = pref === 'system'
+          ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : pref;
+        document.documentElement.setAttribute('data-theme', resolved);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- =========================================================
+     MOBILE TOPBAR
+========================================================= -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="31" fill="#16794B"/>
+      <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+      <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+    </svg>
+    <span>FoodiePlug</span>
+  </a>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<!-- =========================================================
+     APP SHELL: sidebar (left) + content (right)
+     The two-column layout comes from .app-shell in dashboard.css, so the
+     sidebar and the page content must be direct children of it.
+========================================================= -->
+<div class="app-shell">
+
+  <aside class="sidebar" aria-label="Primary navigation">
+
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="31" fill="#16794B"/>
+        <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+        <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+      </svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- =========================================================
+       MAIN CONTENT (right-hand column of .app-shell)
+  ========================================================= -->
+  <main class="main-content" id="main">
+{% with view=request.resolver_match.url_name %}
+{% url 'ai:page' as ai_url %}
+
+<div class="bd-page" id="bd-page">
+  <div class="bd-container">
+
+    <div id="bd-config" data-ai-url="{{ ai_url|default:'#' }}" hidden></div>
+
+    {# ================================================================= BUDGET FORM (create / edit) #}
+    {% if view == "create" or view == "edit" %}
+
+    <section class="bd-card bd-form-card" aria-labelledby="budget-form-title">
+      <h1 class="bd-form-title" id="budget-form-title">{% if view == "edit" %}Adjust budget{% else %}Set a budget{% endif %}</h1>
+      <p class="bd-form-sub">
+        {% if view == "edit" %}
+          Changing the amount or dates doesn't alter any expense you've already recorded.
+        {% else %}
+          Start by setting a food budget that works for you.
+        {% endif %}
+      </p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="bd-form-grid">
+          <div class="bd-field is-full">
+            <label for="id_name">Budget name <small>(optional)</small></label>
+            <input type="text" id="id_name" name="name" value="{{ values.name }}" maxlength="100" placeholder="Food Budget" autocomplete="off">
+          </div>
+          <div class="bd-field is-full">
+            <label for="id_amount">Budget amount (KES)</label>
+            <input type="number" id="id_amount" name="amount" value="{{ values.amount }}" min="0.01" step="0.01" inputmode="decimal" placeholder="8000" required>
+          </div>
+          <div class="bd-field">
+            <label for="id_start_date">Start date</label>
+            <input type="date" id="id_start_date" name="start_date" value="{{ values.start_date }}" required>
+          </div>
+          <div class="bd-field">
+            <label for="id_end_date">End date</label>
+            <input type="date" id="id_end_date" name="end_date" value="{{ values.end_date }}" required>
+          </div>
+        </div>
+
+        <div class="bd-form-actions">
+          <button type="submit" class="bd-btn bd-btn-primary">{% if view == "edit" %}Save changes{% else %}Create budget{% endif %}</button>
+          {% if budget %}
+            <a class="bd-btn bd-btn-secondary" href="{% url 'budgets:detail' budget.id %}">Cancel</a>
+          {% else %}
+            <a class="bd-btn bd-btn-secondary" href="{% url 'budgets:dashboard' %}">Cancel</a>
+          {% endif %}
+        </div>
+      </form>
+    </section>
+
+    {# ================================================================= EXPENSE FORM (add / edit) #}
+    {% elif view == "add_expense" or view == "edit_expense" %}
+
+    <section class="bd-card bd-form-card" aria-labelledby="expense-form-title">
+      <h1 class="bd-form-title" id="expense-form-title">{% if expense %}Edit expense{% else %}Add expense{% endif %}</h1>
+      <p class="bd-form-sub">Budget: {{ budget.name }}</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="bd-form-grid">
+          <div class="bd-field is-full">
+            <label for="id_description">What was it for?</label>
+            <input type="text" id="id_description" name="description" value="{{ values.description }}" maxlength="200" placeholder="e.g. Sukuma wiki and tomatoes" autocomplete="off" required>
+          </div>
+          <div class="bd-field">
+            <label for="id_exp_amount">Amount (KES)</label>
+            <input type="number" id="id_exp_amount" name="amount" value="{{ values.amount }}" min="0.01" step="0.01" inputmode="decimal" placeholder="350" required>
+          </div>
+          <div class="bd-field">
+            <label for="id_exp_date">Date</label>
+            <input type="date" id="id_exp_date" name="date" value="{{ values.date }}" data-default-today required>
+          </div>
+        </div>
+
+        <div class="bd-form-actions">
+          <button type="submit" class="bd-btn bd-btn-primary">{% if expense %}Save changes{% else %}Add expense{% endif %}</button>
+          <a class="bd-btn bd-btn-secondary" href="{% url 'budgets:detail' budget.id %}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    {# ================================================================= DELETE BUDGET #}
+    {% elif view == "delete" %}
+
+    <section class="bd-card bd-form-card bd-confirm" aria-labelledby="delete-budget-title">
+      <span class="bd-confirm-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>
+      </span>
+      <h1 class="bd-form-title" id="delete-budget-title">Delete this budget?</h1>
+      <p class="bd-form-sub">
+        “{{ budget.name }}” ({{ budget.start_date|date:"d M Y" }} – {{ budget.end_date|date:"d M Y" }}) will be deleted,
+        along with the expenses recorded under it. This can't be undone.
+      </p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="bd-form-actions is-center">
+          <button type="submit" class="bd-btn bd-btn-danger">Delete budget</button>
+          <a class="bd-btn bd-btn-secondary" href="{% url 'budgets:detail' budget.id %}">Keep it</a>
+        </div>
+      </form>
+    </section>
+
+    {# ================================================================= DELETE EXPENSE #}
+    {% elif view == "delete_expense" %}
+
+    <section class="bd-card bd-form-card bd-confirm" aria-labelledby="delete-expense-title">
+      <span class="bd-confirm-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>
+      </span>
+      <h1 class="bd-form-title" id="delete-expense-title">Delete this expense?</h1>
+      <p class="bd-form-sub">
+        “{{ expense.description }}” — KES {{ expense.amount|floatformat:"0g" }} on {{ expense.date|date:"d M Y" }}.
+        Your remaining budget will be recalculated.
+      </p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="bd-form-actions is-center">
+          <button type="submit" class="bd-btn bd-btn-danger">Delete expense</button>
+          <a class="bd-btn bd-btn-secondary" href="{% url 'budgets:detail' budget.id %}">Keep it</a>
+        </div>
+      </form>
+    </section>
+
+    {# ================================================================= DASHBOARD / DETAIL #}
+    {% else %}
+
+    <header class="bd-header">
+      <div>
+        <h1>Budget</h1>
+        <p>Plan your food spending, track what you actually spend, and make better decisions before your budget runs out.</p>
+      </div>
+      <div class="bd-header-actions">
+        <a class="bd-btn bd-btn-primary" href="{% url 'budgets:create' %}">+ Set Budget</a>
+        {% if budget %}
+          <button type="button" class="bd-btn bd-btn-secondary" data-open-modal="quick-expense-modal">+ Add Expense</button>
+        {% endif %}
+        <button type="button" class="bd-btn bd-btn-secondary" data-open-modal="ask-modal">Ask FoodiePlug</button>
+        {% if budget %}
+          <a class="bd-btn bd-btn-secondary" href="{% url 'budgets:edit' budget.id %}">Adjust Budget</a>
+        {% endif %}
+        {% if view == "detail" %}
+          <a class="bd-btn bd-btn-quiet" href="{% url 'budgets:dashboard' %}">All budgets</a>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if budget %}
+
+      {# ---------- alerts ---------- #}
+      {% if budget_alerts %}
+      <div class="bd-alerts">
+        {% for alert in budget_alerts %}
+        <div class="bd-alert is-{{ alert.level|default:'info' }}" role="{% if alert.level == 'danger' %}alert{% else %}status{% endif %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <div><strong>{{ alert.title }}</strong>{{ alert.message }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# ---------- summary stats (Remaining first so it leads on mobile) ---------- #}
+      <section class="bd-stats" aria-label="Budget summary">
+        <div class="bd-card bd-stat is-main is-priority">
+          <div class="bd-stat-label">Remaining budget</div>
+          <div class="bd-stat-value{% if remaining_budget < 0 %} is-negative{% endif %}"><small>KES</small> {{ remaining_budget|floatformat:"0g" }}</div>
+          <p class="bd-hint">{% if remaining_budget < 0 %}You're over budget by KES {{ remaining_budget|cut:"-"|floatformat:"0g" }}.{% else %}Budget minus recorded expenses.{% endif %}</p>
+        </div>
+
+        <div class="bd-card bd-stat is-priority">
+          <div class="bd-stat-label">Actual spending</div>
+          <div class="bd-stat-value"><small>KES</small> {{ total_spent|floatformat:"0g" }}</div>
+          <p class="bd-hint">{{ expenses|length }} recorded expense{{ expenses|length|pluralize }}.</p>
+        </div>
+
+        <div class="bd-card bd-stat">
+          <div class="bd-stat-label">Total budget</div>
+          <div class="bd-stat-value"><small>KES</small> {{ budget.amount|floatformat:"0g" }}</div>
+          <p class="bd-hint">{{ budget.start_date|date:"d M" }} – {{ budget.end_date|date:"d M Y" }}</p>
+        </div>
+
+        <div class="bd-card bd-stat">
+          <div class="bd-stat-label">Projected spending</div>
+          {% if projected_spending %}
+            <div class="bd-stat-value"><small>KES</small> {{ projected_spending|floatformat:"0g" }}</div>
+            <p class="bd-hint">Estimate at your current pace{% if avg_weekly_spend %} (about KES {{ avg_weekly_spend|floatformat:"0g" }} a week){% endif %}.</p>
+          {% else %}
+            <div class="bd-stat-value"><span class="bd-stat-na">Not enough data yet</span></div>
+            <p class="bd-hint">Needs at least a week of recorded spending.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <div class="bd-grid">
+
+        {# ---------- progress ---------- #}
+        <section class="bd-card" aria-labelledby="progress-title">
+          <div class="bd-card-head">
+            <h2 class="bd-card-title" id="progress-title">{{ budget.name }}</h2>
+            <div>
+              <a class="bd-btn bd-btn-quiet bd-btn-sm" href="{% url 'budgets:edit' budget.id %}">Edit</a>
+              <a class="bd-btn bd-btn-quiet bd-btn-sm is-danger" href="{% url 'budgets:delete' budget.id %}">Delete</a>
+            </div>
+          </div>
+
+          <div class="bd-progress" role="progressbar" aria-labelledby="progress-title"
+               aria-valuemin="0" aria-valuemax="100"
+               aria-valuenow="{% if budget_usage >= 100 %}100{% else %}{{ budget_usage|stringformat:'d' }}{% endif %}"
+               aria-valuetext="{{ budget_usage|floatformat:0 }}% of budget used">
+            <div class="bd-progress-fill{% if budget_usage >= 100 %} is-over{% elif budget_usage >= 85 %} is-risk{% elif budget_usage >= 70 %} is-watch{% endif %}"
+                 style="width: {% if budget_usage >= 100 %}100{% else %}{{ budget_usage|stringformat:'d' }}{% endif %}%"></div>
+          </div>
+
+          <div class="bd-progress-meta">
+            <span>{{ budget_usage|floatformat:0 }}% used</span>
+            {% if budget_usage >= 100 %}
+              <span class="bd-badge is-over">Over Budget</span>
+            {% elif budget_usage >= 85 %}
+              <span class="bd-badge is-risk">At Risk</span>
+            {% elif budget_usage >= 70 %}
+              <span class="bd-badge is-watch">Watch</span>
+            {% else %}
+              <span class="bd-badge is-healthy">Healthy</span>
+            {% endif %}
+          </div>
+
+          <hr class="bd-rule">
+          <div class="bd-facts">
+            <span>Spent <strong>KES {{ total_spent|floatformat:"0g" }}</strong></span>
+            <span>Left <strong{% if remaining_budget >= 0 %} class="is-good"{% endif %}>KES {{ remaining_budget|floatformat:"0g" }}</strong></span>
+          </div>
+        </section>
+
+        {# ---------- weekly spending chart ---------- #}
+        <section class="bd-card" aria-labelledby="chart-title">
+          <div class="bd-card-head">
+            <h2 class="bd-card-title" id="chart-title">Weekly spending</h2>
+          </div>
+
+          {% if spending_over_time %}
+            <div class="bd-chart" id="spending-chart" role="img"
+                 aria-label="Bar chart of weekly spending. A text version follows."></div>
+            {{ spending_over_time|json_script:"spending-data" }}
+            <ul class="bd-sr">
+              {% for week in spending_over_time %}<li>Week of {{ week.label }}: KES {{ week.amount|floatformat:"0g" }}</li>{% endfor %}
+            </ul>
+            <p class="bd-hint">Weeks are counted from the budget's start date.</p>
+          {% else %}
+            <p class="bd-empty-note">Add a few expenses to see how your spending builds up week by week.</p>
+          {% endif %}
+        </section>
+      </div>
+
+      {# ---------- insights ---------- #}
+      <section class="bd-card bd-section" aria-labelledby="insights-title">
+        <div class="bd-card-head">
+          <h2 class="bd-card-title" id="insights-title">Insights</h2>
+        </div>
+
+        {% if budget_insights %}
+          <ul class="bd-insights">
+            {% for insight in budget_insights %}
+            <li><span class="bd-dot" aria-hidden="true"></span><span>{{ insight }}</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="bd-empty-note">Insights appear once you've recorded some expenses.</p>
+        {% endif %}
+
+        <hr class="bd-rule">
+        <div class="bd-chips" aria-label="Ask FoodiePlug">
+          <a href="#" data-ai-prompt="How much money do I have left?">How much do I have left?</a>
+          <a href="#" data-ai-prompt="How can I make my food budget last longer?">Make my budget last longer</a>
+          <a href="#" data-ai-prompt="Where is most of my food money going?">Where is my money going?</a>
+        </div>
+      </section>
+
+      {# ---------- expenses ---------- #}
+      <section class="bd-card bd-section" aria-labelledby="expenses-title">
+        <div class="bd-card-head">
+          <h2 class="bd-card-title" id="expenses-title">Expenses</h2>
+          <button type="button" class="bd-btn bd-btn-secondary bd-btn-sm" data-open-modal="quick-expense-modal">+ Add</button>
+        </div>
+
+        {% if expenses %}
+          <form class="bd-search" method="get" role="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="expense-search" name="expense_q" value="{{ expense_query }}" placeholder="Search expenses" aria-label="Search expenses" autocomplete="off">
+            {% if view == "dashboard" and budgets_page_obj %}<input type="hidden" name="budgets_page" value="{{ budgets_page_obj.number }}">{% endif %}
+            <button type="submit" class="bd-btn bd-btn-secondary bd-btn-sm">Search</button>
+          </form>
+
+          <ul class="bd-budgets" id="expense-list">
+            {% for e in expenses %}
+            <li class="bd-expense" data-search="{{ e.description|lower }} {{ e.date|date:'d M Y'|lower }} {{ e.amount|floatformat:'0' }}">
+              <div class="bd-expense-main">
+                <div class="bd-expense-name">{{ e.description }}</div>
+                <div class="bd-expense-meta">{{ e.date|date:"D, d M Y" }}</div>
+              </div>
+              <div class="bd-expense-amount">KES {{ e.amount|floatformat:"0g" }}</div>
+              <div class="bd-expense-actions">
+                <a href="{% url 'budgets:edit_expense' budget.id e.id %}" aria-label="Edit {{ e.description }}">Edit</a>
+                <a class="is-danger" href="{% url 'budgets:delete_expense' budget.id e.id %}" aria-label="Delete {{ e.description }}">Delete</a>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% if view == "dashboard" %}
+            {% include "partials/pagination.html" with page_obj=expenses_page_obj page_links=expenses_page_links page_query=expenses_page_query pagination_label="Budget expense pages" %}
+          {% else %}
+            {% include "partials/pagination.html" %}
+          {% endif %}
+          <p class="bd-empty-note" id="search-empty" hidden>No expenses match your search.</p>
+        {% else %}
+          <p class="bd-empty-note">Your spending history will appear here as you record purchases.</p>
+          <div class="bd-form-actions is-center">
+            <button type="button" class="bd-btn bd-btn-primary" data-open-modal="quick-expense-modal">+ Add your first expense</button>
+          </div>
+        {% endif %}
+      </section>
+
+    {% else %}
+
+      {# ---------- no active budget ---------- #}
+      <section class="bd-card bd-empty bd-section">
+        <span class="bd-empty-icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v12H3zM3 7l2-3h14l2 3M16 13h2"/></svg>
+        </span>
+        {% if budgets %}
+          <h2>No budget is active today</h2>
+          <p>Your earlier budgets are listed below. Set a new one to start tracking this period.</p>
+        {% else %}
+          <h2>No budget yet</h2>
+          <p>Start by setting a food budget that works for you.</p>
+        {% endif %}
+        <a class="bd-btn bd-btn-primary" href="{% url 'budgets:create' %}">+ Set Budget</a>
+      </section>
+
+    {% endif %}
+
+    {# ---------- all budgets (dashboard only) ---------- #}
+    {% if view == "dashboard" and budgets %}
+    <section class="bd-card bd-section" aria-labelledby="budgets-title">
+      <div class="bd-card-head">
+        <h2 class="bd-card-title" id="budgets-title">Your budgets</h2>
+      </div>
+      <ul class="bd-budgets">
+        {% for b in budgets %}
+        <li>
+          <a class="bd-budget-link" href="{% url 'budgets:detail' b.id %}">
+            <span class="bd-budget-name">{{ b.name }}</span>
+            <span class="bd-budget-meta">{{ b.start_date|date:"d M" }} – {{ b.end_date|date:"d M Y" }}</span>
+            {% if budget and b.id == budget.id %}<span class="bd-badge is-healthy">Active now</span>{% endif %}
+            <span class="bd-amount">KES {{ b.amount|floatformat:"0g" }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% include "partials/pagination.html" with page_obj=budgets_page_obj page_links=budgets_page_links page_query=budgets_page_query pagination_label="Budget pages" %}
+    </section>
+    {% endif %}
+
+    {# ================================================================= MODALS #}
+    {% if budget %}
+    <div class="bd-modal" id="quick-expense-modal" role="dialog" aria-modal="true" aria-labelledby="quick-expense-title" aria-hidden="true">
+      <div class="bd-sheet">
+        <div class="bd-modal-head">
+          <h2 id="quick-expense-title">Add expense</h2>
+          <button type="button" class="bd-modal-close" data-close-modal aria-label="Close">&#10005;</button>
+        </div>
+        <form method="post" action="{% url 'budgets:add_expense' budget.id %}" novalidate>
+          {% csrf_token %}
+          <div class="bd-form-grid">
+            <div class="bd-field is-full">
+              <label for="qe_description">What was it for?</label>
+              <input type="text" id="qe_description" name="description" maxlength="200" placeholder="e.g. Maize flour 2kg" autocomplete="off" required>
+            </div>
+            <div class="bd-field">
+              <label for="qe_amount">Amount (KES)</label>
+              <input type="number" id="qe_amount" name="amount" min="0.01" step="0.01" inputmode="decimal" required>
+            </div>
+            <div class="bd-field">
+              <label for="qe_date">Date</label>
+              <input type="date" id="qe_date" name="date" data-default-today required>
+            </div>
+          </div>
+          <div class="bd-form-actions">
+            <button type="submit" class="bd-btn bd-btn-primary">Add expense</button>
+            <button type="button" class="bd-btn bd-btn-secondary" data-close-modal>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <button type="button" class="bd-fab" data-open-modal="quick-expense-modal" aria-label="Add expense">+</button>
+    {% endif %}
+
+    <div class="bd-modal" id="ask-modal" role="dialog" aria-modal="true" aria-labelledby="ask-title" aria-hidden="true">
+      <div class="bd-sheet">
+        <div class="bd-modal-head">
+          <h2 id="ask-title">Ask FoodiePlug</h2>
+          <button type="button" class="bd-modal-close" data-close-modal aria-label="Close">&#10005;</button>
+        </div>
+        <p class="bd-lead">Ask anything about your food budget.</p>
+        <form id="ai-form" novalidate>
+          <div class="bd-field">
+            <label for="ai-question">Your question</label>
+            <input type="text" id="ai-question" placeholder="Can I afford this week's meals?" autocomplete="off">
+          </div>
+          <div class="bd-chips">
+            <a href="#" data-ai-prompt="How much money do I have left?">How much do I have left?</a>
+            <a href="#" data-ai-prompt="How can I make my food budget last longer?">Make my budget last longer</a>
+            <a href="#" data-ai-prompt="Where is most of my food money going?">Where is my money going?</a>
+          </div>
+          <div class="bd-form-actions">
+            <button type="submit" class="bd-btn bd-btn-primary">Ask</button>
+            <button type="button" class="bd-btn bd-btn-secondary" data-close-modal>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% endif %}
+
+  </div>
+</div>
+
+{% endwith %}
+  </main>
+</div>{# /.app-shell #}
+
+<!-- dashboard.js is global (theme toggle, drawer); budget.js owns this page -->
+<script src="{% static 'js/dashboard.js' %}" defer></script>
+<script src="{% static 'js/budget.js' %}" defer></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>
