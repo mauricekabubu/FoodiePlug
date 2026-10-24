@@ -83,9 +83,12 @@ def set_volume_ownership():
 def main():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not INITIALIZED.exists():
-        if not DATABASE.exists():
-            seed_database()
-        seed_media()
+        if os.environ.get("DATABASE_URL"):
+            MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+        else:
+            if not DATABASE.exists():
+                seed_database()
+            seed_media()
         INITIALIZED.touch()
 
     set_volume_ownership()
