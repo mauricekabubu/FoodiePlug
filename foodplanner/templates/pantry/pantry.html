@@ -1,0 +1,1039 @@
+{% load static %}
+{% load l10n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pantry — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/pantry.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/toasts.css' %}">
+<script>
+  (function () {
+    try {
+      var pref = localStorage.getItem('foodieplug-theme') || 'system';
+      var resolved = pref === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : pref;
+      document.documentElement.setAttribute('data-theme', resolved);
+    } catch (e) {}
+  })();
+</script>
+</head>
+<style>
+  /* ============================================================
+   FoodiePlug — Premium Toast Notifications
+   File: static/css/toasts.css
+   ============================================================ */
+
+:root {
+    --toast-success: #16794B;
+    --toast-success-tint: #E9F3EC;
+    --toast-success-soft: #F4FAF6;
+
+    --toast-error: #C0392B;
+    --toast-error-tint: #FBEAE8;
+    --toast-error-soft: #FFF7F6;
+
+    --toast-warning: #C96F14;
+    --toast-warning-tint: #FCEEDC;
+    --toast-warning-soft: #FFFAF3;
+
+    --toast-info: #2F6690;
+    --toast-info-tint: #E8F0F5;
+    --toast-info-soft: #F6FAFC;
+
+    --toast-text: #2B2620;
+    --toast-muted: #8A7F72;
+    --toast-border: #E9E1D3;
+}
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+
+.toast-container {
+    position: fixed;
+    top: calc(1rem + env(safe-area-inset-top, 0px));
+    right: 1rem;
+    left: 1rem;
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+
+    pointer-events: none;
+}
+
+/* ============================================================
+   TOAST CARD
+   ============================================================ */
+
+.foodie-toast {
+    position: relative;
+    isolation: isolate;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    padding: 0.95rem 2.75rem 1rem 0.9rem;
+
+    overflow: hidden;
+
+    background: #FFFFFF;
+    border: 1px solid var(--toast-border);
+    border-left: 4px solid var(--toast-info);
+    border-radius: 16px;
+
+    box-shadow:
+        0 3px 6px rgba(43, 38, 32, 0.05),
+        0 14px 35px rgba(43, 38, 32, 0.12);
+
+    pointer-events: auto;
+
+    animation: toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============================================================
+   STATUS VARIANTS
+   ============================================================ */
+
+.foodie-toast.success {
+    border-left-color: var(--toast-success);
+    background: linear-gradient(
+        135deg,
+        #FFFFFF 0%,
+        var(--toast-success-soft) 100%
+    );
+}
+
+.foodie-toast.error {
+    border-left-color: var(--toast-error);
+    background: linear-gradient(
+        135deg,
+        #FFFFFF 0%,
+        var(--toast-error-soft) 100%
+    );
+}
+
+.foodie-toast.warning {
+    border-left-color: var(--toast-warning);
+    background: linear-gradient(
+        135deg,
+        #FFFFFF 0%,
+        var(--toast-warning-soft) 100%
+    );
+}
+
+.foodie-toast.info,
+.foodie-toast.debug {
+    border-left-color: var(--toast-info);
+    background: linear-gradient(
+        135deg,
+        #FFFFFF 0%,
+        var(--toast-info-soft) 100%
+    );
+}
+
+/* ============================================================
+   ICON
+   ============================================================ */
+
+.toast-icon {
+    display: flex;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    color: var(--toast-info);
+    background: var(--toast-info-tint);
+    border-radius: 11px;
+}
+
+.foodie-toast.success .toast-icon {
+    color: var(--toast-success);
+    background: var(--toast-success-tint);
+}
+
+.foodie-toast.error .toast-icon {
+    color: var(--toast-error);
+    background: var(--toast-error-tint);
+}
+
+.foodie-toast.warning .toast-icon {
+    color: var(--toast-warning);
+    background: var(--toast-warning-tint);
+}
+
+.toast-icon svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+    stroke-width: 2;
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+    padding-top: 0.05rem;
+}
+
+.toast-title {
+    display: block;
+    margin: 0 0 0.2rem;
+
+    color: var(--toast-text);
+
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.toast-message {
+    display: block;
+
+    color: #62584E;
+
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    font-size: 0.84rem;
+    font-weight: 400;
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
+}
+
+/* ============================================================
+   CLOSE BUTTON
+   ============================================================ */
+
+.toast-close {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+    padding: 0;
+
+    color: var(--toast-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition:
+        background 150ms ease,
+        color 150ms ease,
+        transform 150ms ease;
+}
+
+.toast-close:hover {
+    color: #55493E;
+    background: #F1EBDF;
+    transform: scale(1.04);
+}
+
+.toast-close:active {
+    transform: scale(0.94);
+}
+
+.toast-close:focus-visible {
+    outline: 2px solid var(--toast-success);
+    outline-offset: 2px;
+}
+
+.toast-close svg {
+    display: block;
+    width: 15px;
+    height: 15px;
+}
+
+/* ============================================================
+   AUTO-DISMISS PROGRESS BAR
+   ============================================================ */
+
+.toast-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    display: block;
+    width: 100%;
+    height: 3px;
+
+    color: var(--toast-info);
+    background: currentColor;
+    opacity: 0.45;
+
+    transform: scaleX(1);
+    transform-origin: left center;
+
+    animation: toast-progress-shrink 5000ms linear forwards;
+}
+
+.foodie-toast.success .toast-progress {
+    color: var(--toast-success);
+}
+
+.foodie-toast.error .toast-progress {
+    color: var(--toast-error);
+}
+
+.foodie-toast.warning .toast-progress {
+    color: var(--toast-warning);
+}
+
+.foodie-toast.info .toast-progress,
+.foodie-toast.debug .toast-progress {
+    color: var(--toast-info);
+}
+
+/* Pause the progress animation while interacting with a toast. */
+
+.foodie-toast:hover .toast-progress,
+.foodie-toast.is-paused .toast-progress {
+    animation-play-state: paused;
+}
+
+/* ============================================================
+   EXIT ANIMATION
+   ============================================================ */
+
+.foodie-toast.is-leaving {
+    pointer-events: none;
+    animation: toast-out 220ms ease forwards;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translate3d(12px, -8px, 0) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes toast-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+        max-height: 200px;
+        margin-bottom: 0;
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(16px);
+        max-height: 0;
+        margin-bottom: -0.7rem;
+    }
+}
+
+@keyframes toast-progress-shrink {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* ============================================================
+   TABLET AND DESKTOP
+   ============================================================ */
+
+@media (min-width: 640px) {
+    .toast-container {
+        right: 1rem;
+        left: auto;
+        width: min(400px, calc(100vw - 2rem));
+        align-items: stretch;
+    }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 639px) {
+    .toast-container {
+        top: calc(0.75rem + env(safe-area-inset-top, 0px));
+        right: 0.75rem;
+        left: 0.75rem;
+        gap: 0.6rem;
+    }
+
+    .foodie-toast {
+        max-width: none;
+        padding: 0.85rem 2.6rem 0.9rem 0.75rem;
+        border-radius: 14px;
+    }
+
+    .toast-icon {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+    }
+
+    .toast-title {
+        font-size: 0.85rem;
+    }
+
+    .toast-message {
+        font-size: 0.82rem;
+    }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .foodie-toast,
+    .foodie-toast.is-leaving,
+    .toast-progress {
+        animation: none;
+    }
+
+    .toast-close {
+        transition: none;
+    }
+
+    .foodie-toast.is-leaving {
+        opacity: 0;
+    }
+}
+</style>
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+
+<!-- ============ MOBILE TOPBAR ============ -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+  <div class="mobile-topbar-actions">
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Notifications" aria-haspopup="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dropdown-panel" role="menu"><h4>Notifications</h4><p style="font-size:0.85rem;color:var(--muted);padding:0.5rem;">You're all caught up.</p></div>
+    </div>
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Account menu" aria-haspopup="true">
+        <span class="avatar" style="width:30px;height:30px;font-size:0.72rem;">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+      </button>
+      <div class="dropdown-panel" role="menu">
+        <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+        <a href="#" class="profile-menu-item">Settings</a>
+        <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+        <div class="profile-menu-divider"></div>
+        <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+      <a href="{% url 'pantry:pantry' %}" class="nav-item is-active">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="#" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-content">
+
+    <div class="page-header">
+      <div>
+        <h1>Pantry</h1>
+        <p>Keep track of what you already have at home and let FoodiePlug help you decide what to cook, use, or buy next.</p>
+      </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn-solid" data-open-modal="add-pantry-modal">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Add pantry item
+        </button>
+      </div>
+    </div>
+
+    <!-- ---- summary ---- -->
+    <div class="pantry-summary">
+      <div class="summary-chip">
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+        <div><p class="s-value">{{ summary.total_items|default:0 }}</p><p class="s-label">Total items</p></div>
+      </div>
+      <div class="summary-chip is-warning">
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg></span>
+        <div><p class="s-value">{{ summary.running_low|default:0 }}</p><p class="s-label">Running low</p></div>
+      </div>
+      <div class="summary-chip is-warning">
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <div><p class="s-value">{{ summary.expiring_soon|default:0 }}</p><p class="s-label">Expiring soon</p></div>
+      </div>
+      <div class="summary-chip is-brand">
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/></svg></span>
+        <div><p class="s-value">KES {{ summary.estimated_value|default:0 }}</p><p class="s-label">Estimated pantry value</p></div>
+      </div>
+    </div>
+
+    <!-- ---- smart insights ---- -->
+    {% if insights %}
+    <div class="insight-strip">
+      <div class="card-header"><h2>Smart pantry insights</h2></div>
+      {% for insight in insights %}
+      <div class="insight-row {% if insight.is_warning %}is-warning{% endif %}">
+        <span class="i-dot" aria-hidden="true">
+          {% if insight.is_warning %}
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>
+          {% else %}
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          {% endif %}
+        </span>
+        <p>{{ insight.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ---- what can I cook? ---- -->
+    {% if cook_suggestions %}
+    <section style="margin-bottom:1.3rem;">
+      <div class="card-header">
+        <div><h2 style="margin-bottom:0.2rem;">What can I cook?</h2><p style="font-size:0.85rem;color:var(--muted);margin:0;">Use what you already have before buying more.</p></div>
+      </div>
+      <div class="cook-grid">
+        {% for cook in cook_suggestions %}
+        <div class="cook-card">
+          <h3>{{ cook.name }}</h3>
+          {% if cook.available_count == cook.total_count %}
+          <p class="avail-line is-full">You have everything you need.</p>
+          {% else %}
+          <p class="avail-line is-partial">{{ cook.available_count }} / {{ cook.total_count }} ingredients available</p>
+          {% endif %}
+          <div class="cook-ingredients">
+            {% for ing in cook.ingredients %}
+            <span class="{% if ing.available %}is-have{% else %}is-missing{% endif %}">
+              {% if ing.available %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              {% endif %}
+              {{ ing.name }}
+            </span>
+            {% endfor %}
+          </div>
+          <a href="{{ cook.url }}">{% if cook.available_count == cook.total_count %}View recipe →{% else %}View meal →{% endif %}</a>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- ---- toolbar: search, filters, sort ---- -->
+    <form id="pantry-filter-form" method="get" class="pantry-filter-form">
+    {% if selected_category != "all" %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+    <div class="pantry-toolbar">
+      <div class="pantry-search">
+        <svg class="icon-left" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="pantry-search-input" name="q" value="{{ query }}" placeholder="Search your pantry..." autocomplete="off">
+        <button type="button" class="search-clear" aria-label="Clear search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <select class="select-field desktop-only" id="availability-filter" name="status" aria-label="Filter by availability">
+        <option value="all">All items</option>
+        <option value="available" {% if status_filter == "available" %}selected{% endif %}>Available</option>
+        <option value="low" {% if status_filter == "low" %}selected{% endif %}>Running low</option>
+        <option value="out" {% if status_filter == "out" %}selected{% endif %}>Out of stock</option>
+      </select>
+
+      <select class="select-field desktop-only" id="pantry-sort" name="sort" aria-label="Sort by">
+        <option value="recent" {% if sort == "recent" %}selected{% endif %}>Recently added</option>
+        <option value="name" {% if sort == "name" %}selected{% endif %}>Name</option>
+        <option value="quantity" {% if sort == "quantity" %}selected{% endif %}>Quantity</option>
+        <option value="expiry" {% if sort == "expiry" %}selected{% endif %}>Expiry date</option>
+        <option value="category" {% if sort == "category" %}selected{% endif %}>Category</option>
+        <option value="low" {% if sort == "low" %}selected{% endif %}>Running low first</option>
+      </select>
+
+      <button type="button" class="filter-btn" data-open-modal="filter-modal">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Filters
+      </button>
+      <button type="submit" class="btn-solid">Apply</button>
+    </div>
+    </form>
+
+    <!-- ---- category chips ---- -->
+    <div class="category-chips" role="tablist" aria-label="Pantry categories">
+      {% for cat in categories %}
+      <a class="cat-chip {% if selected_category == cat.key %}is-active{% endif %}" href="{% if cat.query %}?{{ cat.query }}{% else %}{{ request.path }}{% endif %}" data-category="{{ cat.key }}">{{ cat.label }}</a>
+      {% endfor %}
+    </div>
+
+    <!-- ---- pantry item list ---- -->
+    {% if pantry_count %}
+    {% if pantry_items %}
+    <div class="pantry-list">
+      {% for item in pantry_items %}
+      <div class="pantry-item"
+           data-category="{{ item.category_key }}"
+           data-status="{{ item.status }}"
+           data-search="{{ item.food.name|lower }} {{ item.category_label|lower }} {{ item.unit|lower }}">
+
+        <div class="item-thumb">
+          {% if item.image_url %}
+          <img src="{{ item.image_url }}" alt="{{ item.food.name }}" loading="lazy">
+          {% else %}
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          {% endif %}
+        </div>
+
+        <div class="item-main">
+          <p class="name">{{ item.food.name }}</p>
+          <p class="meta"><span>{{ item.category_label }}</span><span>{{ item.storage }}</span>{% if item.expiry_label %}<span>{{ item.expiry_label }}</span>{% endif %}</p>
+        </div>
+
+        <div class="item-badges">
+          {% if item.status == "available" %}
+          <span class="badge is-available"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Available</span>
+          {% elif item.status == "low" %}
+          <span class="badge is-low"><svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>Running low</span>
+          {% elif item.status == "out" %}
+          <span class="badge is-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Out of stock</span>
+          {% endif %}
+
+          {% if item.expiry_state == "soon" %}
+          <span class="badge is-expiring"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>{{ item.expiry_label }}</span>
+          {% elif item.expiry_state == "expired" %}
+          <span class="badge is-expired"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>Expired</span>
+          {% endif %}
+        </div>
+
+        <div class="item-qty-control"
+             data-step="{{ item.step|default:1 }}"
+             data-unit="{{ item.unit }}"
+             data-url="{% url 'pantry:update_quantity' item.id %}">
+          <button type="button" class="qty-btn qty-minus" aria-label="Decrease quantity">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <span class="qty-value" data-value="{{ item.quantity|unlocalize }}">{{ item.quantity }} {{ item.unit }}</span>
+          <button type="button" class="qty-btn qty-plus" aria-label="Increase quantity">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        {% if item.status == "low" or item.status == "out" %}
+        <a href="#" class="item-shopping-link">Add to shopping list</a>
+        {% endif %}
+
+        <div class="item-actions">
+          <button type="button" class="icon-btn" aria-label="Use {{ item.food.name }}" title="Use food"
+                  data-open-modal="use-food-modal"
+                  data-form-action="{% url 'pantry:consume' item.id %}"
+                  data-name="{{ item.food.name }}"
+                  data-quantity="{{ item.quantity|unlocalize }}"
+                  data-unit="{{ item.unit }}">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+
+          <button type="button" class="icon-btn" aria-label="Edit {{ item.food.name }}"
+                  data-open-modal="edit-pantry-modal"
+                  data-form-action="{% url 'pantry:update' item.id %}"
+                  data-quantity="{{ item.quantity|unlocalize }}"
+                  data-unit="{{ item.unit }}"
+                  data-storage="{{ item.storage }}"
+                  data-min="{{ item.minimum_quantity|unlocalize }}"
+                  data-acquired="{{ item.acquired_at|date:'Y-m-d' }}"
+                  data-expires="{{ item.expires_at|date:'Y-m-d' }}"
+                  data-notes="{{ item.notes }}">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4 11-11 3 3-11 11-4 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+
+          <button type="button" class="icon-btn" aria-label="Remove {{ item.food.name }}"
+                  data-open-modal="delete-pantry-modal"
+                  data-form-action="{% url 'pantry:remove' item.id %}">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <p id="pantry-no-results" style="display:none;text-align:center;font-size:0.9rem;color:var(--muted);padding:2rem 0;">No items match your search or filters.</p>
+    {% include "partials/pagination.html" %}
+    {% else %}
+    <p class="empty-state">No pantry items match these filters.</p>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state" style="padding:3rem 1rem;">
+      <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <h3>Your pantry is waiting.</h3>
+      <p>Add the food you already have at home and FoodiePlug will use it to make smarter meal and shopping suggestions.</p>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="btn-solid" data-open-modal="add-pantry-modal">Add your first item</button>
+        <a href="#" class="btn-outline">Explore Food Library</a>
+      </div>
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+
+<!-- ============ FAB (mobile) ============ -->
+<button type="button" class="fab-add" data-open-modal="add-pantry-modal" aria-label="Add pantry item">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+</button>
+
+<!-- ============ ADD PANTRY ITEM MODAL ============ -->
+<div class="modal-overlay" id="add-pantry-modal">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="add-pantry-title">
+    <div class="modal-header">
+      <div><h2 id="add-pantry-title">Add pantry item</h2><p>Add something you already have at home.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form id="add-pantry-form" method="post" action="{% url 'pantry:add' %}">
+      {% csrf_token %}
+      <div class="modal-field">
+        <label for="add-food">Food</label>
+        <select id="add-food" name="food_id" required>
+          <option value="" disabled selected>Select a food…</option>
+          {% for food in foods %}<option value="{{ food.id }}">{{ food.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="add-quantity">Quantity</label>
+          <input type="number" id="add-quantity" name="quantity" min="0.01" step="0.01" placeholder="2" required>
+        </div>
+        <div class="modal-field">
+          <label for="add-unit">Unit</label>
+          <select id="add-unit" name="unit">
+            <option>kg</option><option>g</option><option>l</option><option>ml</option>
+            <option>piece</option><option>bunch</option><option>packet</option>
+            <option>bottle</option><option>tin</option><option>dozen</option><option>other</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label for="add-storage">Storage location</label>
+        <select id="add-storage" name="storage">
+          <option value="pantry">Pantry</option>
+          <option value="refrigerator">Refrigerator</option>
+          <option value="freezer">Freezer</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="add-purchase-date">Purchase date</label>
+          <input type="date" id="add-purchase-date" name="acquired_at">
+        </div>
+        <div class="modal-field">
+          <label for="add-expiry-date">Expiry date</label>
+          <input type="date" id="add-expiry-date" name="expires_at">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label for="add-min-qty">Minimum quantity</label>
+        <input type="number" id="add-min-qty" name="minimum_quantity" min="0" step="0.01" placeholder="0.5">
+        <p class="hint">We'll flag this item as running low once it drops below this amount.</p>
+      </div>
+      <div class="modal-field">
+        <label for="add-notes">Notes (optional)</label>
+        <textarea id="add-notes" name="notes" placeholder="Opened packet"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Add to pantry</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ EDIT PANTRY ITEM MODAL ============ -->
+<div class="modal-overlay" id="edit-pantry-modal">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="edit-pantry-title">
+    <div class="modal-header">
+      <div><h2 id="edit-pantry-title">Edit pantry item</h2><p>Update quantity, storage, or expiry.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form id="edit-pantry-form" method="post" action="">
+      {% csrf_token %}
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="edit-quantity">Quantity</label>
+          <input type="number" id="edit-quantity" name="quantity" min="0.01" step="0.01" required>
+        </div>
+        <div class="modal-field">
+          <label for="edit-unit">Unit</label>
+          <select id="edit-unit" name="unit">
+            <option>kg</option><option>g</option><option>l</option><option>ml</option>
+            <option>piece</option><option>bunch</option><option>packet</option>
+            <option>bottle</option><option>tin</option><option>dozen</option><option>other</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label for="edit-min-qty">Minimum quantity</label>
+        <input type="number" id="edit-min-qty" name="minimum_quantity" min="0" step="0.01">
+      </div>
+      <div class="modal-field">
+        <label for="edit-storage">Storage location</label>
+        <select id="edit-storage" name="storage">
+          <option value="pantry">Pantry</option>
+          <option value="refrigerator">Refrigerator</option>
+          <option value="freezer">Freezer</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="edit-acquired-date">Purchase date</label>
+          <input type="date" id="edit-acquired-date" name="acquired_at">
+        </div>
+        <div class="modal-field">
+          <label for="edit-expiry-date">Expiry date</label>
+          <input type="date" id="edit-expiry-date" name="expires_at">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label for="edit-notes">Notes</label>
+        <textarea id="edit-notes" name="notes"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ USE FOOD MODAL ============ -->
+<div class="modal-overlay" id="use-food-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="use-food-title">
+    <div class="modal-header">
+      <div><h2 id="use-food-title">Use food</h2></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form id="use-food-form" method="post" action="">
+      {% csrf_token %}
+      <div class="use-food-summary">
+        <span>Current quantity</span>
+        <strong id="use-food-current"></strong>
+      </div>
+      <div class="modal-field">
+        <label for="use-amount">Amount used</label>
+        <input type="number" id="use-amount" name="quantity" min="0.01" step="0.01" placeholder="0.5" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Update pantry</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ DELETE CONFIRMATION MODAL ============ -->
+<div class="modal-overlay" id="delete-pantry-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="delete-pantry-title">
+    <div class="modal-header">
+      <div><h2 id="delete-pantry-title">Remove this pantry item?</h2><p>This will remove it from your pantry. This can't be undone.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form id="delete-pantry-form" method="post" action="">
+      {% csrf_token %}
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid is-danger">Remove item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MOBILE FILTER MODAL ============ -->
+<div class="modal-overlay" id="filter-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="filter-title">
+    <div class="modal-header">
+      <div><h2 id="filter-title">Filters</h2></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="modal-field">
+      <label for="mobile-availability-filter">Availability</label>
+      <select id="mobile-availability-filter">
+        <option value="all">All items</option>
+        <option value="available" {% if status_filter == "available" %}selected{% endif %}>Available</option>
+        <option value="low" {% if status_filter == "low" %}selected{% endif %}>Running low</option>
+        <option value="out" {% if status_filter == "out" %}selected{% endif %}>Out of stock</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label for="mobile-sort">Sort by</label>
+      <select id="mobile-sort">
+        <option value="recent" {% if sort == "recent" %}selected{% endif %}>Recently added</option>
+        <option value="name" {% if sort == "name" %}selected{% endif %}>Name</option>
+        <option value="quantity" {% if sort == "quantity" %}selected{% endif %}>Quantity</option>
+        <option value="expiry" {% if sort == "expiry" %}selected{% endif %}>Expiry date</option>
+        <option value="category" {% if sort == "category" %}selected{% endif %}>Category</option>
+        <option value="low" {% if sort == "low" %}selected{% endif %}>Running low first</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-solid" data-close-modal style="width:100%;">Apply filters</button>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/pantry.js' %}"></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>

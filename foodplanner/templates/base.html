@@ -1,0 +1,228 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>{% block title %}FoodiePlug{% endblock %}</title>
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+<link rel="stylesheet" href="{% static 'css/library.css' %}">
+<link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+<link rel="stylesheet" href="{% static 'css/shopping.css' %}">
+
+
+{% block extra_css %}{% endblock %}
+```
+
+</head>
+
+<body>
+
+```
+<!-- =========================
+     NAVBAR
+========================== -->
+<header class="site-header">
+
+    <nav class="navbar">
+
+        <!-- Brand -->
+        <a href="{% url 'dashboard' %}" class="navbar-brand">
+            <span class="brand-mark">
+                <!-- FoodiePlug logo SVG -->
+            </span>
+
+            <span class="brand-name">
+                FoodiePlug
+            </span>
+        </a>
+
+
+        <!-- =========================
+             DESKTOP NAVIGATION
+        ========================== -->
+        <div class="navbar-links">
+
+            <!-- Overview / Dashboard -->
+            <a href="{% url 'dashboard' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}">
+                Home
+            </a>
+
+
+            <!-- Meal Planner -->
+            <a href="{% url 'meals:meal_library' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'meal_library' %}is-active{% endif %}">
+                Meals
+            </a>
+
+
+            <!-- Food Library -->
+            <a href="{% url 'foods:foods' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'foods' %}is-active{% endif %}">
+                Food Library
+            </a>
+
+
+            <!-- Pantry -->
+            <a href="{% url 'pantry:pantry' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'pantry' %}is-active{% endif %}">
+                Pantry
+            </a>
+
+
+            <!-- Shopping -->
+            <a href="{% url 'shopping_lists' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'shopping_lists' %}is-active{% endif %}">
+                Shopping
+            </a>
+
+
+            <!-- Budget -->
+            <a href="{% url 'budgets:dashboard' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}">
+                Budget
+            </a>
+
+
+            <!-- AI Assistant -->
+            <a href="{% url 'ai' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'ai' %}is-active{% endif %}">
+                AI Assistant
+            </a>
+
+        </div>
+
+
+        <!-- =========================
+             RIGHT SIDE
+        ========================== -->
+        <div class="navbar-actions">
+
+            <!-- Notifications -->
+            <div class="navbar-notifications">
+
+                <button
+                    type="button"
+                    class="navbar-icon"
+                    aria-label="Notifications"
+                    aria-haspopup="true"
+                >
+                    <!-- notification SVG -->
+                </button>
+
+            </div>
+
+
+            <!-- User -->
+            <div class="navbar-user">
+
+                <button
+                    type="button"
+                    class="user-button"
+                    aria-label="Account menu"
+                >
+                    <span class="user-avatar">
+                        {{ user.first_name|default:user.username|slice:":1"|upper }}
+                    </span>
+
+                    <span class="user-name">
+                        {{ user.first_name|default:user.username }}
+                    </span>
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             MOBILE MENU BUTTON
+        ========================== -->
+        <button
+            type="button"
+            class="mobile-menu-button"
+            id="mobile-menu-button"
+            aria-label="Open navigation"
+            aria-expanded="false"
+        >
+            <!-- hamburger SVG -->
+        </button>
+
+    </nav>
+
+
+    <!-- =========================
+         MOBILE NAVIGATION
+    ========================== -->
+    <div class="mobile-nav" id="mobile-nav">
+
+        <a href="{% url 'dashboard' %}" class="nav-link">
+            Home
+        </a>
+
+        <a href="{% url 'meals:meal_library' %}" class="nav-link">
+            Meals
+        </a>
+
+        <a href="{% url 'foods:foods' %}" class="nav-link">
+            Food Library
+        </a>
+
+        <a href="{% url 'pantry:pantry' %}" class="nav-link">
+            Pantry
+        </a>
+
+        <a href="{% url 'shopping_lists' %}" class="nav-link">
+            Shopping
+        </a>
+
+        <a href="{% url 'budgets:dashboard' %}" class="nav-link">
+            Budget
+        </a>
+
+        <a href="{% url 'ai:page' %}" class="nav-link">
+            AI Assistant
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- =========================
+     PAGE CONTENT
+========================== -->
+
+<main>
+
+    {% block content %}
+    {% endblock %}
+
+</main>
+
+
+<!-- =========================
+     GLOBAL JAVASCRIPT
+========================== -->
+
+<script src="{% static 'js/base.js' %}"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/library.js' %}"></script>
+<script src="{% static 'js/pantry.js' %}"></script>
+
+
+
+
+{% block extra_js %}
+{% endblock %}
+```
+
+</body>
+</html>

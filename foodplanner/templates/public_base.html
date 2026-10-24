@@ -1,0 +1,80 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en-KE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}FoodiePlug | Smarter Kenyan Meal Planning{% endblock %}</title>
+
+    <meta name="description"
+          content="{% block meta_description %}Plan affordable meals, manage your food budget, and organise groceries with FoodiePlug, built with Kenyan food habits in mind.{% endblock %}">
+
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <meta name="theme-color" content="#FCFDFB">
+
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FoodiePlug">
+    <meta property="og:title" content="{% block og_title %}FoodiePlug | Smarter Kenyan Meal Planning{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Plan meals, manage groceries, and make smarter food-budget decisions with FoodiePlug.{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">    <link rel="stylesheet" href="{% static 'css/public.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+        <a class="site-brand" href="{% url 'intro' %}" aria-label="FoodiePlug homepage">
+            <svg
+                class="site-brand-logo"
+                viewBox="0 0 64 64"
+                role="img"
+                aria-label="FoodiePlug logo"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <circle cx="32" cy="32" r="31" fill="#16794B"/>
+                <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+                <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+            </svg>
+            <span>FoodiePlug</span>
+        </a>
+
+
+        <nav class="site-nav" aria-label="Main navigation">
+            <a href="{% url 'intro' %}">Home</a>
+            <a href="/#features">Features</a>
+            <a href="/#how-it-works">How it works</a>
+            <a href="{% url 'contact' %}">Contact</a>
+        </nav>
+
+        <div class="header-actions">
+            <a class="login-link" href="{% url 'login' %}">Log in</a>
+            <a class="button button-small" href="{% url 'register' %}">Get started</a>
+        </div>
+    </header>
+
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <a class="site-brand" href="{% url 'intro' %}">FoodiePlug</a>
+        <p>Smarter everyday food decisions, made simpler.</p>
+
+        <nav aria-label="Footer navigation">
+            <a href="{% url 'contact' %}">Contact</a>
+            <a href="{% url 'privacy' %}">Privacy</a>
+            <a href="{% url 'terms' %}">Terms</a>
+        </nav>
+
+        <small>&copy; {% now "Y" %} FoodiePlug. All rights reserved.</small>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

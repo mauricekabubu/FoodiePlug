@@ -1,0 +1,9 @@
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+{% if messages %}
+<div id="flash-messages" hidden>
+  {% for message in messages %}
+  <span data-level="{{ message.tags|default:'info' }}">{{ message }}</span>
+  {% endfor %}
+</div>
+{% endif %}

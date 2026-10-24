@@ -1,0 +1,916 @@
+{% load static %}
+{% load l10n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% if shopping_list %}{{ shopping_list.name }} — {% endif %}Shopping — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/pantry.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/food_library.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/shopping.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/toasts.css' %}">
+<script>
+  (function () {
+    try {
+      var pref = localStorage.getItem('foodieplug-theme') || 'system';
+      var resolved = pref === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : pref;
+      document.documentElement.setAttribute('data-theme', resolved);
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- ============ MOBILE TOPBAR ============ -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+  <div class="mobile-topbar-actions">
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Notifications" aria-haspopup="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dropdown-panel" role="menu"><h4>Notifications</h4><p style="font-size:0.85rem;color:var(--muted);padding:0.5rem;">You're all caught up.</p></div>
+    </div>
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Account menu" aria-haspopup="true">
+        <span class="avatar" style="width:30px;height:30px;font-size:0.72rem;">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+      </button>
+      <div class="dropdown-panel" role="menu">
+        <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+        <a href="#" class="profile-menu-item">Settings</a>
+        <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+        <div class="profile-menu-divider"></div>
+        <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+      <a href="{% url 'shopping_lists' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-content shop-page" id="shop-page" {% if not shopping_list %}data-lists-index{% endif %}>
+
+    {% if shopping_list %}
+    <!-- =====================================================
+         LIST DETAIL  (unchanged)
+         ===================================================== -->
+    <a href="{% url 'shopping_lists' %}" class="back-link">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      All shopping lists
+    </a>
+
+    <div class="page-header">
+      <div>
+        <h1>{{ shopping_list.name }}</h1>
+        <p>Buy what you need, tick it off as you shop, and keep an eye on what's left.</p>
+      </div>
+      <div class="page-header-actions shop-header-actions">
+        <button type="button" class="btn-outline" id="mode-toggle" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Shopping mode</span>
+        </button>
+        <button type="button" class="btn-solid" data-open-modal="add-item-modal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Add item
+        </button>
+        <div class="dropdown">
+          <button type="button" class="icon-btn shop-more-btn" aria-label="List options" aria-haspopup="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg>
+          </button>
+          <div class="dropdown-panel" role="menu">
+            <button type="button" class="profile-menu-item shop-menu-btn" data-open-modal="rename-list-modal">Rename list</button>
+            <div class="profile-menu-divider"></div>
+            <button type="button" class="profile-menu-item shop-menu-btn is-danger" data-open-modal="delete-list-modal">Delete list</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- progress summary (counted from the rows below) ---- -->
+    <div class="pantry-summary shop-summary" id="shop-summary"
+         data-total-count="{{ progress.total_items }}"
+         data-purchased-count="{{ progress.purchased_items }}">
+      <div class="summary-chip">
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><p class="s-value"><span id="sum-purchased">0</span> / <span id="sum-total">0</span></p><p class="s-label">Purchased</p></div>
+      </div>
+      <div class="summary-chip is-warning">
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg></span>
+        <div><p class="s-value" id="sum-left">0</p><p class="s-label">Still to buy</p></div>
+      </div>
+      <div class="summary-chip is-brand" id="sum-estimated-chip" hidden>
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/></svg></span>
+        <div><p class="s-value">KES <span id="sum-estimated">0</span></p><p class="s-label">Estimated</p></div>
+      </div>
+      <div class="summary-chip is-brand" id="sum-actual-chip" hidden>
+        <span class="s-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg></span>
+        <div><p class="s-value">KES <span id="sum-actual">0</span></p><p class="s-label">Actual spent</p></div>
+      </div>
+    </div>
+
+    <div class="shop-progress" role="progressbar" aria-label="Shopping progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="shop-progress">
+      <div class="shop-progress-bar" id="shop-progress-bar"></div>
+    </div>
+    <p class="shop-progress-label"><span id="sum-pct">0</span>% done</p>
+
+    {% if item_total_count %}
+    <!-- ---- toolbar ---- -->
+    <form class="pantry-toolbar shop-toolbar" method="get" action="{% url 'shopping_list_detail' shopping_list.id %}">
+      <div class="pantry-search">
+        <svg class="icon-left" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="shop-search" name="q" value="{{ query }}" placeholder="Search your shopping list..." autocomplete="off" aria-label="Search your shopping list">
+        <button type="button" class="search-clear" id="shop-search-clear" aria-label="Clear search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <select class="select-field" id="shop-status" name="status" aria-label="Filter by status">
+        <option value="all">All items</option>
+        <option value="todo" {% if status_filter == "todo" %}selected{% endif %}>To buy</option>
+        <option value="done" {% if status_filter == "done" %}selected{% endif %}>Purchased</option>
+      </select>
+
+      <select class="select-field" id="shop-group" name="group" aria-label="Group items">
+        <option value="none" {% if group == "none" %}selected{% endif %}>No grouping</option>
+        <option value="category" {% if group == "category" %}selected{% endif %}>By category</option>
+      </select>
+      <button type="submit" class="btn-solid">Apply</button>
+    </form>
+
+    <!-- ---- items ---- -->
+    {% if item_result_count %}
+    <ul class="shop-items" id="shop-items">
+      {% for item in items %}
+      <li class="shop-item {% if item.is_purchased %}is-purchased{% endif %}"
+          data-food-id="{{ item.food.id }}"
+          data-name="{{ item.food.name|lower }}"
+          data-category="{{ item.food.category.name|default:'Other' }}"
+          data-purchased="{% if item.is_purchased %}1{% else %}0{% endif %}"
+          {% if item.estimated_price %}data-estimated="{{ item.estimated_price|unlocalize }}"{% endif %}
+          {% if item.actual_price %}data-actual="{{ item.actual_price|unlocalize }}"{% endif %}>
+
+        <form method="post"
+              action="{% if item.is_purchased %}{% url 'unpurchase_item' item.id %}{% else %}{% url 'purchase_item' item.id %}{% endif %}"
+              class="shop-toggle-form">
+          {% csrf_token %}
+          <input type="hidden" name="list_id" value="{{ shopping_list.id }}">
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="shop-check" role="checkbox"
+                  aria-checked="{% if item.is_purchased %}true{% else %}false{% endif %}"
+                  aria-label="{% if item.is_purchased %}Mark {{ item.food.name }} as not purchased{% else %}Mark {{ item.food.name }} as purchased{% endif %}">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+
+        <div class="shop-thumb">
+          {% include "foods/_food_visual.html" with item=item.food %}
+        </div>
+
+        <div class="shop-item-main">
+          <p class="shop-item-name">{{ item.food.name }}</p>
+          <p class="shop-item-qty">
+            {{ item.quantity|floatformat:"-2" }} {{ item.unit }}
+            {% if item.is_purchased %}<span class="shop-state"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Purchased</span>{% endif %}
+          </p>
+          <p class="shop-item-meta shop-secondary">
+            {% if item.food.category %}<span class="food-tag">{{ item.food.category.name }}</span>{% endif %}
+            {% if item.estimated_price %}<span>Est. KES {{ item.estimated_price|floatformat:"-2" }}</span>{% endif %}
+            {% if item.actual_price %}<span>Paid KES {{ item.actual_price|floatformat:"-2" }}</span>{% endif %}
+            {% if item.notes %}<span class="shop-note">{{ item.notes }}</span>{% endif %}
+          </p>
+        </div>
+
+        <div class="shop-item-actions shop-secondary">
+          <button type="button" class="icon-btn" aria-label="Edit {{ item.food.name }}" title="Edit"
+                  data-open-modal="edit-item-modal"
+                  data-form-action="{% url 'update_item' item.id %}"
+                  data-name="{{ item.food.name }}"
+                  data-quantity="{{ item.quantity|unlocalize }}"
+                  data-unit="{{ item.unit }}">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 20l1-4 11-11 3 3-11 11-4 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </button>
+          <button type="button" class="icon-btn" aria-label="Remove {{ item.food.name }}" title="Remove"
+                  data-open-modal="remove-item-modal"
+                  data-form-action="{% url 'remove_item' item.id %}"
+                  data-name="{{ item.food.name }}">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <p id="shop-no-results" hidden class="shop-no-results">No items match your search or filters.</p>
+    {% include "partials/pagination.html" %}
+
+    <!-- ---- shopping mode running totals ---- -->
+    <div class="shop-bar" id="shop-bar" hidden>
+      <div><span class="shop-bar-label">Still to buy</span><strong id="bar-left">0</strong></div>
+      <div id="bar-est" hidden><span class="shop-bar-label">Estimated</span><strong>KES <span id="bar-est-val">0</span></strong></div>
+      <div id="bar-act" hidden><span class="shop-bar-label">Actual</span><strong>KES <span id="bar-act-val">0</span></strong></div>
+    </div>
+
+    {% else %}
+    <p class="shop-no-results">No items match these filters.</p>
+    {% endif %}
+    {% else %}
+    <div class="empty-state" style="padding:3rem 1rem;">
+      <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg></div>
+      <h3>This list is empty</h3>
+      <p>Add the foods you need to buy. You can pick from the Food Library.</p>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="btn-solid" data-open-modal="add-item-modal">Add your first item</button>
+        <a href="{% url 'foods:foods' %}" class="btn-outline">Explore Food Library</a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- =====================================================
+         LISTS INDEX
+         ===================================================== -->
+    <div class="page-header">
+      <div>
+        <h1>Shopping</h1>
+        <p>Turn your plans into a practical shopping list — buy what you need and avoid unnecessary spending.</p>
+      </div>
+      <div class="page-header-actions">
+        <button type="button" class="btn-solid" data-open-modal="create-list-modal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          New shopping list
+        </button>
+      </div>
+    </div>
+
+    {% if archive_enabled %}
+    <nav class="shop-tabs" aria-label="List status">
+      <a href="{% url 'shopping_lists' %}" class="shop-tab {% if status != 'archived' %}is-active{% endif %}" {% if status != 'archived' %}aria-current="page"{% endif %}>
+        Active <span class="shop-tab-count">{{ active_count }}</span>
+      </a>
+      <a href="{% url 'shopping_lists' %}?status=archived" class="shop-tab {% if status == 'archived' %}is-active{% endif %}" {% if status == 'archived' %}aria-current="page"{% endif %}>
+        Archived <span class="shop-tab-count">{{ archived_count }}</span>
+      </a>
+    </nav>
+    {% endif %}
+
+    {% if user_total or q %}
+
+    <!-- ---- search + sort (plain GET form: works without JavaScript) ---- -->
+    <form method="get" class="shop-lists-toolbar" id="lists-search-form" role="search">
+      {% if status == 'archived' %}<input type="hidden" name="status" value="archived">{% endif %}
+      <div class="pantry-search">
+        <svg class="icon-left" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="lists-search" name="q" value="{{ q }}" maxlength="100"
+               placeholder="Search your shopping lists..." autocomplete="off" aria-label="Search shopping lists">
+      </div>
+
+      <select class="select-field" id="lists-sort" name="sort" aria-label="Sort lists">
+        {% for key, label in sort_options %}
+          <option value="{{ key }}" {% if key == sort %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" class="btn-outline">Search</button>
+      {% if q %}
+        <a class="btn-outline" href="{% url 'shopping_lists' %}{% if clear_search_qs %}?{{ clear_search_qs }}{% endif %}">Clear</a>
+      {% endif %}
+    </form>
+
+    <p class="shop-count" role="status">
+      {{ total_count }} list{{ total_count|pluralize }}{% if q %} matching “{{ q }}”{% endif %}{% if page_obj.paginator.num_pages > 1 %} · Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endif %}
+    </p>
+
+    {% if shopping_lists %}
+    <ul class="shop-lists">
+      {% for l in shopping_lists %}
+      <li class="shop-list-card">
+        <div class="shop-list-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+
+        <div class="shop-list-body">
+          <h3 title="{{ l.name }}">{{ l.name }}</h3>
+          <p>
+            {{ l.item_total }} item{{ l.item_total|pluralize }}{% if l.item_total %} · {{ l.purchased_total }} bought{% endif %}
+          </p>
+          <p class="shop-list-date">
+            {% if l.updated_at %}Updated {{ l.updated_at|date:"j M Y" }}{% elif l.created_at %}Created {{ l.created_at|date:"j M Y" }}{% endif %}
+          </p>
+
+          {% if l.item_total %}
+          <div class="shop-list-mini" aria-hidden="true"><span style="width: {% widthratio l.purchased_total l.item_total 100 %}%"></span></div>
+          {% endif %}
+
+          <a href="{% url 'shopping_list_detail' l.id %}" class="shop-list-cta shop-list-link" aria-label="Open {{ l.name }}">
+            Open
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <!-- Contextual menu: a separate control above the card's link, so using it never opens the list -->
+        <div class="dropdown shop-card-menu">
+          <button type="button" class="icon-btn shop-card-menu-btn" aria-label="Options for {{ l.name }}" aria-haspopup="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg>
+          </button>
+          <div class="dropdown-panel" role="menu">
+            {% if status == 'archived' %}
+              <button type="button" class="profile-menu-item shop-menu-btn" role="menuitem"
+                      data-list-action="restore" data-form-action="{% url 'restore_list' l.id %}">Restore list</button>
+            {% else %}
+              <button type="button" class="profile-menu-item shop-menu-btn" role="menuitem"
+                      data-open-modal="rename-list-modal"
+                      data-form-action="{% url 'rename_list' l.id %}"
+                      data-name="{{ l.name }}">Rename list</button>
+              {% if archive_enabled %}
+              <button type="button" class="profile-menu-item shop-menu-btn" role="menuitem"
+                      data-list-action="archive" data-form-action="{% url 'archive_list' l.id %}">Archive list</button>
+              {% endif %}
+            {% endif %}
+            <div class="profile-menu-divider"></div>
+            <button type="button" class="profile-menu-item shop-menu-btn is-danger" role="menuitem"
+                    data-open-modal="delete-list-modal"
+                    data-form-action="{% url 'delete_list' l.id %}"
+                    data-name="{{ l.name }}"
+                    data-items="{{ l.item_total }}"
+                    data-can-archive="{% if archive_enabled and status != 'archived' %}1{% else %}0{% endif %}">Delete list</button>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="shop-pagination" aria-label="Shopping list pages">
+      {% if page_obj.has_previous %}
+        <a class="shop-page-btn" rel="prev" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ page_obj.previous_page_number }}">← Previous</a>
+      {% else %}
+        <span class="shop-page-btn is-disabled" aria-disabled="true">← Previous</span>
+      {% endif %}
+
+      <ul class="shop-page-numbers">
+        {% for p in page_links %}
+          {% if p.gap %}
+            <li class="shop-page-gap" aria-hidden="true">…</li>
+          {% elif p.current %}
+            <li><span class="shop-page-btn is-current" aria-current="page">{{ p.number }}</span></li>
+          {% else %}
+            <li><a class="shop-page-btn" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ p.number }}" aria-label="Page {{ p.number }}">{{ p.number }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+
+      {% if page_obj.has_next %}
+        <a class="shop-page-btn" rel="next" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ page_obj.next_page_number }}">Next →</a>
+      {% else %}
+        <span class="shop-page-btn is-disabled" aria-disabled="true">Next →</span>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- the search matched nothing -->
+    <div class="empty-state" style="padding:3rem 1rem;">
+      <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      <h3>No lists match “{{ q }}”</h3>
+      <p>Check the spelling or try a shorter name.</p>
+      <a class="btn-outline" href="{% url 'shopping_lists' %}{% if clear_search_qs %}?{{ clear_search_qs }}{% endif %}">Clear search</a>
+    </div>
+    {% endif %}
+
+    {% elif status == 'archived' %}
+    <div class="empty-state" style="padding:3rem 1rem;">
+      <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none"><rect x="3" y="4" width="18" height="4" rx="1" stroke="currentColor" stroke-width="1.6"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>No archived lists</h3>
+      <p>Archive a list from its menu to tuck it away without deleting it.</p>
+      <a href="{% url 'shopping_lists' %}" class="btn-outline">Back to active lists</a>
+    </div>
+
+    {% else %}
+    <div class="empty-state" style="padding:3rem 1rem;">
+      <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg></div>
+      <h3>Your shopping list is empty</h3>
+      <p>Start a list for the week, then add the foods you need to buy.</p>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="btn-solid" data-open-modal="create-list-modal">Create shopping list</button>
+        <a href="{% url 'foods:foods' %}" class="btn-outline">Explore Food Library</a>
+      </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+  </main>
+</div>
+
+<!-- ============ CREATE LIST MODAL ============ -->
+<div class="modal-overlay" id="create-list-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="create-list-title">
+    <div class="modal-header">
+      <div><h2 id="create-list-title">New shopping list</h2><p>Give your list a name to get started.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="{% url 'create_list' %}">
+      {% csrf_token %}
+      <div class="modal-field">
+        <label for="create-list-name">List name</label>
+        <input type="text" id="create-list-name" name="name" maxlength="120" placeholder="Weekly Groceries" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Create list</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if shopping_list %}
+<!-- ============ RENAME LIST MODAL ============ -->
+<div class="modal-overlay" id="rename-list-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="rename-list-title">
+    <div class="modal-header">
+      <div><h2 id="rename-list-title">Rename list</h2></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="{% url 'rename_list' shopping_list.id %}">
+      {% csrf_token %}
+      <div class="modal-field">
+        <label for="rename-list-name">List name</label>
+        <input type="text" id="rename-list-name" name="name" maxlength="120" value="{{ shopping_list.name }}" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Save name</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ DELETE LIST MODAL ============ -->
+<div class="modal-overlay" id="delete-list-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="delete-list-title">
+    <div class="modal-header">
+      <div><h2 id="delete-list-title">Delete “{{ shopping_list.name }}”?</h2><p>This removes the list and all of its items. This can't be undone.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="{% url 'delete_list' shopping_list.id %}">
+      {% csrf_token %}
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid is-danger">Delete list</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ ADD ITEM MODAL ============ -->
+<div class="modal-overlay" id="add-item-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="add-item-title">
+    <div class="modal-header">
+      <div><h2 id="add-item-title">Add item</h2><p>Choose a food from the library.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="{% url 'add_item' shopping_list.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <div class="modal-field">
+        <label for="add-item-search">Food</label>
+        <input type="search" id="add-item-search" placeholder="Search rice, beans, tomatoes, milk..." autocomplete="off">
+        <select id="add-item-food" name="food_id" size="5" class="food-picker" required aria-label="Select a food">
+          {% for food in foods %}<option value="{{ food.id }}">{{ food.name }}{% if food.category %} · {{ food.category.name }}{% endif %}</option>{% endfor %}
+        </select>
+        <p class="hint" id="add-item-empty" hidden>No foods match your search. Check the Food Library for what's available.</p>
+        <p class="shop-dup" id="add-item-dup" role="status" hidden>This food is already on the list. Adding it again may update the existing item or create a second entry.</p>
+      </div>
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="add-item-qty">Quantity</label>
+          <input type="number" id="add-item-qty" name="quantity" min="0.01" step="0.01" placeholder="2" required>
+        </div>
+        <div class="modal-field">
+          <label for="add-item-unit">Unit</label>
+          <select id="add-item-unit" name="unit">
+            <option>kg</option><option>g</option><option>l</option><option>ml</option>
+            <option>piece</option><option>bunch</option><option>packet</option>
+            <option>tray</option><option>tin</option><option>bottle</option><option>dozen</option><option>other</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Add to list</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ EDIT ITEM MODAL ============ -->
+<div class="modal-overlay" id="edit-item-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="edit-item-title">
+    <div class="modal-header">
+      <div><h2 id="edit-item-title">Edit item</h2></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="list_id" value="{{ shopping_list.id }}">
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="edit-item-qty">Quantity</label>
+          <input type="number" id="edit-item-qty" name="quantity" min="0.01" step="0.01" required>
+        </div>
+        <div class="modal-field">
+          <label for="edit-item-unit">Unit</label>
+          <select id="edit-item-unit" name="unit">
+            <option>kg</option><option>g</option><option>l</option><option>ml</option>
+            <option>piece</option><option>bunch</option><option>packet</option>
+            <option>tray</option><option>tin</option><option>bottle</option><option>dozen</option><option>other</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ REMOVE ITEM MODAL ============ -->
+<div class="modal-overlay" id="remove-item-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="remove-item-title">
+    <div class="modal-header">
+      <div><h2 id="remove-item-title">Remove this item?</h2><p>It will be taken off this shopping list.</p></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="list_id" value="{{ shopping_list.id }}">
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid is-danger">Remove item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<!-- ============ LISTS INDEX: ONE shared rename modal and ONE shared delete modal ============ -->
+
+<div class="modal-overlay" id="rename-list-modal">
+  <div class="modal-panel is-small" role="dialog" aria-modal="true" aria-labelledby="rename-list-title">
+    <div class="modal-header">
+      <div><h2 id="rename-list-title">Rename list</h2></div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="" id="rename-list-form" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ return_to }}">
+      <div class="modal-field">
+        <label for="rename-list-name">List name</label>
+        <input type="text" id="rename-list-name" name="name" maxlength="120" required aria-describedby="rename-list-error">
+        <p class="modal-error" id="rename-list-error" role="alert" hidden></p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid">Save name</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="delete-list-modal">
+  <div class="modal-panel is-small" role="alertdialog" aria-modal="true" aria-labelledby="delete-list-title" aria-describedby="delete-list-desc">
+    <div class="modal-header">
+      <div>
+        <h2 id="delete-list-title">Delete this list?</h2>
+        <p id="delete-list-desc">This permanently deletes the list and its items. This can't be undone.</p>
+      </div>
+      <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="" id="delete-list-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ return_to }}">
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid is-danger">Delete list</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- shared form for archive / restore (filled and submitted by shopping_lists.js) -->
+<form method="post" id="list-action-form" action="" hidden>
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ return_to }}">
+</form>
+{% endif %}
+
+<!-- ============ PAGE WIRING ============ -->
+<script>
+(function () {
+  // ---- Point shared modals at the clicked item ----
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-form-action]');
+    if (!btn) return;
+    var modal = document.getElementById(btn.dataset.openModal);
+    var form = modal && modal.querySelector('form');
+    if (!form) return;
+    var d = btn.dataset;
+    form.action = d.formAction;
+
+    if (modal.id === 'edit-item-modal') {
+      document.getElementById('edit-item-title').textContent = 'Edit ' + d.name;
+      document.getElementById('edit-item-qty').value = d.quantity || '';
+      document.getElementById('edit-item-unit').value = d.unit || '';
+    } else if (modal.id === 'remove-item-modal') {
+      document.getElementById('remove-item-title').textContent = 'Remove ' + d.name + '?';
+    }
+  });
+
+  // ---- Shopping list: filter, group, counts, shopping mode ----
+  var listEl = document.getElementById('shop-items');
+  var page = document.getElementById('shop-page');
+
+  function fmt(n) { return Number(n).toLocaleString('en-KE', { maximumFractionDigits: 2 }); }
+  function $(id) { return document.getElementById(id); }
+
+  if (page && document.getElementById('shop-summary')) {
+    var rows = listEl ? [].slice.call(listEl.querySelectorAll('.shop-item')) : [];
+    rows.forEach(function (r, i) { r._idx = i; });
+
+    function updateSummary() {
+      var total = rows.length;
+      var done = rows.filter(function (r) { return r.dataset.purchased === '1'; }).length;
+      var summary = $('shop-summary');
+      if (summary && summary.dataset.totalCount !== undefined) {
+        total = parseInt(summary.dataset.totalCount, 10) || 0;
+        done = parseInt(summary.dataset.purchasedCount, 10) || 0;
+      }
+      var pct = total ? Math.round(done / total * 100) : 0;
+      var est = 0, act = 0;
+      rows.forEach(function (r) {
+        if (r.dataset.estimated) est += parseFloat(r.dataset.estimated) || 0;
+        if (r.dataset.actual) act += parseFloat(r.dataset.actual) || 0; // only real actual prices
+      });
+      $('sum-purchased').textContent = done;
+      $('sum-total').textContent = total;
+      $('sum-left').textContent = total - done;
+      $('sum-pct').textContent = pct;
+      $('shop-progress-bar').style.width = pct + '%';
+      $('shop-progress').setAttribute('aria-valuenow', pct);
+
+      $('sum-estimated-chip').hidden = !(est > 0);
+      $('sum-actual-chip').hidden = !(act > 0);
+      $('sum-estimated').textContent = fmt(est);
+      $('sum-actual').textContent = fmt(act);
+
+      if ($('bar-left')) {
+        $('bar-left').textContent = total - done;
+        $('bar-est').hidden = !(est > 0);
+        $('bar-act').hidden = !(act > 0);
+        $('bar-est-val').textContent = fmt(est);
+        $('bar-act-val').textContent = fmt(act);
+      }
+    }
+
+    function render() {
+      if (!listEl) return;
+      var q = ($('shop-search').value || '').trim().toLowerCase();
+      var status = $('shop-status').value;
+      var group = $('shop-group').value;
+
+      [].slice.call(listEl.querySelectorAll('.shop-group')).forEach(function (h) { h.remove(); });
+
+      var visible = rows.filter(function (r) {
+        var matchQ = !q || r.dataset.name.indexOf(q) > -1 || r.dataset.category.toLowerCase().indexOf(q) > -1;
+        var matchS = status === 'all' || (status === 'done' ? r.dataset.purchased === '1' : r.dataset.purchased === '0');
+        return matchQ && matchS;
+      });
+
+      rows.forEach(function (r) { r.hidden = visible.indexOf(r) === -1; });
+
+      var ordered = visible.slice();
+      if (group === 'category') {
+        ordered.sort(function (a, b) {
+          return a.dataset.category.localeCompare(b.dataset.category) || a._idx - b._idx;
+        });
+      } else {
+        ordered.sort(function (a, b) { return a._idx - b._idx; });
+      }
+
+      var last = null;
+      ordered.forEach(function (r) {
+        if (group === 'category' && r.dataset.category !== last) {
+          last = r.dataset.category;
+          var h = document.createElement('li');
+          h.className = 'shop-group';
+          h.setAttribute('role', 'presentation');
+          h.textContent = last;
+          listEl.appendChild(h);
+        }
+        listEl.appendChild(r);
+      });
+      rows.filter(function (r) { return r.hidden; }).forEach(function (r) { listEl.appendChild(r); });
+
+      $('shop-no-results').hidden = !(rows.length && !visible.length);
+      $('shop-search-clear').style.display = q ? 'flex' : 'none';
+    }
+
+    if (listEl) {
+      var t;
+      $('shop-search').addEventListener('input', function () { clearTimeout(t); t = setTimeout(render, 120); });
+      $('shop-search-clear').addEventListener('click', function () {
+        $('shop-search').value = '';
+        render();
+        var form = document.querySelector('.shop-toolbar');
+        if (form && typeof form.requestSubmit === 'function') form.requestSubmit();
+        else if (form) form.submit();
+        $('shop-search').focus();
+      });
+      $('shop-status').addEventListener('change', function () {
+        var form = document.querySelector('.shop-toolbar');
+        if (form && typeof form.requestSubmit === 'function') form.requestSubmit();
+        else if (form) form.submit();
+      });
+      $('shop-group').addEventListener('change', function () {
+        var form = document.querySelector('.shop-toolbar');
+        if (form && typeof form.requestSubmit === 'function') form.requestSubmit();
+        else if (form) form.submit();
+      });
+    }
+
+    // Shopping mode
+    var modeBtn = $('mode-toggle');
+    var bar = $('shop-bar');
+    function setMode(on) {
+      page.classList.toggle('is-shopping-mode', on);
+      modeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      modeBtn.querySelector('span').textContent = on ? 'Exit shopping mode' : 'Shopping mode';
+      if (bar) bar.hidden = !on;
+      try { localStorage.setItem('foodieplug-shopping-mode', on ? '1' : '0'); } catch (e) {}
+    }
+    if (modeBtn) {
+      modeBtn.addEventListener('click', function () { setMode(modeBtn.getAttribute('aria-pressed') !== 'true'); });
+      try { if (localStorage.getItem('foodieplug-shopping-mode') === '1') setMode(true); } catch (e) {}
+    }
+
+    // Add-item modal: filter the food list and warn about duplicates
+    var foodSearch = $('add-item-search');
+    var foodSelect = $('add-item-food');
+    if (foodSearch && foodSelect) {
+      var foodOpts = [].slice.call(foodSelect.options);
+      var onList = {};
+      rows.forEach(function (r) { onList[r.dataset.foodId] = true; });
+
+      function checkDup() {
+        $('add-item-dup').hidden = !(foodSelect.value && onList[foodSelect.value]);
+      }
+
+      foodSearch.addEventListener('input', function () {
+        var q = foodSearch.value.trim().toLowerCase();
+        var first = null;
+        foodOpts.forEach(function (o) {
+          var match = !q || o.textContent.toLowerCase().indexOf(q) > -1;
+          o.hidden = !match;
+          o.disabled = !match;
+          if (match && !first) first = o;
+        });
+        $('add-item-empty').hidden = !!first;
+        if (q && first) foodSelect.value = first.value;
+        else if (!first) foodSelect.selectedIndex = -1;
+        checkDup();
+      });
+      foodSelect.addEventListener('change', checkDup);
+    }
+
+    updateSummary();
+    render();
+  }
+
+
+})();
+</script>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+{% if not shopping_list %}<script src="{% static 'js/shopping_lists.js' %}"></script>{% endif %}
+
+</body>
+</html>

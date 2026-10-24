@@ -1,0 +1,21 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+</head>
+<body>
+
+    <h1>Profile Data</h1>
+
+    <p>{{ profile.user }}</p>
+    <p>{{ profile.avatar }}</p>
+    <p>{{ profile.display_name }}</p>
+    <p>{{ profile.created_at }}</p>
+    <p>{{ profile.timezone }}</p>
+
+</body>
+</html>

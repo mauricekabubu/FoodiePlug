@@ -1,0 +1,1073 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Meals — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+<link rel="stylesheet" href="{% static 'css/meals.css' %}">
+
+<script>
+(function () {
+  try {
+    var pref = localStorage.getItem('foodieplug-theme') || 'system';
+    var resolved = pref === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : pref;
+    document.documentElement.setAttribute('data-theme', resolved);
+  } catch (e) {}
+})();
+</script>
+</head>
+
+<body>
+
+<!-- Shared fallback illustration -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="ml-fallback" viewBox="0 0 120 120">
+    <ellipse cx="60" cy="86" rx="40" ry="8" style="fill:var(--ml-fb-shadow)"/>
+    <ellipse cx="60" cy="68" rx="36" ry="21" style="fill:var(--ml-fb-plate);stroke:var(--ml-green);stroke-width:3"/>
+    <ellipse cx="60" cy="64" rx="27" ry="14" style="fill:var(--ml-amber)"/>
+    <path d="M42 63 Q50 48 60 61 T80 62" fill="none" style="stroke:var(--ml-green);stroke-width:3" stroke-linecap="round"/>
+    <circle cx="50" cy="59" r="3.2" style="fill:var(--ml-tomato)"/>
+    <circle cx="70" cy="67" r="3.2" style="fill:var(--ml-green)"/>
+    <path d="M52 34c0-5 4-5 4-10M64 36c0-5 4-5 4-10" fill="none" style="stroke:var(--ml-green);opacity:.45;stroke-width:2.5" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- MOBILE TOPBAR -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="31" fill="#16794B"/>
+      <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+      <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+    </svg>
+    <span>FoodiePlug</span>
+  </a>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="31" fill="#16794B"/>
+        <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+        <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+      </svg>
+      <span>FoodiePlug</span>
+
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        Overview
+      </a>
+
+      <a href="{% url 'meals:meal_library' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        My Meals
+      </a>
+
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Meal Planner
+      </a>
+
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+        Pantry
+      </a>
+
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+        Shopping
+      </a>
+
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="16" cy="14" r="1.3" fill="currentColor"/>
+        </svg>
+        Budget
+      </a>
+
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        Food Library
+      </a>
+
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Insights
+      </a>
+
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Settings
+      </a>     
+
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Help
+      </a>
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Light
+        </button>
+
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+          Dark
+        </button>
+
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    {% with view=request.resolver_match.url_name %}
+    <div class="ml-page" id="ml-page">
+
+      {# ======================== CREATE MEAL ======================== #}
+      {% if view == "create_meal" %}
+
+        <a class="ml-back" href="{% url 'meals:meal_library' %}">← My Meals</a>
+
+        <section class="ml-card ml-form-card" aria-labelledby="create-title">
+          <h1 class="ml-form-title" id="create-title">Add a meal</h1>
+          <p class="ml-sub">Save the meals you love. You can add ingredients on the next screen.</p>
+
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <div class="ml-field">
+              <label for="id_image">Meal image <small>(optional)</small></label>
+
+              <div class="ml-image-upload">
+                <div class="ml-image-preview" id="ml-image-preview">
+                  <svg id="ml-image-placeholder" xmlns="http://www.w3.org/2000/svg"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.5" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="m21 15-5-5L5 21"/>
+                  </svg>
+                  <img id="ml-image-preview-img" alt="Preview of the selected meal image" hidden>
+                </div>
+
+                <div class="ml-image-upload-info">
+                  <label for="id_image" class="ml-btn ml-btn-secondary">Choose image</label>
+                  <input type="file" id="id_image" name="image"
+                         accept="image/jpeg,image/png,image/webp" hidden>
+
+                  <p class="ml-hint" id="ml-image-help">
+                    JPG, PNG or WebP. Choose a clear photo of your meal.
+                  </p>
+
+                  <button type="button" id="ml-image-remove"
+                          class="ml-btn ml-btn-quiet ml-btn-sm" hidden>
+                    Remove image
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ml-field">
+              <label for="id_name">Meal name</label>
+              <input type="text" id="id_name" name="name"
+                     value="{{ request.POST.name }}" maxlength="150"
+                     placeholder="e.g. Githeri with avocado" autocomplete="off" required>
+            </div>
+
+            <div class="ml-field">
+              <label for="id_description">Description <small>(optional)</small></label>
+              <textarea id="id_description" name="description" rows="3">{{ request.POST.description }}</textarea>
+            </div>
+
+            <div class="ml-field-row">
+              <div class="ml-field">
+                <label for="id_prep">Prep time (min) <small>(optional)</small></label>
+                <input type="number" id="id_prep" name="prep_time"
+                       value="{{ request.POST.prep_time }}" min="0" inputmode="numeric">
+              </div>
+
+              <div class="ml-field">
+                <label for="id_cook">Cook time (min) <small>(optional)</small></label>
+                <input type="number" id="id_cook" name="cook_time"
+                       value="{{ request.POST.cook_time }}" min="0" inputmode="numeric">
+              </div>
+            </div>
+
+            <div class="ml-field">
+              <label for="id_instructions">Instructions <small>(optional)</small></label>
+              <textarea id="id_instructions" name="instructions" rows="6">{{ request.POST.instructions }}</textarea>
+            </div>
+
+            <div class="ml-actions">
+              <button type="submit" class="ml-btn ml-btn-primary">Create meal</button>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'meals:meal_library' %}">Cancel</a>
+            </div>
+          </form>
+        </section>
+
+      {# ======================== EDIT MEAL ======================== #}
+      {% elif view == "edit_meal" %}
+
+        {% if meal %}
+          <a class="ml-back" href="{% url 'meals:meal_library' %}">← My Meals</a>
+
+          <section class="ml-card ml-form-card ml-form-card-wide" aria-labelledby="edit-title">
+            <h1 class="ml-form-title" id="edit-title">Edit meal</h1>
+            <p class="ml-sub">Update the details, photo and ingredients for “{{ meal.name }}”.</p>
+
+            {% if error_list %}
+              <div class="ml-error-summary" id="ml-error-summary" role="alert" tabindex="-1">
+                <strong>Please fix the following:</strong>
+                <ul>{% for e in error_list %}<li>{{ e }}</li>{% endfor %}</ul>
+              </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+              {% csrf_token %}
+
+              <!-- Image -->
+              <div class="ml-field {% if errors.image %}has-error{% endif %}">
+                <label for="id_image">Meal image <small>(optional)</small></label>
+
+                <div class="ml-image-upload">
+                  <div class="ml-image-preview" id="ml-image-preview">
+                    <svg id="ml-image-placeholder" xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" aria-hidden="true" {% if current_image_url %}hidden{% endif %}>
+                      <rect x="3" y="3" width="18" height="18" rx="3"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <path d="m21 15-5-5L5 21"/>
+                    </svg>
+                    <img id="ml-image-preview-img" alt="Meal image preview"
+                         {% if current_image_url %}src="{{ current_image_url }}" data-current-src="{{ current_image_url }}"{% else %}hidden{% endif %}>
+                  </div>
+
+                  <div class="ml-image-upload-info">
+                    <label for="id_image" class="ml-btn ml-btn-secondary">
+                      {% if current_image_url %}Replace image{% else %}Choose image{% endif %}
+                    </label>
+                    <input type="file" id="id_image" name="image"
+                           accept="image/jpeg,image/png,image/webp" hidden>
+
+                    <p class="ml-hint" id="ml-image-help">
+                      {% if current_image_url %}Leave this alone to keep the current image.{% else %}JPG, PNG or WebP.{% endif %}
+                    </p>
+
+                    <button type="button" id="ml-image-remove" class="ml-btn ml-btn-quiet ml-btn-sm" hidden>
+                      {% if current_image_url %}Keep current image{% else %}Remove image{% endif %}
+                    </button>
+                  </div>
+                </div>
+                {% if errors.image %}<p class="ml-error">{{ errors.image }}</p>{% endif %}
+              </div>
+
+              <!-- Name -->
+              <div class="ml-field {% if errors.name %}has-error{% endif %}">
+                <label for="id_name">Meal name</label>
+                <input type="text" id="id_name" name="name" value="{{ form.name }}"
+                       maxlength="150" autocomplete="off" required
+                       {% if errors.name %}aria-invalid="true" aria-describedby="err-name"{% endif %}>
+                {% if errors.name %}<p class="ml-error" id="err-name">{{ errors.name }}</p>{% endif %}
+              </div>
+
+              <!-- Description -->
+              <div class="ml-field">
+                <label for="id_description">Description <small>(optional)</small></label>
+                <textarea id="id_description" name="description" rows="3">{{ form.description }}</textarea>
+              </div>
+
+              <!-- Times -->
+              <div class="ml-field-row">
+                <div class="ml-field {% if errors.prep_time %}has-error{% endif %}">
+                  <label for="id_prep">Prep time (min) <small>(optional)</small></label>
+                  <input type="number" id="id_prep" name="prep_time" value="{{ form.prep_time }}"
+                         min="0" inputmode="numeric">
+                  {% if errors.prep_time %}<p class="ml-error">{{ errors.prep_time }}</p>{% endif %}
+                </div>
+
+                <div class="ml-field {% if errors.cook_time %}has-error{% endif %}">
+                  <label for="id_cook">Cook time (min) <small>(optional)</small></label>
+                  <input type="number" id="id_cook" name="cook_time" value="{{ form.cook_time }}"
+                         min="0" inputmode="numeric">
+                  {% if errors.cook_time %}<p class="ml-error">{{ errors.cook_time }}</p>{% endif %}
+                </div>
+              </div>
+
+              <!-- Instructions -->
+              <div class="ml-field">
+                <label for="id_instructions">Instructions <small>(optional)</small></label>
+                <textarea id="id_instructions" name="instructions" rows="6">{{ form.instructions }}</textarea>
+              </div>
+
+              <!-- Ingredients -->
+              <fieldset class="ml-edit-section" id="edit-ingredients">
+                <legend>Ingredients</legend>
+
+                {% if errors.ingredients %}<p class="ml-error">{{ errors.ingredients }}</p>{% endif %}
+
+                {% if rows %}
+                  <ul class="ml-edit-ings">
+                    {% for row in rows %}
+                      <li class="ml-edit-ing {% if row.remove %}is-removed{% endif %} {% if row.error %}has-error{% endif %}">
+                        <input type="hidden" name="row_food" value="{{ row.food_id }}">
+                        <input type="hidden" name="row_old_unit" value="{{ row.old_unit }}">
+
+                        <span class="ml-ing-name">{{ row.food_name }}</span>
+
+                        <input type="number" name="row_qty" value="{{ row.quantity }}"
+                               min="0.01" step="0.01" inputmode="decimal"
+                               aria-label="Quantity of {{ row.food_name }}">
+
+                        <select name="row_unit" aria-label="Unit for {{ row.food_name }}">
+                          {% for u in row.unit_options %}
+                            <option value="{{ u }}" {% if row.unit == u %}selected{% endif %}>{{ u }}</option>
+                          {% endfor %}
+                        </select>
+
+                        <label class="ml-remove-toggle">
+                          <input type="checkbox" name="row_remove" value="{{ forloop.counter0 }}" {% if row.remove %}checked{% endif %}>
+                          Remove
+                        </label>
+
+                        {% if row.error %}<p class="ml-error">{{ row.error }}</p>{% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="ml-muted" style="margin-bottom:14px;">No ingredients yet. Add the first one below.</p>
+                {% endif %}
+
+                <p class="ml-card-title" style="margin:10px 0 8px;">Add an ingredient <small>(optional)</small></p>
+
+                <div class="ml-new-ing {% if errors.new_ingredient %}has-error{% endif %}">
+                  <select name="new_food" aria-label="Food to add" {% if not foods %}disabled{% endif %}>
+                    <option value="">Choose a food</option>
+                    {% for f in foods %}
+                      <option value="{{ f.id }}" {% if new_ing.food_id == f.id|stringformat:"s" %}selected{% endif %}>{{ f.name }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <input type="number" name="new_qty" value="{{ new_ing.quantity }}"
+                         min="0.01" step="0.01" inputmode="decimal" placeholder="Qty" aria-label="Quantity">
+
+                  <select name="new_unit" aria-label="Unit">
+                    <option value="">Unit</option>
+                    {% for u in units %}
+                      <option value="{{ u }}" {% if new_ing.unit == u %}selected{% endif %}>{{ u }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                {% if errors.new_ingredient %}<p class="ml-error">{{ errors.new_ingredient }}</p>{% endif %}
+
+                {% if not foods %}
+                  <p class="ml-hint" style="margin-top:8px;">
+                    Your Food Library is empty. <a href="{% url 'foods:foods' %}">Add foods</a> first.
+                  </p>
+                {% endif %}
+              </fieldset>
+
+              <div class="ml-actions">
+                <button type="submit" class="ml-btn ml-btn-primary">Save changes</button>
+                <a class="ml-btn ml-btn-secondary" href="{% url 'meals:meal_library' %}">Cancel</a>
+              </div>
+            </form>
+          </section>
+
+        {% else %}
+          <section class="ml-card ml-empty">
+            <h2>Meal not found</h2>
+            <p>We couldn't find that meal.</p>
+            <a class="ml-btn ml-btn-primary" href="{% url 'meals:meal_library' %}">Back to My Meals</a>
+          </section>
+        {% endif %}
+
+      {# ======================== MEAL DETAIL ======================== #}
+      {% elif view == "meal_detail" or view == "add_ingredient" or view == "remove_ingredient" %}
+
+        {% if meal %}
+          <a class="ml-back" href="{% url 'meals:meal_library' %}">← My Meals</a>
+
+          <div class="ml-detail" {% if scroll_to_ingredients %}data-scroll-ingredients="1"{% endif %}>
+            <div class="ml-detail-main">
+              <div class="ml-media ml-media-lg">
+                <svg class="ml-fallback" aria-hidden="true" focusable="false">
+                  <use href="#ml-fallback"/>
+                </svg>
+
+                {% if meal.image %}
+                  <img class="ml-img" src="{{ meal.image.url }}" alt="" loading="eager">
+                {% elif meal.image_url %}
+                  <img class="ml-img" src="{{ meal.image_url }}" alt=""
+                       loading="eager" referrerpolicy="no-referrer">
+                {% endif %}
+              </div>
+
+              <h1 class="ml-title">{{ meal.name }}</h1>
+
+              <p class="ml-meta">
+                {% if meal.prep_time %}<span>Prep {{ meal.prep_time }} min</span>{% endif %}
+                {% if meal.cook_time %}<span>Cook {{ meal.cook_time }} min</span>{% endif %}
+              </p>
+
+              {% if meal.description %}
+                <p class="ml-desc-full">{{ meal.description }}</p>
+              {% endif %}
+
+              <div class="ml-actions">
+                <button type="button" class="ml-btn ml-btn-primary"
+                        data-plan-meal data-meal-id="{{ meal.id }}"
+                        data-meal-name="{{ meal.name }}">Add to Plan</button>
+                <a class="ml-btn ml-btn-secondary" href="{% url 'meals:edit_meal' meal.id %}">Edit Meal</a>
+                <a class="ml-btn ml-btn-secondary" href="{% url 'meals:timetable' %}">Meal Planner</a>
+
+                {# Favorite: state comes from the view (is_favorite in context, or meal.is_favorite). #}
+                <form method="post" action="{% url 'meals:toggle_favorite' meal.id %}" class="ml-inline-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  {% if is_favorite or meal.is_favorite %}
+                    <button type="submit" class="ml-btn ml-btn-quiet ml-btn-fav is-on" aria-pressed="true"
+                            aria-label="Remove {{ meal.name }} from favorites">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.8 3.6 4.8 6.8 4.8c1.9 0 3.5 1 5.2 3 1.7-2 3.3-3 5.2-3 3.2 0 5.1 3 4 6.3-1.7 4.8-9.2 9.4-9.2 9.4z"/>
+                      </svg>
+                      Favorited
+                    </button>
+                  {% else %}
+                    <button type="submit" class="ml-btn ml-btn-quiet ml-btn-fav" aria-pressed="false"
+                            aria-label="Add {{ meal.name }} to favorites">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.8 3.6 4.8 6.8 4.8c1.9 0 3.5 1 5.2 3 1.7-2 3.3-3 5.2-3 3.2 0 5.1 3 4 6.3-1.7 4.8-9.2 9.4-9.2 9.4z"/>
+                      </svg>
+                      Favorite
+                    </button>
+                  {% endif %}
+                </form>
+
+                <form method="post" action="{% url 'meals:archive_meal' meal.id %}"
+                      class="ml-inline-form" data-archive-form data-meal-name="{{ meal.name }}">
+                  {% csrf_token %}
+                  <button type="submit" class="ml-btn ml-btn-quiet ml-btn-archive"
+                          aria-label="Archive {{ meal.name }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="4" rx="1"/>
+                      <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/>
+                      <path d="M10 12h4"/>
+                    </svg>
+                    Archive
+                  </button>
+                </form>
+              </div>
+
+              {% if meal.instructions %}
+                <section class="ml-card ml-section" aria-labelledby="inst-title">
+                  <h2 class="ml-card-title" id="inst-title">Instructions</h2>
+                  <div class="ml-prose">{{ meal.instructions|linebreaks }}</div>
+                </section>
+              {% endif %}
+            </div>
+
+            <aside class="ml-detail-side">
+              <section class="ml-card ml-ingredients-card" id="ingredients" aria-labelledby="ing-title">
+                <h2 class="ml-section-title" id="ing-title">Ingredients</h2>
+                <p class="ml-sub">Add the foods and quantities needed to prepare this meal.</p>
+
+                <form method="post" action="{% url 'meals:add_ingredient' meal.id %}" class="ml-add-ing">
+                  {% csrf_token %}
+
+                  <div class="ml-field">
+                    <label for="ing-food">Food</label>
+                    <select id="ing-food" name="food_id" required {% if not foods %}disabled{% endif %}>
+                      <option value="" disabled {% if not form_data.food_id %}selected{% endif %}>Choose a food</option>
+                      {% for f in foods %}
+                        <option value="{{ f.id }}" {% if form_data.food_id == f.id|stringformat:"s" %}selected{% endif %}>
+                          {{ f.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                    {% if not foods %}
+                      <p class="ml-hint">
+                        Your Food Library is empty.
+                        <a href="{% url 'foods:foods' %}">Add foods</a> first, then come back.
+                      </p>
+                    {% endif %}
+                  </div>
+
+                  <div class="ml-field-row">
+                    <div class="ml-field">
+                      <label for="ing-qty">Quantity per serving</label>
+                      <input type="number" id="ing-qty" name="quantity"
+                             min="0.01" step="0.01" inputmode="decimal"
+                             value="{{ form_data.quantity }}" required>
+                      <p class="ml-hint">Cooking scales recipe quantities by the servings in your meal plan.</p>
+                    </div>
+
+                    <div class="ml-field">
+                      <label for="ing-unit">Unit</label>
+                      <select id="ing-unit" name="unit" required>
+                        <option value="" disabled {% if not form_data.unit %}selected{% endif %}>Choose unit</option>
+                        {% for u in units %}
+                          <option value="{{ u }}" {% if form_data.unit == u %}selected{% endif %}>{{ u }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="ml-btn ml-btn-primary ml-btn-block"
+                          {% if not foods %}disabled{% endif %}>Add Ingredient</button>
+                </form>
+
+                <hr class="ml-rule">
+
+                {% if ingredients %}
+                  <ul class="ml-ingredients">
+                    {% for ing in ingredients %}
+                      <li>
+                        <span class="ml-ing-name">{{ ing.food.name }}</span>
+                        <span class="ml-ing-qty">{{ ing.quantity|floatformat:"-2" }} {{ ing.unit }}</span>
+
+                        <form method="post" action="{% url 'meals:remove_ingredient' meal.id %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="food_id" value="{{ ing.food_id }}">
+                          <input type="hidden" name="unit" value="{{ ing.unit }}">
+                          <button type="submit" class="ml-link-danger"
+                                  aria-label="Remove {{ ing.food.name }}">Remove</button>
+                        </form>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="ml-muted ml-empty-ing">
+                    No ingredients yet. Choose a food above, enter a quantity and unit,
+                    then press <strong>Add Ingredient</strong>.
+                  </p>
+                {% endif %}
+
+                <div class="ml-actions">
+                  <a class="ml-btn ml-btn-secondary ml-btn-sm" href="{% url 'meals:meal_library' %}">Back to My Meals</a>
+                  <a class="ml-btn ml-btn-quiet ml-btn-sm" href="{% url 'meals:timetable' %}">Go to Meal Planner</a>
+                </div>
+              </section>
+            </aside>
+          </div>
+
+        {% else %}
+          <section class="ml-card ml-empty">
+            <h2>Meal not found</h2>
+            <p>We couldn't find that meal.</p>
+            <a class="ml-btn ml-btn-primary" href="{% url 'meals:meal_library' %}">Back to My Meals</a>
+          </section>
+        {% endif %}
+
+      {# ======================== ARCHIVED MEALS ======================== #}
+      {% elif view == "archived_meals" %}
+
+        <a class="ml-back" href="{% url 'meals:meal_library' %}">← My Meals</a>
+
+        <header class="ml-header">
+          <div>
+            <h1>Archived Meals</h1>
+            <p>Archived meals are hidden from your active library and the planner's meal picker, but nothing is deleted. Restore a meal to bring it back. Meals already on your planner keep their entries.</p>
+          </div>
+
+          <div class="ml-header-actions">
+            <a class="ml-btn ml-btn-secondary" href="{% url 'meals:favorite_meals' %}">Favorites</a>
+          </div>
+        </header>
+
+        {% if archived_meals %}
+          <p class="ml-count" role="status">
+            {{ meal_total_count }} archived meal{{ meal_total_count|pluralize }}
+          </p>
+
+          <ul class="ml-grid">
+            {% for meal in archived_meals %}
+              <li class="ml-card ml-meal ml-meal-archived">
+
+                <div class="ml-media" aria-hidden="true">
+                  <svg class="ml-fallback" aria-hidden="true" focusable="false">
+                    <use href="#ml-fallback"/>
+                  </svg>
+
+                  {% if meal.image %}
+                    <img class="ml-img" src="{{ meal.image.url }}" alt="" loading="lazy" decoding="async">
+                  {% elif meal.image_url %}
+                    <img class="ml-img" src="{{ meal.image_url }}" alt=""
+                         loading="lazy" decoding="async" referrerpolicy="no-referrer">
+                  {% endif %}
+                </div>
+
+                <div class="ml-body">
+                  <h2 class="ml-name">{{ meal.name }}</h2>
+
+                  {% if meal.description %}
+                    <p class="ml-desc">{{ meal.description|truncatewords:18 }}</p>
+                  {% endif %}
+
+                  {% if meal.prep_time or meal.cook_time %}
+                    <p class="ml-meta">
+                      {% if meal.prep_time %}<span>Prep {{ meal.prep_time }} min</span>{% endif %}
+                      {% if meal.cook_time %}<span>Cook {{ meal.cook_time }} min</span>{% endif %}
+                    </p>
+                  {% endif %}
+
+                  <div class="ml-card-actions">
+                    {# Restore only: an archived meal never shows the Archive action #}
+                    <form method="post" action="{% url 'meals:restore_meal' meal.id %}" class="ml-inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="ml-btn ml-btn-primary ml-btn-sm"
+                              aria-label="Restore {{ meal.name }}">
+                        Restore
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+          {% include "partials/pagination.html" %}
+
+        {% else %}
+          <section class="ml-card ml-empty">
+            <svg class="ml-empty-art is-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <rect x="3" y="4" width="18" height="4" rx="1"/>
+              <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/>
+              <path d="M10 12h4"/>
+            </svg>
+            <h2>No archived meals</h2>
+            <p>When you archive a meal from My Meals, it will wait here until you restore it.</p>
+            <a class="ml-btn ml-btn-primary" href="{% url 'meals:meal_library' %}">Back to My Meals</a>
+          </section>
+        {% endif %}
+
+      {# ======================== MEAL LIBRARY + FAVORITE MEALS ======================== #}
+      {% else %}
+
+        {# On the favorites page the view may pass `favorite_meals`; otherwise it passes `meals`. #}
+        {% with cards=favorite_meals|default:meals %}
+
+        {% if view == "favorite_meals" or favorites_page %}
+
+          <a class="ml-back" href="{% url 'meals:meal_library' %}">← My Meals</a>
+
+          <header class="ml-header">
+            <div>
+              <h1>Favorite Meals</h1>
+              <p>The meals you've marked with a heart. Tap a heart to take a meal off this list; it stays in My Meals.</p>
+            </div>
+
+            <div class="ml-header-actions">
+              <a class="ml-btn ml-btn-secondary" href="{% url 'meals:timetable' %}">Meal Planner</a>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'meals:archived_meals' %}">Archive{% if archived_count %} ({{ archived_count }}){% endif %}</a>
+            </div>
+          </header>
+
+        {% else %}
+
+          <header class="ml-header">
+            <div>
+              <h1>My Meals</h1>
+              <p>Your favorite meals, saved recipes, and everyday food inspiration — all in one place.</p>
+            </div>
+
+            <div class="ml-header-actions">
+              <a class="ml-btn ml-btn-primary" href="{% url 'meals:create_meal' %}">+ Add Meal</a>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'meals:timetable' %}">Meal Planner</a>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'meals:favorite_meals' %}">Favorites{% if favorites_count %} ({{ favorites_count }}){% endif %}</a>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'meals:archived_meals' %}">Archive{% if archived_count %} ({{ archived_count }}){% endif %}</a>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'ai:page' %}">Ask FoodiePlug</a>
+            </div>
+          </header>
+
+        {% endif %}
+
+        {% if cards or query %}
+          <div class="ml-toolbar">
+            {# Search is a library search, so it is hidden on the favorites page #}
+            {% if view != "favorite_meals" and not favorites_page %}
+              <form method="get" action="{% url 'meals:meal_library' %}" class="ml-search" role="search">
+                <input type="hidden" name="sort" value="{{ sort|default:'default' }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7"/>
+                  <path d="m20 20-3.5-3.5"/>
+                </svg>
+
+                <label for="ml-q" class="ml-sr">Search meals</label>
+                <input type="search" id="ml-q" name="q" value="{{ query }}"
+                       placeholder="Search meals, ingredients, or recipes…" autocomplete="off">
+                <button type="submit" class="ml-btn ml-btn-secondary ml-btn-sm">Search</button>
+
+                {% if query %}
+                  <a class="ml-btn ml-btn-quiet ml-btn-sm" href="{% url 'meals:meal_library' %}">Clear</a>
+                {% endif %}
+              </form>
+            {% endif %}
+
+            <div class="ml-sort">
+              <label for="ml-sort">Sort by</label>
+              <select id="ml-sort" name="sort" aria-label="Sort meals">
+                <option value="default" {% if sort == "default" %}selected{% endif %}>Default order</option>
+                <option value="az" {% if sort == "az" %}selected{% endif %}>Name: A–Z</option>
+                <option value="za" {% if sort == "za" %}selected{% endif %}>Name: Z–A</option>
+                <option value="time" {% if sort == "time" %}selected{% endif %}>Quickest first</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="ml-count" role="status">
+            {% if query %}
+              {{ meal_total_count }} result{{ meal_total_count|pluralize }} for “{{ query }}”
+            {% elif view == "favorite_meals" or favorites_page %}
+              {{ meal_total_count }} favorite{{ meal_total_count|pluralize }}
+            {% else %}
+              {{ meal_total_count }} meal{{ meal_total_count|pluralize }}
+            {% endif %}
+          </p>
+        {% endif %}
+
+        {% if cards %}
+          <ul class="ml-grid" id="ml-grid">
+            {% for meal in cards %}
+              <li class="ml-card ml-meal"
+                  data-name="{{ meal.name|lower }}"
+                  data-prep="{{ meal.prep_time|default_if_none:'' }}"
+                  data-cook="{{ meal.cook_time|default_if_none:'' }}">
+
+                {# Favorite toggle. State comes from the view: meal.is_favorite (annotation) or favorite_ids. #}
+                <form method="post" action="{% url 'meals:toggle_favorite' meal.id %}" class="ml-fav-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  {% if view == "favorite_meals" or favorites_page or meal.is_favorite or meal.id in favorite_ids %}
+                    <button type="submit" class="ml-fav is-on" aria-pressed="true"
+                            aria-label="Remove {{ meal.name }} from favorites"
+                            title="Remove from favorites">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.8 3.6 4.8 6.8 4.8c1.9 0 3.5 1 5.2 3 1.7-2 3.3-3 5.2-3 3.2 0 5.1 3 4 6.3-1.7 4.8-9.2 9.4-9.2 9.4z"/>
+                      </svg>
+                    </button>
+                  {% else %}
+                    <button type="submit" class="ml-fav" aria-pressed="false"
+                            aria-label="Add {{ meal.name }} to favorites"
+                            title="Add to favorites">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.8 3.6 4.8 6.8 4.8c1.9 0 3.5 1 5.2 3 1.7-2 3.3-3 5.2-3 3.2 0 5.1 3 4 6.3-1.7 4.8-9.2 9.4-9.2 9.4z"/>
+                      </svg>
+                    </button>
+                  {% endif %}
+                </form>
+
+                <a class="ml-media" href="{% url 'meals:meal_detail' meal.id %}"
+                   tabindex="-1" aria-hidden="true">
+                  <svg class="ml-fallback" aria-hidden="true" focusable="false">
+                    <use href="#ml-fallback"/>
+                  </svg>
+
+                  {% if meal.image %}
+                    <img class="ml-img" src="{{ meal.image.url }}" alt=""
+                         loading="lazy" decoding="async">
+                  {% elif meal.image_url %}
+                    <img class="ml-img" src="{{ meal.image_url }}" alt=""
+                         loading="lazy" decoding="async" referrerpolicy="no-referrer">
+                  {% endif %}
+                </a>
+
+                <div class="ml-body">
+                  <h2 class="ml-name">
+                    <a href="{% url 'meals:meal_detail' meal.id %}">{{ meal.name }}</a>
+                  </h2>
+
+                  {% if meal.description %}
+                    <p class="ml-desc">{{ meal.description|truncatewords:18 }}</p>
+                  {% endif %}
+
+                  {% if meal.prep_time or meal.cook_time %}
+                    <p class="ml-meta">
+                      {% if meal.prep_time %}<span>Prep {{ meal.prep_time }} min</span>{% endif %}
+                      {% if meal.cook_time %}<span>Cook {{ meal.cook_time }} min</span>{% endif %}
+                    </p>
+                  {% endif %}
+
+                  <div class="ml-card-actions">
+                    <a class="ml-btn ml-btn-secondary ml-btn-sm"
+                       href="{% url 'meals:meal_detail' meal.id %}">
+                      View Meal
+                    </a>
+
+                    <a class="ml-btn ml-btn-secondary ml-btn-sm"
+                       href="{% url 'meals:edit_meal' meal.id %}"
+                       aria-label="Edit {{ meal.name }}">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                      </svg>
+                      Edit Meal
+                    </a>
+
+                    <a class="ml-btn ml-btn-primary ml-btn-sm"
+                       href="{% url 'meals:meal_detail' meal.id %}#ingredients"
+                       aria-label="Add ingredients to {{ meal.name }}">
+                      + Add Ingredients
+                    </a>
+
+                    <button type="button" class="ml-btn ml-btn-quiet ml-btn-sm"
+                            data-plan-meal data-meal-id="{{ meal.id }}"
+                            data-meal-name="{{ meal.name }}">
+                      Add to Plan
+                    </button>
+
+                    <form method="post" action="{% url 'meals:archive_meal' meal.id %}"
+                          class="ml-inline-form" data-archive-form data-meal-name="{{ meal.name }}">
+                      {% csrf_token %}
+                      <button type="submit" class="ml-btn ml-btn-quiet ml-btn-archive ml-btn-sm"
+                              aria-label="Archive {{ meal.name }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <rect x="3" y="4" width="18" height="4" rx="1"/>
+                          <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/>
+                          <path d="M10 12h4"/>
+                        </svg>
+                        Archive
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+          {% include "partials/pagination.html" %}
+
+        {% elif query %}
+          <section class="ml-card ml-empty">
+            <svg class="ml-empty-art" aria-hidden="true" focusable="false">
+              <use href="#ml-fallback"/>
+            </svg>
+            <h2>No meals match your search.</h2>
+            <p>Try a different name or ingredient.</p>
+            <a class="ml-btn ml-btn-primary" href="{% url 'meals:meal_library' %}">Clear Filters</a>
+          </section>
+
+        {% elif view == "favorite_meals" or favorites_page %}
+          <section class="ml-card ml-empty">
+            <svg class="ml-empty-art is-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.8 3.6 4.8 6.8 4.8c1.9 0 3.5 1 5.2 3 1.7-2 3.3-3 5.2-3 3.2 0 5.1 3 4 6.3-1.7 4.8-9.2 9.4-9.2 9.4z"/>
+            </svg>
+            <h2>No favorite meals yet</h2>
+            <p>Tap the heart on any meal to keep your go-to dishes close at hand.</p>
+            <a class="ml-btn ml-btn-primary" href="{% url 'meals:meal_library' %}">Back to My Meals</a>
+          </section>
+
+        {% else %}
+          <section class="ml-card ml-empty">
+            <svg class="ml-empty-art" aria-hidden="true" focusable="false">
+              <use href="#ml-fallback"/>
+            </svg>
+            <h2>Your meal collection starts here</h2>
+            <p>Save the meals you love and build a collection that makes everyday food planning easier.</p>
+
+            <div class="ml-actions ml-actions-center">
+              <a class="ml-btn ml-btn-primary" href="{% url 'meals:create_meal' %}">+ Add Your First Meal</a>
+              <a class="ml-btn ml-btn-secondary" href="{% url 'foods:foods' %}">Explore Food Library</a>
+            </div>
+
+            {% if archived_count %}
+              <p class="ml-archive-note">
+                You have {{ archived_count }} archived meal{{ archived_count|pluralize }}.
+                <a href="{% url 'meals:archived_meals' %}">View archive</a>
+              </p>
+            {% endif %}
+          </section>
+        {% endif %}
+
+        {% endwith %}
+
+      {% endif %}
+
+      {# ======================== ADD TO PLAN + ARCHIVE DIALOGS (library, favorites and detail only) ======================== #}
+      {% if view != "create_meal" and view != "edit_meal" and view != "archived_meals" %}
+        <dialog class="ml-dialog" id="plan-dialog" aria-labelledby="plan-title">
+          <form method="post" action="{% url 'meals:schedule_meal' %}">
+            {% csrf_token %}
+            <input type="hidden" name="meal_id" id="plan-meal-id">
+
+            <div class="ml-dialog-head">
+              <h2 id="plan-title">Add to meal planner</h2>
+              <button type="button" class="ml-x" data-close-dialog aria-label="Close">&#10005;</button>
+            </div>
+
+            <p class="ml-sub" id="plan-meal-name"></p>
+
+            <div class="ml-field">
+              <label for="plan-date">Date</label>
+              <input type="date" id="plan-date" name="date" value="{% now 'Y-m-d' %}" required>
+            </div>
+
+            <div class="ml-field-row">
+              <div class="ml-field">
+                <label for="plan-type">Meal</label>
+                <select id="plan-type" name="meal_type" required>
+                  <option value="breakfast">Breakfast</option>
+                  <option value="lunch" selected>Lunch</option>
+                  <option value="supper">Supper</option>
+                  <option value="snack">Snack</option>
+                </select>
+              </div>
+
+              <div class="ml-field">
+                <label for="plan-servings">Servings</label>
+                <input type="number" id="plan-servings" name="servings"
+                       value="1" min="1" step="1" inputmode="numeric" required>
+              </div>
+            </div>
+
+            <div class="ml-actions">
+              <button type="submit" class="ml-btn ml-btn-primary">Add to plan</button>
+              <button type="button" class="ml-btn ml-btn-secondary" data-close-dialog>Cancel</button>
+            </div>
+          </form>
+        </dialog>
+
+        <dialog class="ml-dialog" id="archive-dialog" aria-labelledby="archive-title">
+          <div class="ml-dialog-head">
+            <h2 id="archive-title">Archive this meal?</h2>
+            <button type="button" class="ml-x" data-close-archive aria-label="Close">&#10005;</button>
+          </div>
+
+          <p class="ml-sub" id="archive-meal-name"></p>
+          <p class="ml-dialog-note">
+            It will be hidden from your active library and the planner's meal picker. Nothing is deleted:
+            the meal, its ingredients and anything already on your planner stay as they are, and you can restore it any time from Archived Meals.
+          </p>
+
+          <div class="ml-actions">
+            <button type="button" class="ml-btn ml-btn-danger" id="archive-confirm">Archive meal</button>
+            <button type="button" class="ml-btn ml-btn-secondary" data-close-archive>Cancel</button>
+          </div>
+        </dialog>
+      {% endif %}
+
+    </div>
+    {% endwith %}
+  </main>
+</div>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/meals.js' %}" defer></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>

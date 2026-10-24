@@ -1,0 +1,494 @@
+
+{% load static %}
+{% load l10n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meal Planner — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/food_library.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/meal.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/toasts.css' %}">
+<script>
+  (function () {
+    try {
+      var pref = localStorage.getItem('foodieplug-theme') || 'system';
+      var resolved = pref === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : pref;
+      document.documentElement.setAttribute('data-theme', resolved);
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- ============ MOBILE TOPBAR ============ -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+  <div class="mobile-topbar-actions">
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Notifications" aria-haspopup="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dropdown-panel" role="menu"><h4>Notifications</h4><p style="font-size:0.85rem;color:var(--muted);padding:0.5rem;">You're all caught up.</p></div>
+    </div>
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Account menu" aria-haspopup="true">
+        <span class="avatar" style="width:30px;height:30px;font-size:0.72rem;">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+      </button>
+      <div class="dropdown-panel" role="menu">
+        <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+        <a href="#" class="profile-menu-item">Settings</a>
+        <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+        <div class="profile-menu-divider"></div>
+        <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+      <a href="{% url 'meals:timetable' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-content mp-page" id="mp-page">
+
+    <div class="mp-header">
+      <div>
+        <h1>Meal Planner</h1>
+        <p>Plan your meals, use what you already have, and stay within your food budget.</p>
+      </div>
+      <div class="mp-header-actions">
+        <a href="{% url 'meals:timetable' %}" class="btn-outline">Today</a>
+        <button type="button" class="btn-solid" data-open-modal="add-meal-modal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Add Meal
+        </button>
+      </div>
+    </div>
+
+    <!-- ---- week navigation ---- -->
+    <nav class="mp-weeknav {% if is_current_week %}is-current{% endif %}" aria-label="Week navigation">
+      <a class="mp-weeknav-btn" rel="prev" href="{% url 'meals:timetable' %}?date={{ previous_week|date:'Y-m-d' }}">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Previous week
+      </a>
+      <div class="mp-weeknav-range">
+        <strong>{{ week_start|date:"M j" }} – {{ week_end|date:"M j, Y" }}</strong>
+        {% if is_current_week %}<span class="mp-pill">This week</span>{% endif %}
+      </div>
+      <a class="mp-weeknav-btn" rel="next" href="{% url 'meals:timetable' %}?date={{ next_week|date:'Y-m-d' }}">
+        Next week
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </nav>
+
+    <!-- ---- planning summary (this week) ---- -->
+    <dl class="mp-summary" aria-label="Planning summary for this week">
+      <div class="mp-stat"><dt>Days planned</dt><dd>{{ summary.days_planned }}<span>/ 7</span></dd></div>
+      <div class="mp-stat"><dt>Meals planned</dt><dd>{{ summary.meals_planned }}</dd></div>
+      <div class="mp-stat"><dt>Meals using pantry</dt><dd>{{ summary.pantry_ready }}</dd></div>
+      {% if summary.total_cost is not None %}
+      <div class="mp-stat"><dt>Estimated cost</dt><dd>KES {{ summary.total_cost|floatformat:"0g" }}</dd></div>
+      {% endif %}
+    </dl>
+
+    <!-- ---- timetable ---- -->
+    <div class="tt-scroll" role="region" aria-label="Weekly meal timetable (scrolls sideways on small screens)" tabindex="0">
+      <table class="tt">
+        <caption class="mp-sr">Meals planned for {{ week_start|date:"F j" }} to {{ week_end|date:"F j, Y" }}</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="tt-corner"><span class="mp-sr">Meal</span></th>
+            {% for day in days %}
+            <th scope="col" class="tt-day {% if day.is_today %}is-today{% endif %}" {% if day.is_today %}aria-current="date"{% endif %}>
+              <span class="mp-sr">{{ day.date|date:"l, F j" }}</span>
+              <span class="tt-dow" aria-hidden="true">{{ day.date|date:"D" }}</span>
+              <span class="tt-dom" aria-hidden="true">{{ day.date|date:"j" }}</span>
+              {% if day.is_today %}<span class="tt-today-tag" aria-hidden="true">Today</span>{% endif %}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <th scope="row" class="tt-rowhead">
+              <span>
+                {% if row.key == "breakfast" %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18h16"/><path d="M7 18a5 5 0 0 1 10 0"/><path d="M12 6v3M5.6 9.6l1.8 1.8M18.4 9.6l-1.8 1.8"/></svg>{% elif row.key == "lunch" %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.5"/><path d="M3 5v5M5 5v5M4 10v9M20 5c-1.5 1-2 3-2 5h2v9"/></svg>{% elif row.key == "supper" or row.key == "dinner" %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>{% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h17a8.5 8.5 0 0 1-17 0z"/><path d="M8 20.5h8"/></svg>{% endif %}
+                {{ row.label }}
+              </span>
+            </th>
+            {% for cell in row.cells %}
+            <td class="tt-cell {% if cell.is_today %}is-today{% endif %}">
+              {% if cell.schedule %}
+              {% with s=cell.schedule %}
+              <button type="button" class="tt-meal state-{{ s.pantry_state }}"
+                      data-open-modal="meal-modal"
+                      data-schedule-id="{{ s.id }}"
+                      data-meal-id="{{ s.meal.id }}"
+                      data-meal-name="{{ s.meal.name }}"
+                      data-date="{{ cell.date|date:'Y-m-d' }}"
+                      data-date-label="{{ cell.date|date:'l, M j' }}"
+                      data-meal-type="{{ row.key }}"
+                      data-meal-type-label="{{ row.label }}"
+                      data-servings="{{ s.servings }}"
+                      data-pantry-state="{{ s.pantry_state }}"
+                      data-is-cooked="{{ s.is_cooked|yesno:'true,false' }}"
+                      data-cooked-at="{% if s.cooked_at %}{{ s.cooked_at|date:'M j, Y, g:i A' }}{% endif %}"
+                      data-available="{{ s.available_count }}"
+                      data-total="{{ s.total_count }}"
+                      data-missing="{{ s.missing_labels|join:'|' }}"
+                      aria-label="{{ s.meal.name }}, {{ cell.date|date:'l' }} {{ row.label|lower }}, {% if s.is_cooked %}already cooked{% elif s.cooking_status == 'ready' %}ready to cook{% elif s.cooking_status == 'missing' %}missing ingredients{% else %}planned{% endif %}. Open options">
+                <span class="tt-meal-top">
+                  <span class="mp-thumb">{% include "foods/_food_visual.html" with item=s.meal %}</span>
+                  <span>
+                    <span class="tt-meal-name">{{ s.meal.name }}</span>
+                    <span class="tt-meal-sub">{% if s.servings and s.servings != 1 %}{{ s.servings }} servings{% elif s.meal.description %}{{ s.meal.description|truncatechars:30 }}{% else %}1 serving{% endif %}</span>
+                  </span>
+                </span>
+                <span class="tt-meal-foot">
+                  {% if s.is_cooked %}
+                  <span class="tt-pantry is-ready">Cooked{% if s.cooked_at %} {{ s.cooked_at|date:"M j" }}{% endif %}</span>
+                  {% elif s.cooking_status == "ready" %}
+                  <span class="tt-pantry is-ready">Ready to cook</span>
+                  {% elif s.cooking_status == "missing" %}
+                  <span class="tt-pantry is-missing">Missing ingredients</span>
+                  {% else %}
+                  <span class="tt-pantry is-unknown">Planned</span>
+                  {% endif %}
+                  {% if s.is_cooked %}
+                  <span class="tt-pantry is-unknown">Pantry deducted</span>
+                  {% elif s.pantry_state == "ready" %}
+                  <span class="tt-pantry is-ready"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Pantry ready</span>
+                  {% elif s.pantry_state == "partial" %}
+                  <span class="tt-pantry is-partial"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 7v6M12 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>{{ s.missing|length }} to buy</span>
+                  {% elif s.pantry_state == "missing" %}
+                  <span class="tt-pantry is-missing"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>{{ s.missing|length }} to buy</span>
+                  {% else %}
+                  <span class="tt-pantry is-unknown">No ingredients listed</span>
+                  {% endif %}
+                  {% if s.cost is not None %}<span class="tt-cost">KES {{ s.cost|floatformat:"0g" }}</span>{% endif %}
+                </span>
+              </button>
+              {% endwith %}
+              {% else %}
+              <button type="button" class="tt-add"
+                      data-open-modal="add-meal-modal"
+                      data-date="{{ cell.date|date:'Y-m-d' }}"
+                      data-meal-type="{{ row.key }}"
+                      aria-label="Add meal: {{ cell.date|date:'l' }} {{ row.label|lower }}">
+                + Add meal
+              </button>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ---- planning insights (computed from real schedule + pantry data) ---- -->
+    <section class="mp-insights" aria-labelledby="mp-insights-title">
+      <h2 id="mp-insights-title">Planning insights</h2>
+      {% if insights %}
+      <ul>
+        {% for item in insights %}
+        <li class="mp-insight is-{{ item.kind }}">
+          <span class="mp-insight-icon" aria-hidden="true">{% if item.kind == "good" %}✓{% elif item.kind == "warn" %}!{% else %}i{% endif %}</span>
+          <span><span class="mp-sr">{% if item.kind == "good" %}Good news: {% elif item.kind == "warn" %}Heads up: {% else %}Note: {% endif %}</span>{{ item.text }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="mp-insights-empty">Plan a few meals and FoodiePlug will show how they line up with your pantry.</p>
+      {% endif %}
+    </section>
+
+  </main>
+</div>
+
+<!-- URL templates used by meals.js (the trailing /0/ is swapped for the real id) -->
+<div id="mp-urls" hidden
+     data-servings="{% url 'meals:update_meal_servings' 0 %}"
+     data-remove="{% url 'meals:remove_meal_schedule' 0 %}"
+     data-move="{% url 'meals:move_meal_schedule' 0 %}"
+     data-missing="{% url 'meals:add_missing_to_shopping' 0 %}"
+     data-cook="{% url 'meals:cook_meal_schedule' 0 %}"
+     data-detail="{% url 'meals:meal_detail' 0 %}"></div>
+
+<!-- ============ ADD MEAL MODAL ============ -->
+<div class="mp-modal" id="add-meal-modal" aria-hidden="true">
+  <div class="mp-panel" role="dialog" aria-modal="true" aria-labelledby="add-meal-title">
+    <div class="mp-panel-head">
+      <div><h2 id="add-meal-title">Add meal</h2><p>Choose a meal and where it goes in your week.</p></div>
+      <button type="button" class="icon-btn" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" action="{% url 'meals:schedule_meal' %}" id="add-meal-form">
+      {% csrf_token %}
+      <input type="hidden" name="week" value="{{ week_param }}">
+      <div class="mp-field">
+        <label for="add-meal-select">Meal</label>
+        <select id="add-meal-select" name="meal_id" required>
+          <option value="" disabled selected>Select a meal…</option>
+          {% for m in meal_options %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}
+        </select>
+        {% if not meal_options %}<p class="mp-hint">No meals in your library yet. <a href="{% url 'meals:meal_library' %}">Open the meal library</a>.</p>{% endif %}
+      </div>
+      <div class="mp-avail" id="add-meal-avail" role="status" aria-live="polite" hidden></div>
+      <div class="mp-field-row">
+        <div class="mp-field">
+          <label for="add-meal-date">Day</label>
+          <select id="add-meal-date" name="date" required>
+            {% for day in days %}<option value="{{ day.date|date:'Y-m-d' }}" {% if day.is_today %}selected{% endif %}>{{ day.date|date:"l, M j" }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mp-field">
+          <label for="add-meal-type">Meal type</label>
+          <select id="add-meal-type" name="meal_type" required>
+            {% for row in rows %}<option value="{{ row.key }}">{{ row.label }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="mp-field">
+        <label for="add-meal-servings">Servings</label>
+        <input type="number" id="add-meal-servings" name="servings" min="1" step="1" value="1" required>
+      </div>
+      <div class="mp-actions">
+        <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+        <button type="submit" class="btn-solid" {% if not meal_options %}disabled{% endif %}>Add to plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MEAL OPTIONS MODAL (edit / move / duplicate / remove) ============ -->
+<div class="mp-modal" id="meal-modal" aria-hidden="true">
+  <div class="mp-panel" role="dialog" aria-modal="true" aria-labelledby="meal-modal-title">
+    <div class="mp-panel-head">
+      <div><h2 id="meal-modal-title">Meal</h2><p id="meal-modal-slot"></p></div>
+      <button type="button" class="icon-btn" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <div class="mp-section" id="meal-pantry-section">
+      <h3>Pantry</h3>
+      <div class="mp-avail" id="meal-pantry" role="status"></div>
+      <p class="mp-hint" id="meal-cooked-status" hidden></p>
+      <ul class="mp-missing" id="meal-missing-list" hidden></ul>
+      <form method="post" id="meal-missing-form" hidden>
+        {% csrf_token %}
+        <input type="hidden" name="week" value="{{ week_param }}">
+        <button type="submit" class="btn-outline">Add missing items to shopping list</button>
+      </form>
+      <form method="post" id="meal-cook-form" hidden>
+        {% csrf_token %}
+        <input type="hidden" name="week" value="{{ week_param }}">
+        <button type="submit" class="btn-solid">Mark as Cooked / Eaten</button>
+      </form>
+    </div>
+
+    <div class="mp-section" id="meal-servings-section">
+      <h3>Edit servings</h3>
+      <form method="post" id="meal-servings-form" class="mp-inline">
+        {% csrf_token %}
+        <input type="hidden" name="week" value="{{ week_param }}">
+        <div class="mp-field">
+          <label for="meal-servings">Servings</label>
+          <input type="number" id="meal-servings" name="servings" min="1" step="1" required>
+        </div>
+        <button type="submit" class="btn-outline">Save</button>
+      </form>
+    </div>
+
+    <div class="mp-section" id="meal-move-section">
+      <h3>Move to</h3>
+      <form method="post" id="meal-move-form">
+        {% csrf_token %}
+        <input type="hidden" name="week" value="{{ week_param }}">
+        <input type="hidden" name="meal_id" id="move-meal-id">
+        <input type="hidden" name="servings" id="move-servings">
+        <input type="hidden" name="from_date" id="move-from-date">
+        <input type="hidden" name="from_type" id="move-from-type">
+        <div class="mp-inline">
+          <div class="mp-field">
+            <label for="move-date">Day</label>
+            <select id="move-date" name="date">
+              {% for day in days %}<option value="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"l, M j" }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mp-field">
+            <label for="move-type">Meal type</label>
+            <select id="move-type" name="meal_type">
+              {% for row in rows %}<option value="{{ row.key }}">{{ row.label }}</option>{% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn-outline" id="move-submit">Move</button>
+        </div>
+        <p class="mp-hint" id="move-hint" hidden>Pick a different day or meal type to move this meal.</p>
+      </form>
+    </div>
+
+    <div class="mp-section" id="meal-duplicate-section">
+      <h3>Duplicate to</h3>
+      <form method="post" action="{% url 'meals:schedule_meal' %}" id="meal-dup-form" class="mp-inline">
+        {% csrf_token %}
+        <input type="hidden" name="week" value="{{ week_param }}">
+        <input type="hidden" name="meal_id" id="dup-meal-id">
+        <input type="hidden" name="servings" id="dup-servings">
+        <input type="hidden" name="meal_type" id="dup-type">
+        <div class="mp-field">
+          <label for="dup-date">Day (same meal type)</label>
+          <select id="dup-date" name="date">
+            {% for day in days %}<option value="{{ day.date|date:'Y-m-d' }}">{{ day.date|date:"l, M j" }}</option>{% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn-outline">Duplicate</button>
+      </form>
+    </div>
+
+    <div class="mp-foot-links">
+      <a href="#" id="meal-detail-link">View meal &amp; ingredients</a>
+      <button type="button" class="mp-danger-link" id="meal-remove-link" data-open-modal="remove-meal-modal">Remove from plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REMOVE CONFIRMATION MODAL ============ -->
+<div class="mp-modal" id="remove-meal-modal" aria-hidden="true">
+  <div class="mp-panel is-small" role="dialog" aria-modal="true" aria-labelledby="remove-meal-title">
+    <div class="mp-panel-head">
+      <div><h2 id="remove-meal-title">Remove this meal?</h2><p id="remove-meal-text">It will be taken off your plan.</p></div>
+      <button type="button" class="icon-btn" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+    <form method="post" id="remove-meal-form">
+      {% csrf_token %}
+      <input type="hidden" name="week" value="{{ week_param }}">
+      <div class="mp-actions">
+        <button type="button" class="btn-outline" data-close-modal>Keep meal</button>
+        <button type="submit" class="btn-solid is-danger">Remove meal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{ meal_options|json_script:"meal-options" }}
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/meal.js' %}"></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>

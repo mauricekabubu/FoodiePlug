@@ -1,0 +1,293 @@
+
+{% extends "public_base.html" %}
+{% load static %}
+
+{% block title %}FoodiePlug Help Center | FAQs & Support{% endblock %}
+
+{% block meta_description %}
+Find answers about FoodiePlug account access, Kenyan meal planning, groceries, food budgets, AI recommendations, privacy, and troubleshooting.
+{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/help.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+<!-- ============ HERO + SEARCH ============ -->
+<section class="help-hero">
+  <h1>How can we help?</h1>
+  <p>Find answers, learn how FoodiePlug works, or get help with your account.</p>
+
+  <div class="search-wrap">
+    <svg class="icon-left" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <label for="help-search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Search FoodiePlug help</label>
+    <input type="search" id="help-search" placeholder="Search FoodiePlug help..." autocomplete="off">
+    <button type="button" class="search-clear" aria-label="Clear search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <p class="hint">Search for meals, groceries, your account, passwords, AI recommendations, and more.</p>
+</section>
+
+<!-- ============ SEARCH RESULTS (shown when searching) ============ -->
+<section class="search-results" id="search-results">
+  <h2 id="results-heading">Search results</h2>
+  <div id="results-list"></div>
+  <div class="no-results" id="no-results">
+    <h3>No results found?</h3>
+    <p>Try another search term or contact our support team.</p>
+    <a href="/contact/" class="btn-solid">Contact FoodiePlug →</a>
+  </div>
+</section>
+
+<!-- ============ BROWSE HELP TOPICS ============ -->
+<section class="help-section browse-content">
+  <h2>Browse help topics</h2>
+  <div class="category-grid">
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 19c1.6-3.6 4.7-5.5 7.5-5.5s5.9 1.9 7.5 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+      <h3>Account &amp; Login</h3>
+      <p>Manage your account, password, username, and profile.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 4v8l5 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+      <h3>Meal Planning</h3>
+      <p>Learn how FoodiePlug creates and manages meal plans.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.7"/></svg></span>
+      <h3>Groceries</h3>
+      <p>Manage groceries, ingredients, shopping lists, and prices.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 14l.7 1.8L20.5 16.5l-1.8.7L18 19l-.7-1.8-1.8-.7 1.8-.7L18 14z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+      <h3>AI Food Assistant</h3>
+      <p>Understand AI-powered recommendations and food suggestions.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.7"/><circle cx="16" cy="14" r="1.4" fill="currentColor"/></svg></span>
+      <h3>Budget &amp; Prices</h3>
+      <p>Understand food budgets, price estimates, and spending tools.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+      <h3>Account Settings</h3>
+      <p>Update preferences, personal information, and account settings.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6l7-3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+      <h3>Privacy &amp; Security</h3>
+      <p>Learn how FoodiePlug handles your information and privacy.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+
+    <a href="#" class="category-card">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-4 3v-3H6a2 2 0 0 1-2-2V6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+      <h3>Troubleshooting</h3>
+      <p>Find solutions when something isn't working as expected.</p>
+      <span class="card-arrow">Browse <span class="arrow-nudge">→</span></span>
+    </a>
+  </div>
+</section>
+
+<!-- ============ POPULAR QUESTIONS ============ -->
+<section class="help-section browse-content">
+  <h2>Popular questions</h2>
+  <p class="section-lede">Quick answers to what people ask us most.</p>
+
+  <div class="faq-list">
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How do I create a FoodiePlug account?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Select "Create account" from the top of any page, then fill in your name, a username, your email, and a password.</p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How do I reset my password?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Go to the login page and select "Forgot password?" — we'll email you a link to set a new one.</p><p><a class="learn-more" href="#article-reset-password">Learn more →</a></p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How do I change my username or email?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Both can be updated from Account Settings. Changing your email will ask you to confirm the new address before it takes effect.</p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How does FoodiePlug create my meal plan?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>FoodiePlug combines your stated preferences, household size, and budget with AI-assisted suggestions to propose a plan you can adjust.</p><p><a class="learn-more" href="#">Learn more →</a></p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">Can I change my food preferences?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Yes — update them any time from Account Settings, and future suggestions will reflect the change.</p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How does FoodiePlug use my grocery prices?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Prices you or other users enter help power budgeting estimates within the app. They're estimates, not guarantees.</p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">Are FoodiePlug food prices always accurate?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Not always — prices vary by location and change over time, and user-submitted prices may not reflect current market rates.</p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How does the AI food assistant work?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>It generates meal and grocery suggestions based on what you tell FoodiePlug. Always review its recommendations before relying on them.</p><p><a class="learn-more" href="#ai-info">Learn more →</a></p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">Can I delete my account?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Yes. Contact our support team and we'll help you close and delete your account.</p></div>
+    </div>
+    <div class="faq-item" data-open="false">
+      <button type="button" class="faq-question" aria-expanded="false">How do I contact FoodiePlug support?<span class="plusminus" aria-hidden="true"></span></button>
+      <div class="faq-answer"><p>Use our <a href="/contact/">Contact page</a> — pick the topic that fits and send us a message.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURE GUIDES ============ -->
+<section class="help-section browse-content">
+  <h2>Learn how FoodiePlug works</h2>
+  <div class="guide-grid">
+    <div class="guide-card">
+      <div class="motif" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+      <h3>Plan your meals</h3>
+      <p>Build meal plans around your food preferences, budget, and available ingredients.</p>
+      <a href="#">Learn about meal planning →</a>
+    </div>
+    <div class="guide-card">
+      <div class="motif" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg></div>
+      <h3>Manage your groceries</h3>
+      <p>Keep track of ingredients and make smarter shopping decisions.</p>
+      <a href="#">Learn about groceries →</a>
+    </div>
+    <div class="guide-card">
+      <div class="motif" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>Make smarter food decisions</h3>
+      <p>Use FoodiePlug recommendations to explore practical everyday food choices.</p>
+      <a href="#">Learn more →</a>
+    </div>
+    <div class="guide-card">
+      <div class="motif" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+      <h3>Use FoodiePlug AI</h3>
+      <p>Understand how AI-powered recommendations can help you plan and decide.</p>
+      <a href="#ai-info">Learn about AI →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ACCOUNT & LOGIN QUICK HELP ============ -->
+<section class="help-section browse-content">
+  <h2>Having trouble with your account?</h2>
+  <div class="quick-actions">
+    <a href="#article-reset-password" class="quick-action">
+      <p class="q">Forgot your password?</p>
+      <p class="a">Reset your password <span class="arrow-nudge">→</span></p>
+    </a>
+    <a href="#" class="quick-action">
+      <p class="q">Can't log in?</p>
+      <p class="a">Troubleshoot login <span class="arrow-nudge">→</span></p>
+    </a>
+    <a href="#" class="quick-action">
+      <p class="q">Account information</p>
+      <p class="a">Manage your account <span class="arrow-nudge">→</span></p>
+    </a>
+    <a href="#" class="quick-action">
+      <p class="q">Delete your account</p>
+      <p class="a">Learn about account deletion <span class="arrow-nudge">→</span></p>
+    </a>
+  </div>
+</section>
+
+<!-- ============ ABOUT FOODIEPLUG AI ============ -->
+<section class="help-section browse-content" id="ai-info">
+  <h2>About FoodiePlug AI</h2>
+  <div class="info-panel">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      About FoodiePlug AI
+    </h3>
+    <p>FoodiePlug may use AI-powered features to help generate meal ideas, planning suggestions, and food-related recommendations.</p>
+    <ul>
+      <li>AI responses may occasionally be inaccurate.</li>
+      <li>Recommendations should be reviewed before use.</li>
+      <li>Food prices and availability can change.</li>
+      <li>AI recommendations are not a substitute for professional medical or nutritional advice.</li>
+    </ul>
+    <a href="#">Learn more about AI-powered features →</a>
+  </div>
+</section>
+
+<!-- ============ SAMPLE HELP ARTICLE ============ -->
+<section class="article-section" id="article-reset-password">
+  <div class="article-layout">
+    <div class="article-content">
+      <p class="article-eyebrow">Account &amp; Login</p>
+      <h2>How do I reset my password?</h2>
+      <p class="intro">If you've forgotten your password, you can set a new one in a few quick steps.</p>
+
+      <ol class="article-steps">
+        <li>Open the FoodiePlug login page.</li>
+        <li>Select "Forgot password?"</li>
+        <li>Enter your email address.</li>
+        <li>Follow the password-reset instructions we send you.</li>
+        <li>Create your new password.</li>
+      </ol>
+
+      <div class="article-note"><strong>Note:</strong> the reset link expires after a short time for security. If it's expired, just request a new one.</div>
+
+      <div class="article-feedback">
+        <p>Was this helpful?</p>
+        <div class="feedback-buttons">
+          <button type="button" id="feedback-yes">Yes, thanks!</button>
+          <button type="button" id="feedback-no">Not really</button>
+        </div>
+        <div class="feedback-followup" id="feedback-followup">
+          <label for="feedback-text" style="display:block;font-size:0.9rem;font-weight:600;margin:0.9rem 0 0.5rem;">What could we improve?</label>
+          <textarea id="feedback-text" placeholder="Tell us what was missing..."></textarea>
+          <button type="button" class="btn-outline" id="feedback-submit">Submit feedback</button>
+        </div>
+        <p class="feedback-thanks" id="feedback-thanks">Thanks — that helps us improve this article.</p>
+      </div>
+    </div>
+
+    <nav class="article-toc" aria-label="On this page">
+      <p>On this page</p>
+      <ul>
+        <li><a href="#article-reset-password">How do I reset my password?</a></li>
+      </ul>
+    </nav>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final-cta">
+  <h2>Can't find what you're looking for?</h2>
+  <p>Our support team is here to help.</p>
+  <div class="final-cta-actions">
+    <a href="/contact/" class="btn-solid">Contact us</a>
+    <a href="/" class="btn-outline">Back to FoodiePlug</a>
+  </div>
+</section>
+
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/help.js' %}" defer></script>
+{% endblock %}

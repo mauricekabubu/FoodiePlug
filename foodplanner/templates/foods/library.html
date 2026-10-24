@@ -1,0 +1,492 @@
+{% load static %}
+{% load l10n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <title>Food Library — FoodiePlug</title>
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+    <link rel="stylesheet" href="{% static 'css/library.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+
+    <script>
+    (function () {
+        try {
+            var pref = localStorage.getItem('foodieplug-theme') || 'system';
+            var resolved = pref === 'system'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : pref;
+
+            document.documentElement.setAttribute('data-theme', resolved);
+        } catch (e) {}
+    })();
+    </script>
+</head>
+
+<body>
+
+    {% include "partials/django_toasts.html" %}
+
+    <!-- Mobile topbar -->
+    <header class="mobile-topbar">
+        <button type="button" class="icon-btn" id="drawer-open"
+                aria-label="Open navigation" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16"
+                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <a href="{% url 'dashboard' %}" class="brand-mini">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="32" cy="32" r="31" fill="#16794B"/>
+                <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+                <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+            </svg>
+            <span>FoodiePlug</span>
+        </a>
+
+        <div class="mobile-topbar-actions">
+            <div class="dropdown">
+                <button type="button" class="icon-btn"
+                        aria-label="Notifications" aria-haspopup="true">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z"
+                              stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                        <path d="M10 19a2 2 0 0 0 4 0"
+                              stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="dropdown-panel" role="menu">
+                    <h4>Notifications</h4>
+                    <p style="font-size:.85rem;color:var(--muted);padding:.5rem;">
+                        You're all caught up.
+                    </p>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button type="button" class="icon-btn"
+                        aria-label="Account menu" aria-haspopup="true">
+                    <span class="avatar" style="width:30px;height:30px;font-size:.72rem;">
+                        {{ user.first_name|default:user.username|slice:":1"|upper }}
+                    </span>
+                </button>
+                <div class="dropdown-panel" role="menu">
+                    <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+                    <a href="#" class="profile-menu-item">Settings</a>
+                    <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+                    <div class="profile-menu-divider"></div>
+                    <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="drawer-scrim" id="drawer-scrim"></div>
+
+    <div class="app-shell">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Primary navigation">
+            <div class="sidebar-brand">
+                <svg viewBox="0 0 64 64" aria-hidden="true">
+                    <circle cx="32" cy="32" r="31" fill="#16794B"/>
+                    <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+                    <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+                </svg>
+                <span>FoodiePlug</span>
+                <button type="button" class="icon-btn" id="drawer-close"
+                        aria-label="Close navigation" style="margin-left:auto;">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18"
+                              stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard' %}" class="nav-item">Overview</a>
+                <a href="{% url 'meals:meal_library' %}" class="nav-item">My Meals</a>
+                <a href="{% url 'meals:timetable' %}" class="nav-item">Meal Planner</a>
+                <a href="{% url 'pantry:pantry' %}" class="nav-item">Pantry</a>
+                <a href="{% url 'shopping_lists' %}" class="nav-item">Shopping</a>
+                <a href="{% url 'budgets:dashboard' %}" class="nav-item">Budget</a>
+                <a href="{% url 'foods:foods' %}" class="nav-item is-active" aria-current="page">Food Library</a>
+                <a href="{% url 'ai:page' %}" class="nav-item">AI Assistant</a>
+
+                <p class="nav-label">More</p>
+                <a href="{% url 'insights:overview' %}" class="nav-item">Insights</a>
+                <a href="{% url 'settings' %}" class="nav-item">Settings</a>
+                <a href="{% url 'help' %}" class="nav-item">Help</a>
+                <a href="{% url 'logout' %}" class="nav-item">logout</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="theme-toggle" role="group" aria-label="Theme">
+                    <button type="button" data-theme-value="light" aria-pressed="false">Light</button>
+                    <button type="button" data-theme-value="dark" aria-pressed="false">Dark</button>
+                    <button type="button" data-theme-value="system" aria-pressed="false">Auto</button>
+                </div>
+
+                <div class="sidebar-user">
+                    <span class="avatar">
+                        {{ user.first_name|default:user.username|slice:":1"|upper }}
+                    </span>
+                    <div class="sidebar-user-text">
+                        <p class="name">{{ user.get_full_name|default:user.username }}</p>
+                        <p class="handle">{{ user.email|default:user.username }}</p>
+                    </div>
+                    <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">⚙</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main-content">
+
+            {% if food %}
+
+                <!-- Food detail -->
+                <a href="{% url 'foods:foods' %}" class="back-link">
+                    ← Back to Food Library
+                </a>
+
+                <article class="food-detail">
+                    <div class="food-detail-media">
+                        {% include "foods/_food_visual.html" with item=food eager=True %}
+                    </div>
+
+                    <div class="food-detail-body">
+                        {% if food.category %}
+                            <span class="food-tag">{{ food.category.name }}</span>
+                        {% endif %}
+
+                        <h1>{{ food.name }}</h1>
+
+                        {% if food.description %}
+                            <p class="food-desc">{{ food.description }}</p>
+                        {% else %}
+                            <p class="food-desc">No description has been added for this food yet.</p>
+                        {% endif %}
+
+                        <div class="food-detail-actions">
+                            <a href="{% url 'foods:edit' food.id %}" class="btn-outline">Edit food</a>
+
+                            <form method="post" action="{% url 'foods:archive' food.id %}"
+                                  onsubmit="return confirm('Delete this food from the active library?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-outline archive-button">Delete food</button>
+                            </form>
+
+                            <a href="{% url 'pantry:pantry' %}" class="btn-outline">Open Pantry</a>
+                        </div>
+                    </div>
+                </article>
+
+            {% elif food_id %}
+
+                <!-- Food not found -->
+                <div class="empty-state" style="padding:3rem 1rem;">
+                    <h3>We couldn't find that food.</h3>
+                    <p>It may have been archived. Browse the library to find something similar.</p>
+                    <a href="{% url 'foods:foods' %}" class="btn-solid">Browse Food Library</a>
+                </div>
+
+            {% else %}
+
+                <!-- Food Library header -->
+                <div class="page-header">
+                    <div>
+                        <h1>Food Library</h1>
+                        <p>Browse every food FoodiePlug knows about.</p>
+                    </div>
+
+                    <button type="button" class="btn-solid" data-open-modal="add-food-modal">
+                        Add Food
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <form class="pantry-toolbar" method="get"
+                      action="{% url 'foods:foods' %}" role="search">
+                    <div class="pantry-search">
+                        <input type="search" name="q" id="food-search-input"
+                               value="{{ query|default:'' }}"
+                               placeholder="Search the food library..."
+                               autocomplete="off" aria-label="Search foods">
+                        {% if selected_category %}
+                            <input type="hidden" name="category" value="{{ selected_category }}">
+                        {% endif %}
+
+                        {% if query %}
+                            <a href="{% url 'foods:foods' %}{% if selected_category %}?category={{ selected_category }}{% endif %}" class="search-clear"
+                               aria-label="Clear search">×</a>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn-solid">Search</button>
+                </form>
+
+                <!-- Category filters -->
+                <nav class="category-chips food-cats" aria-label="Food categories">
+                    <a href="{% url 'foods:foods' %}"
+                       class="cat-chip {% if not selected_category and not query %}is-active{% endif %}">
+                        All
+                    </a>
+
+                    {% for cat in categories %}
+                        <a href="{% url 'foods:foods' %}?category={{ cat.id }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}"
+                           class="cat-chip {% if selected_category|stringformat:'s' == cat.id|stringformat:'s' %}is-active{% endif %}">
+                            {{ cat.name }}
+                        </a>
+                    {% endfor %}
+                </nav>
+
+                <!-- Food results -->
+                {% if foods %}
+                    <p class="food-count" role="status">
+                        {{ total_count|default:foods|length }} food{{ total_count|default:foods|length|pluralize }}
+                        {% if query %}matching “{{ query }}”{% endif %}
+                    </p>
+
+                    <div class="food-grid">
+                        {% for f in foods %}
+                            <div class="food-card">
+
+                                <a href="{% url 'foods:detail' f.id %}"
+                                   class="food-card-media"
+                                   aria-label="View {{ f.name }}">
+                                    {% include "foods/_food_visual.html" with item=f %}
+                                </a>
+
+                                <div class="food-card-body">
+                                    <h3>
+                                        <a href="{% url 'foods:detail' f.id %}">
+                                            {{ f.name }}
+                                        </a>
+                                    </h3>
+
+                                    {% if f.category %}
+                                        <span class="food-tag">{{ f.category.name }}</span>
+                                    {% endif %}
+                                </div>
+                                {% include "partials/pagination.html" %}
+
+                                <!-- Edit and Delete only; no action wrapper -->
+                                <a href="{% url 'foods:edit' f.id %}"
+                                   class="btn-outline food-card-add"
+                                   aria-label="Edit {{ f.name }}">
+                                    Edit
+                                </a>
+
+                                <form method="post"
+                                      action="{% url 'foods:archive' f.id %}"
+                                      style="margin:0;"
+                                      onsubmit="return confirm('Delete {{ f.name|escapejs }} from the active Food Library? This will not permanently delete its database record.');">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="btn-outline food-card-add archive-button"
+                                            aria-label="Delete {{ f.name }}">
+                                        Delete
+                                    </button>
+                                </form>
+
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                {% else %}
+
+                    <!-- Empty state -->
+                    <div class="empty-state" style="padding:3rem 1rem;">
+                        <h3>
+                            {% if query %}
+                                No foods match “{{ query }}”.
+                            {% elif selected_category %}
+                                No foods in this category yet.
+                            {% else %}
+                                The food library is empty.
+                            {% endif %}
+                        </h3>
+
+                        <p>
+                            {% if query %}
+                                Check the spelling or try a shorter search term.
+                            {% else %}
+                                Try another category or add a food to your library.
+                            {% endif %}
+                        </p>
+
+                        <div style="display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap;">
+                            <a href="{% url 'foods:foods' %}" class="btn-outline">Show all foods</a>
+                            <button type="button" class="btn-solid" data-open-modal="add-food-modal">Add Food</button>
+                        </div>
+                    </div>
+
+                {% endif %}
+            {% endif %}
+        </main>
+    </div>
+
+    <!-- Add Food modal -->
+    <div class="modal-overlay" id="add-food-modal" aria-hidden="true">
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="add-food-title">
+            <div class="modal-header">
+                <div>
+                    <h2 id="add-food-title">Add food</h2>
+                    <p>Add a new food to your FoodiePlug library.</p>
+                </div>
+                <button type="button" class="icon-btn modal-close" data-close-modal aria-label="Close">×</button>
+            </div>
+
+            <form id="add-food-form" method="post"
+                  action="{% url 'foods:add' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="modal-field">
+                    <label for="food-name">Food name</label>
+                    <input type="text" id="food-name" name="name"
+                           placeholder="e.g. Sukuma Wiki" maxlength="150" required>
+                </div>
+
+                <div class="modal-field">
+                    <label for="food-category">Category</label>
+                    <select id="food-category" name="category" required>
+                        <option value="">Select a category</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="modal-field">
+                    <label for="food-description">Description</label>
+                    <textarea id="food-description" name="description" rows="4"
+                              placeholder="Add a short description..."></textarea>
+                </div>
+
+                <div class="modal-field">
+                    <label for="food-image">Food image</label>
+                    <input type="file" id="food-image" name="image" accept="image/*">
+                    <p class="hint">JPG, PNG or WebP recommended.</p>
+                </div>
+
+                <div class="modal-field">
+                    <label for="food-unit">Default unit</label>
+                    <select id="food-unit" name="default_unit" required>
+                        <option value="">Select a unit</option>
+                        <option value="kg">Kilogram (kg)</option>
+                        <option value="g">Gram (g)</option>
+                        <option value="l">Litre (l)</option>
+                        <option value="ml">Millilitre (ml)</option>
+                        <option value="piece">Piece</option>
+                        <option value="bunch">Bunch</option>
+                        <option value="packet">Packet</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+                    <button type="submit" class="btn-solid">Add Food</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add to Pantry modal retained for compatibility with library.js -->
+    <div class="modal-overlay" id="add-to-pantry-modal" aria-hidden="true">
+        <div class="modal-panel" role="dialog" aria-modal="true"
+             aria-labelledby="add-to-pantry-title">
+            <div class="modal-header">
+                <div>
+                    <h2 id="add-to-pantry-title">Add to pantry</h2>
+                    <p>Tell us how much you have at home.</p>
+                </div>
+                <button type="button" class="icon-btn modal-close"
+                        data-close-modal aria-label="Close">×</button>
+            </div>
+
+            <form id="add-to-pantry-form" method="post" action="{% url 'pantry:add' %}">
+                {% csrf_token %}
+                <input type="hidden" name="food_id" id="atp-food-id" value="">
+
+                <div class="modal-field-row">
+                    <div class="modal-field">
+                        <label for="atp-quantity">Quantity</label>
+                        <input type="number" id="atp-quantity" name="quantity"
+                               min="0.01" step="0.01" required>
+                    </div>
+
+                    <div class="modal-field">
+                        <label for="atp-unit">Unit</label>
+                        <select id="atp-unit" name="unit">
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="l">l</option>
+                            <option value="ml">ml</option>
+                            <option value="piece">piece</option>
+                            <option value="bunch">bunch</option>
+                            <option value="packet">packet</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-field">
+                    <label for="atp-storage">Storage location</label>
+                    <select id="atp-storage" name="storage">
+                        <option value="pantry">Pantry</option>
+                        <option value="refrigerator">Refrigerator</option>
+                        <option value="freezer">Freezer</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="modal-field-row">
+                    <div class="modal-field">
+                        <label for="atp-acquired">Purchase date</label>
+                        <input type="date" id="atp-acquired" name="acquired_at">
+                    </div>
+                    <div class="modal-field">
+                        <label for="atp-expires">Expiry date</label>
+                        <input type="date" id="atp-expires" name="expires_at">
+                    </div>
+                </div>
+
+                <div class="modal-field">
+                    <label for="atp-min">Minimum quantity</label>
+                    <input type="number" id="atp-min" name="minimum_quantity"
+                           min="0" step="0.01" placeholder="0.5">
+                    <p class="hint">We'll flag this item as running low below this amount.</p>
+                </div>
+
+                <div class="modal-field">
+                    <label for="atp-notes">Notes (optional)</label>
+                    <textarea id="atp-notes" name="notes" placeholder="Opened packet"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" data-close-modal>Cancel</button>
+                    <button type="submit" class="btn-solid">Add to pantry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/library.js' %}"></script>
+    <script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>

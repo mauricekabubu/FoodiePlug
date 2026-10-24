@@ -1,0 +1,415 @@
+/* =====================================================================
+FoodiePlug — Premium Toast Notifications
+Django messages
+===================================================================== */
+
+:root {
+--toast-success: #16794B;
+--toast-success-tint: #E9F3EC;
+--toast-success-soft: #F4FAF6;
+
+--toast-error: #C0392B;
+--toast-error-tint: #FBEAE8;
+--toast-error-soft: #FFF7F6;
+
+--toast-warning: #C96F14;
+--toast-warning-tint: #FCEEDC;
+--toast-warning-soft: #FFFAF3;
+
+--toast-info: #2F6690;
+--toast-info-tint: #E8F0F5;
+--toast-info-soft: #F6FAFC;
+
+--toast-text: #2B2620;
+--toast-muted: #8A7F72;
+--toast-border: #E9E1D3;
+}
+
+/* =====================================================================
+CONTAINER
+===================================================================== */
+
+.toast-container {
+position: fixed;
+top: calc(1rem + env(safe-area-inset-top, 0px));
+right: 1rem;
+left: 1rem;
+
+z-index: 9999;
+
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+gap: 0.7rem;
+
+pointer-events: none;
+}
+
+@media (min-width: 640px) {
+.toast-container {
+left: auto;
+width: 400px;
+}
+}
+
+/* =====================================================================
+TOAST
+===================================================================== */
+
+.foodie-toast {
+position: relative;
+
+width: 100%;
+max-width: 400px;
+
+display: flex;
+align-items: flex-start;
+gap: 0.75rem;
+
+background: #FFFFFF;
+
+border: 1px solid var(--toast-border);
+border-left: 4px solid var(--toast-info);
+
+border-radius: 16px;
+
+padding: 0.95rem 2.7rem 1rem 0.9rem;
+
+box-shadow:
+    0 3px 6px rgba(43, 38, 32, 0.05),
+    0 14px 35px rgba(43, 38, 32, 0.12);
+
+overflow: hidden;
+
+pointer-events: auto;
+
+animation: toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =====================================================================
+TYPE VARIANTS
+===================================================================== */
+
+.foodie-toast.success {
+border-left-color: var(--toast-success);
+background: linear-gradient(
+135deg,
+#FFFFFF 0%,
+var(--toast-success-soft) 100%
+);
+}
+
+.foodie-toast.error {
+border-left-color: var(--toast-error);
+background: linear-gradient(
+135deg,
+#FFFFFF 0%,
+var(--toast-error-soft) 100%
+);
+}
+
+.foodie-toast.warning {
+border-left-color: var(--toast-warning);
+background: linear-gradient(
+135deg,
+#FFFFFF 0%,
+var(--toast-warning-soft) 100%
+);
+}
+
+.foodie-toast.info,
+.foodie-toast.debug {
+border-left-color: var(--toast-info);
+background: linear-gradient(
+135deg,
+#FFFFFF 0%,
+var(--toast-info-soft) 100%
+);
+}
+
+/* =====================================================================
+ICON
+===================================================================== */
+
+.toast-icon {
+flex-shrink: 0;
+
+width: 38px;
+height: 38px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 11px;
+
+color: var(--toast-info);
+background: var(--toast-info-tint);
+
+box-shadow:
+    inset 0 0 0 1px rgba(47, 102, 144, 0.08);
+}
+
+.foodie-toast.success .toast-icon {
+color: var(--toast-success);
+background: var(--toast-success-tint);
+
+box-shadow:
+    inset 0 0 0 1px rgba(22, 121, 75, 0.10);
+}
+
+.foodie-toast.error .toast-icon {
+color: var(--toast-error);
+background: var(--toast-error-tint);
+
+box-shadow:
+    inset 0 0 0 1px rgba(192, 57, 43, 0.10);
+}
+
+.foodie-toast.warning .toast-icon {
+color: var(--toast-warning);
+background: var(--toast-warning-tint);
+
+box-shadow:
+    inset 0 0 0 1px rgba(201, 111, 20, 0.10);
+}
+
+.toast-icon svg {
+width: 19px;
+height: 19px;
+stroke-width: 2;
+}
+
+/* =====================================================================
+CONTENT
+===================================================================== */
+
+.toast-content {
+flex: 1;
+min-width: 0;
+padding-top: 0.05rem;
+}
+
+/* Optional title */
+
+.toast-title {
+display: block;
+
+margin-bottom: 0.15rem;
+
+font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+
+font-size: 0.88rem;
+font-weight: 700;
+line-height: 1.3;
+
+color: var(--toast-text);
+}
+
+/* Message */
+
+.toast-message {
+display: block;
+
+font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+
+font-size: 0.84rem;
+font-weight: 400;
+
+line-height: 1.5;
+
+color: #62584E;
+
+overflow-wrap: anywhere;
+}
+
+/* =====================================================================
+CLOSE BUTTON
+===================================================================== */
+
+.toast-close {
+position: absolute;
+
+top: 0.55rem;
+right: 0.55rem;
+
+width: 28px;
+height: 28px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+background: transparent;
+border: none;
+border-radius: 8px;
+
+color: var(--toast-muted);
+
+cursor: pointer;
+
+transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.toast-close:hover {
+background: #F1EBDF;
+color: #55493E;
+transform: scale(1.04);
+}
+
+.toast-close:active {
+transform: scale(0.94);
+}
+
+.toast-close:focus-visible {
+outline: 2px solid #16794B;
+outline-offset: 2px;
+}
+
+.toast-close svg {
+width: 15px;
+height: 15px;
+}
+
+/* =====================================================================
+PROGRESS BAR
+===================================================================== */
+
+.toast-progress {
+position: absolute;
+
+left: 0;
+bottom: 0;
+
+height: 3px;
+width: 100%;
+
+background: currentColor;
+
+color: var(--toast-info);
+
+opacity: 0.45;
+
+transform-origin: left;
+
+animation: toast-progress-shrink 5s linear forwards;
+}
+
+.foodie-toast.success .toast-progress {
+color: var(--toast-success);
+}
+
+.foodie-toast.error .toast-progress {
+color: var(--toast-error);
+}
+
+.foodie-toast.warning .toast-progress {
+color: var(--toast-warning);
+}
+
+.foodie-toast.info .toast-progress,
+.foodie-toast.debug .toast-progress {
+color: var(--toast-info);
+}
+
+/* =====================================================================
+HOVER / PAUSE
+===================================================================== */
+
+.foodie-toast:hover .toast-progress,
+.foodie-toast.is-paused .toast-progress {
+animation-play-state: paused;
+}
+
+/* =====================================================================
+EXIT ANIMATION
+===================================================================== */
+
+.foodie-toast.is-leaving {
+animation: toast-out 0.22s ease forwards;
+}
+
+/* =====================================================================
+ANIMATIONS
+===================================================================== */
+
+@keyframes toast-in {
+from {
+opacity: 0;
+transform: translateY(-12px) translateX(8px) scale(0.97);
+}
+
+to {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1);
+}
+}
+
+@keyframes toast-out {
+from {
+opacity: 1;
+transform: translateX(0);
+max-height: 200px;
+margin-bottom: 0;
+}
+
+to {
+    opacity: 0;
+    transform: translateX(18px);
+    max-height: 0;
+    margin-bottom: -0.7rem;
+}
+}
+
+@keyframes toast-progress-shrink {
+from {
+transform: scaleX(1);
+}
+
+to {
+    transform: scaleX(0);
+}
+}
+
+/* =====================================================================
+MOBILE
+===================================================================== */
+
+@media (max-width: 639px) {
+.toast-container {
+top: calc(0.75rem + env(safe-area-inset-top, 0px));
+right: 0.75rem;
+left: 0.75rem;
+}
+
+.foodie-toast {
+    max-width: none;
+    border-radius: 14px;
+}
+}
+
+/* =====================================================================
+REDUCED MOTION
+===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+.foodie-toast,
+.foodie-toast.is-leaving,
+.toast-progress {
+animation: none;
+}
+}
+

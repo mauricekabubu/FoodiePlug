@@ -1,0 +1,588 @@
+{% extends "public_base.html" %}
+{% load static %}
+
+
+{% block title %}FoodiePlug | Kenyan Meal Planning & Food Budgeting{% endblock %}
+
+{% block meta_description %}Plan affordable Kenyan meals, manage your food budget, organise groceries and reduce food waste with FoodiePlug. Make everyday food decisions simpler.{% endblock %}
+
+{% block og_title %}FoodiePlug — Eat Well. Spend Wisely. Plan Smarter.{% endblock %}
+
+{% block og_description %}Discover a smarter way to plan Kenyan meals, manage groceries and make your food budget go further.{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+<link rel="stylesheet" href="{% static 'css/features.css' %}">
+<link rel="stylesheet" href="{% static 'css/how-it-works.css' %}">
+
+
+<meta name="keywords" content="Kenyan meal planning, food budgeting Kenya, affordable Kenyan meals, grocery planning, Kenyan foods, meal planner">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "FoodiePlug",
+  "description": "A food planning platform for affordable meals, grocery organisation and food budgeting.",
+  "inLanguage": "en-KE"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<section class="home-hero">
+    <div class="hero-copy">
+        <span class="eyebrow">
+            MADE FOR EVERYDAY FOOD DECISIONS
+        </span>
+
+        <h1>
+            Eat well.<br>
+            Spend wisely.<br>
+            <span>Plan smarter.</span>
+        </h1>
+
+        <p class="hero-description">
+            From ugali and sukuma wiki to chapati and pilau,
+            make meal planning, grocery shopping and managing
+            your food budget a little easier.
+        </p>
+
+        <div class="hero-actions">
+            <a href="{% url 'register' %}" class="button">
+                Start planning for free
+                <span aria-hidden="true">→</span>
+            </a>
+
+            <a href="#features" class="text-link">
+                Explore FoodiePlug
+            </a>
+        </div>
+
+        <p class="hero-note">
+            Your food. Your budget. Your way.
+        </p>
+    </div>
+
+    <div class="hero-visual">
+        <div class="hero-image-main">
+            <img
+                src="{% static 'images/ugali.jpg' %}"
+                alt="A Kenyan-style ugali meal"
+                fetchpriority="high"
+                width="800"
+                height="800"
+            >
+        </div>
+
+        <div class="floating-food-card">
+            <img
+                src="{% static 'images/githeri.jpg' %}"
+                alt="Traditional Kenyan githeri"
+                loading="lazy"
+                width="120"
+                height="120"
+            >
+            <div>
+                <strong>Everyday favourites</strong>
+                <span>Meals that feel like home</span>
+            </div>
+        </div>
+
+        <div class="hero-decoration" aria-hidden="true">✳</div>
+    </div>
+</section>
+
+
+
+<section class="features-section" id="features" aria-labelledby="features-title">
+    <div class="features-container">
+        <header class="features-heading">
+            <span class="section-eyebrow">THE FOODIEPLUG EXPERIENCE</span>
+            <h2 id="features-title">
+                Good food decisions start <span>with a plan.</span>
+            </h2>
+            <p>
+                From deciding what to cook to keeping your food budget in check,
+                FoodiePlug brings your everyday food planning together in one place.
+            </p>
+        </header>
+
+        <div class="features-grid">
+            <article class="feature-card">
+                <img src="{% static 'images/meal-plan.jpg' %}"
+                     alt="Ugali served as part of a familiar Kenyan meal"
+                     loading="lazy">
+                <div class="feature-content">
+                    <span class="feature-number">01 / PLAN</span>
+                    <h3>Kenyan meal planning</h3>
+                    <p>
+                        Organise breakfast, lunch and supper around familiar
+                        Kenyan meals, your schedule and available ingredients.
+                    </p>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <img src="{% static 'images/food_budget.jpg' %}"
+                     alt="Groceries and ingredients for everyday meal preparation"
+                     loading="lazy">
+                <div class="feature-content">
+                    <span class="feature-number">02 / BUDGET</span>
+                    <h3>Food budget management</h3>
+                    <p>
+                        Keep food spending organised and make more informed
+                        decisions about the cost of everyday meals.
+                    </p>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <img src="{% static 'images/food_lib.jpg' %}"
+                     alt="Githeri, a Kenyan dish made with maize and beans"
+                     loading="lazy">
+                <div class="feature-content">
+                    <span class="feature-number">03 / DISCOVER</span>
+                    <h3>Kenyan food library</h3>
+                    <p>
+                        Explore familiar foods, ingredients and meal ideas
+                        to make deciding what to cook easier.
+                    </p>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <img src="{% static 'images/shopping.jpg' %}"
+                     alt="Chapati prepared for a home-cooked meal"
+                     loading="lazy">
+                <div class="feature-content">
+                    <span class="feature-number">04 / ORGANISE</span>
+                    <h3>Smart shopping lists</h3>
+                    <p>
+                        Keep your grocery needs organised and plan shopping
+                        around the foods and ingredients you need.
+                    </p>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <img src="{% static 'images/pantry.jpg' %}"
+                     alt="Food ingredients organised for pantry management"
+                     loading="lazy">
+                <div class="feature-content">
+                    <span class="feature-number">05 / TRACK</span>
+                    <h3>Pantry management</h3>
+                    <p>
+                        Track pantry items, spot low-stock ingredients and
+                        monitor foods approaching their expiry dates.
+                    </p>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <img src="{% static 'images/ai.jpg' %}"
+                     alt="Kenyan-style pilau served as a meal"
+                     loading="lazy">
+                <div class="feature-content">
+                    <span class="feature-number">06 / GET HELP</span>
+                    <h3>Your AI food assistant</h3>
+                    <p>
+                        Get help thinking through meal ideas, ingredients
+                        and everyday food decisions with Kenyan context in mind.
+                    </p>
+                </div>
+            </article>
+        </div>
+
+        <div class="features-cta">
+            <div>
+                <h3>Make your next meal easier to plan.</h3>
+                <p>Bring your meals, groceries and food budget together.</p>
+            </div>
+            <a class="features-cta-button" href="{% url 'register' %}">
+                Get started <span aria-hidden="true">→</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="how-it-works" id="how-it-works" aria-labelledby="how-title">
+    <div class="how-container">
+
+        <header class="how-heading">
+            <span class="how-eyebrow">SIMPLE BY DESIGN</span>
+            <h2 id="how-title">
+                From “what's for supper?” to <span>I've got a plan.</span>
+            </h2>
+            <p>
+                FoodiePlug helps you organise everyday food decisions
+                without making meal planning another chore.
+            </p>
+        </header>
+
+        <div class="how-steps">
+
+            <article class="how-step">
+                <div class="how-step-top">
+                    <span class="how-step-number">01</span>
+                    <span class="how-step-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="8" r="4"
+                                    stroke="currentColor" stroke-width="1.7"/>
+                            <path d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2"
+                                  stroke="currentColor" stroke-width="1.7"
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                </div>
+                <h3>Set up your food profile</h3>
+                <p>
+                    Create your account and personalise your food-planning
+                    experience around your preferences and needs.
+                </p>
+                <span class="how-step-label">MAKE IT YOURS</span>
+            </article>
+
+            <article class="how-step">
+                <div class="how-step-top">
+                    <span class="how-step-number">02</span>
+                    <span class="how-step-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="4" width="18" height="17" rx="2"
+                                  stroke="currentColor" stroke-width="1.7"/>
+                            <path d="M8 2v4M16 2v4M3 9h18M7 13h3m4 0h3M7 17h3"
+                                  stroke="currentColor" stroke-width="1.7"
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                </div>
+                <h3>Plan your meals</h3>
+                <p>
+                    Organise breakfast, lunch and supper with meal ideas
+                    that make sense for your routine and familiar foods.
+                </p>
+                <span class="how-step-label">KNOW WHAT TO COOK</span>
+            </article>
+
+            <article class="how-step">
+                <div class="how-step-top">
+                    <span class="how-step-number">03</span>
+                    <span class="how-step-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6"
+                                  stroke="currentColor" stroke-width="1.7"
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="10" cy="21" r="1.3"
+                                    fill="currentColor"/>
+                            <circle cx="18" cy="21" r="1.3"
+                                    fill="currentColor"/>
+                        </svg>
+                    </span>
+                </div>
+                <h3>Organise your groceries</h3>
+                <p>
+                    Keep track of pantry ingredients and organise shopping
+                    lists around what you have and what you need.
+                </p>
+                <span class="how-step-label">SHOP WITH A PLAN</span>
+            </article>
+
+            <article class="how-step">
+                <div class="how-step-top">
+                    <span class="how-step-number">04</span>
+                    <span class="how-step-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M3 3v18h18M7 15l4-4 3 3 6-7"
+                                  stroke="currentColor" stroke-width="1.7"
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 7h4v4"
+                                  stroke="currentColor" stroke-width="1.7"
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </div>
+                <h3>Stay on top of your budget</h3>
+                <p>
+                    Track food spending, review your food plans and use
+                    the available insights to make more informed choices.
+                </p>
+                <span class="how-step-label">MAKE YOUR BUDGET WORK</span>
+            </article>
+
+        </div>
+
+        <div class="how-bottom">
+            <div class="how-bottom-copy">
+                <span class="how-bottom-dot" aria-hidden="true"></span>
+                <p>
+                    <strong>One place for your food decisions.</strong>
+                    Less guesswork. More organised everyday meals.
+                </p>
+            </div>
+            <a class="how-cta" href="{% url 'register' %}">
+                Start planning <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="trust-strip" aria-label="FoodiePlug benefits">
+    <span>Plan your meals</span>
+    <span>Organise your groceries</span>
+    <span>Be intentional with your budget</span>
+</section>
+
+<section class="section home-intro" id="how-it-works">
+    <div class="section-heading">
+        <span class="eyebrow">LESS GUESSWORK, MORE GOOD FOOD</span>
+
+        <h2>Make your food decisions work for you.</h2>
+
+        <p>
+            Deciding what to cook, what to buy and how much to spend
+            shouldn't feel like a daily puzzle. FoodiePlug brings
+            your food planning into one place.
+        </p>
+    </div>
+
+    <div class="steps-grid">
+        <article class="step-card">
+            <span class="step-number">01</span>
+            <h3>Plan what to eat</h3>
+            <p>
+                Organise meals around your routine, food preferences
+                and the ingredients you have available.
+            </p>
+        </article>
+
+        <article class="step-card">
+            <span class="step-number">02</span>
+            <h3>Know what you need</h3>
+            <p>
+                Keep track of pantry items and organise your shopping
+                list before your next trip to the market or shop.
+            </p>
+        </article>
+
+        <article class="step-card">
+            <span class="step-number">03</span>
+            <h3>Make a budget go further</h3>
+            <p>
+                Think ahead about meal costs and everyday food spending
+                so you can make more informed choices.
+            </p>
+        </article>
+    </div>
+</section>
+
+<section class="section features-section" id="features">
+    <div class="section-heading">
+        <span class="eyebrow">YOUR FOOD TOOLKIT</span>
+
+        <h2>Everything starts with a better plan.</h2>
+
+        <p>
+            Practical tools for the everyday work of feeding yourself
+            and your household.
+        </p>
+    </div>
+
+    <div class="features-grid">
+        <article class="feature-card feature-meals">
+            <div class="feature-image">
+                <img
+                    src="{% static 'images/chapati.jpg' %}"
+                    alt="Fresh chapati, a familiar Kenyan meal favourite"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                >
+            </div>
+
+            <div class="feature-copy">
+                <span class="feature-label">01 · MEAL PLANNING</span>
+                <h3>Know what's cooking.</h3>
+                <p>
+                    Organise your meals and make it easier to decide
+                    what to prepare throughout the week.
+                </p>
+            </div>
+        </article>
+
+        <article class="feature-card feature-budget">
+            <div class="feature-image">
+                <img
+                    src="{% static 'images/groceries.jpg' %}"
+                    alt="Groceries ready for meal preparation and planning"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                >
+            </div>
+
+            <div class="feature-copy">
+                <span class="feature-label">02 · FOOD BUDGET</span>
+                <h3>Give every shilling a thought.</h3>
+                <p>
+                    Plan food spending with your real needs in mind
+                    and make more deliberate shopping decisions.
+                </p>
+            </div>
+        </article>
+
+        <article class="feature-card feature-pantry">
+            <div class="feature-image">
+                <img
+                    src="{% static 'images/rice-beans.jpg' %}"
+                    alt="Rice and beans prepared for an everyday meal"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                >
+            </div>
+
+            <div class="feature-copy">
+                <span class="feature-label">03 · PANTRY & SHOPPING</span>
+                <h3>Make what you have count.</h3>
+                <p>
+                    Keep your ingredients and shopping needs organised
+                    to help you plan your next meal.
+                </p>
+            </div>
+        </article>
+
+        <article class="feature-card feature-ai">
+            <div class="feature-image">
+                <img
+                    src="{% static 'images/pilau.jpg' %}"
+                    alt="A serving of Kenyan-style pilau"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                >
+            </div>
+
+            <div class="feature-copy">
+                <span class="feature-label">04 · FOODIEPLUG AI</span>
+                <h3>Get help with food decisions.</h3>
+                <p>
+                    Explore food ideas and ask questions with an
+                    assistant designed around your food-planning needs.
+                </p>
+            </div>
+        </article>
+    </div>
+</section>
+
+<section class="kenyan-section">
+    <div class="kenyan-copy">
+        <span class="eyebrow">ROOTED IN EVERYDAY FOOD</span>
+
+        <h2>Food planning that feels closer to home.</h2>
+
+        <p>
+            Kenyan food is wonderfully varied. From githeri and
+            sukuma wiki to chapati, beans, rice and ugali, everyday
+            meals depend on your tastes, ingredients, household
+            and budget.
+        </p>
+
+        <p>
+            FoodiePlug aims to make planning around those everyday
+            realities simpler, without telling you what you must eat.
+        </p>
+
+        <a href="#faq" class="button button-outline">
+            Learn more
+        </a>
+    </div>
+
+    <div class="kenyan-image">
+        <img
+            src="{% static 'images/githeri.jpg' %}"
+            alt="Githeri, a popular Kenyan dish made with maize and beans"
+            loading="lazy"
+            width="800"
+            height="800"
+        >
+    </div>
+</section>
+
+<section class="section faq-section" id="faq">
+    <div class="section-heading">
+        <span class="eyebrow">COMMON QUESTIONS</span>
+        <h2>Getting started with FoodiePlug.</h2>
+    </div>
+
+    <div class="faq-list">
+        <details>
+            <summary>What is FoodiePlug?</summary>
+            <p>
+                FoodiePlug is a food-planning platform designed to
+                help people organise meals, manage pantry items,
+                plan shopping and make more informed food-budget
+                decisions.
+            </p>
+        </details>
+
+        <details>
+            <summary>Can FoodiePlug help me plan affordable meals in Kenya?</summary>
+            <p>
+                FoodiePlug is designed with everyday Kenyan food
+                habits in mind. You can use its planning tools to
+                organise meals and groceries around your needs.
+                Actual food costs vary by location, season and shop.
+            </p>
+        </details>
+
+        <details>
+            <summary>Can I organise my groceries and pantry?</summary>
+            <p>
+                Yes. FoodiePlug includes pantry and shopping
+                functionality to help you organise ingredients
+                and keep track of what you need to buy.
+            </p>
+        </details>
+
+        <details>
+            <summary>Does FoodiePlug include an AI assistant?</summary>
+            <p>
+                FoodiePlug includes an AI assistant intended to
+                help with food-related questions and planning.
+                Its responses should be treated as guidance,
+                not a guarantee of prices or nutritional outcomes.
+            </p>
+        </details>
+
+        <details>
+            <summary>How do I get started?</summary>
+            <p>
+                Create an account to get started with FoodiePlug
+                and explore the tools available to you.
+            </p>
+        </details>
+    </div>
+</section>
+
+<section class="final-cta">
+    <span class="eyebrow">A LITTLE PLANNING GOES A LONG WAY</span>
+
+    <h2>Make your next food decision a smarter one.</h2>
+
+    <p>
+        Start organising your meals, groceries and food budget
+        with FoodiePlug.
+    </p>
+
+    <a href="{% url 'register' %}" class="button button-light">
+        Get started
+        <span aria-hidden="true">→</span>
+    </a>
+</section>
+
+{% endblock %}

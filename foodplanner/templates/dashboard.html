@@ -1,0 +1,631 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/toasts.css' %}">
+
+<script>
+  // Set theme before first paint to avoid a light/dark flash.
+  (function () {
+    try {
+      var pref = localStorage.getItem('foodieplug-theme') || 'system';
+      var resolved = pref === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : pref;
+      document.documentElement.setAttribute('data-theme', resolved);
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+{# Logout is a POST (works on every Django version, required on 5+). Falls back to "#" if no 'logout' route exists. #}
+{% url 'logout' as logout_url %}
+
+<!-- ============ MOBILE TOPBAR ============ -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+
+  <div class="mobile-topbar-actions">
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Notifications" aria-haspopup="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        {% if unread_notification_count %}<span class="dot" aria-hidden="true"></span>{% endif %}
+      </button>
+
+      <div class="dropdown-panel" role="menu">
+        <h4>Notifications</h4>
+        {% for n in notifications %}
+        <div class="notif-item {% if n.is_unread %}is-unread{% endif %}">
+          <span class="n-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          <div><p>{{ n.text }}</p><time>{{ n.time_display }}</time></div>
+        </div>
+        {% empty %}
+        <p style="font-size:0.85rem;color:var(--muted);padding:0.5rem;">You're all caught up.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button type="button" class="icon-btn" aria-label="Account menu" aria-haspopup="true">
+        <span class="avatar" style="width:30px;height:30px;font-size:0.72rem;">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+      </button>
+
+      <div class="dropdown-panel" role="menu">
+        <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+        <a href="{% url 'settings' %}" class="profile-menu-item">Settings</a>
+        <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+        <div class="profile-menu-divider"></div>
+        <form method="post" action="{{ logout_url|default:'logout' }}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="profile-menu-item" style="width:100%;background:none;border:0;text-align:left;font:inherit;cursor:pointer;">Log out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" role="img" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-content">
+
+    <div class="page-header">
+      <div>
+        <h1>Good {{ time_of_day|default:"evening" }}, {{ user.first_name|default:"there" }}.</h1>
+        <p>Here's what's happening with your food plan today.</p>
+      </div>
+
+      <div class="page-header-actions">
+        <div class="dropdown">
+          <button type="button" class="icon-btn" aria-label="Notifications" aria-haspopup="true">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            {% if unread_notification_count %}<span class="dot" aria-hidden="true"></span>{% endif %}
+          </button>
+
+          <div class="dropdown-panel" role="menu">
+            <h4>Notifications</h4>
+
+            {% for n in notifications %}
+            <div class="notif-item {% if n.is_unread %}is-unread{% endif %}">
+              <span class="n-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+              <div><p>{{ n.text }}</p><time>{{ n.time_display }}</time></div>
+            </div>
+            {% empty %}
+            <p style="font-size:0.85rem;color:var(--muted);padding:0.5rem;">You're all caught up.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button type="button" class="icon-btn" aria-label="Account menu" aria-haspopup="true">
+            <span class="avatar" style="width:30px;height:30px;font-size:0.72rem;">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+          </button>
+
+          <div class="dropdown-panel" role="menu">
+            <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+            <a href="{% url 'settings' %}" class="profile-menu-item">Settings</a>
+            <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+            <div class="profile-menu-divider"></div>
+            <form method="post" action="{{ logout_url|default:'#' }}" style="margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="profile-menu-item" style="width:100%;background:none;border:0;text-align:left;font:inherit;cursor:pointer;">Log out</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+
+      <!-- ---- 1. Today's plan (mobile priority #1) ---- -->
+      <section class="card col-8">
+        <div class="card-header">
+          <h2>Today's plan</h2>
+          <a href="{% url 'meals:timetable' %}" class="card-link">View timetable →</a>
+        </div>
+
+        {% if today_meals %}
+        <div class="progress-row">
+          <div class="progress-bar"><span style="width: {{ meals_planned_count|default:0 }}0%;"></span></div>
+          <span class="count">{{ meals_planned_count }} / {{ meals_total_count }} meals planned</span>
+        </div>
+
+        <div class="meal-list">
+          {% for meal in today_meals %}
+          <div class="meal-card {% if meal.is_done %}is-done{% endif %}">
+            <div class="meal-thumb"><img src="{{ meal.image_url }}" alt="{{ meal.name }}" loading="lazy"></div>
+
+            <div class="meal-info">
+              <p class="slot">{{ meal.slot }}</p>
+              <p class="name">{{ meal.name }}</p>
+              <p class="meta">{{ meal.time }} · KES {{ meal.cost }}</p>
+            </div>
+
+            <span class="meal-check" aria-label="{% if meal.is_done %}Completed{% else %}Mark as done{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="spend-strip" style="margin-top:1.1rem;">
+          <div><p class="label">Planned today</p><p class="value">KES {{ today_planned_spend }}</p></div>
+          <div><p class="label">Spent</p><p class="value">KES {{ today_actual_spend }}</p></div>
+          <div><p class="label">Remaining</p><p class="value remaining">KES {{ today_remaining }}</p></div>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+          <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>No meals planned</h3>
+          <p>Your week is still waiting to be planned. Let's create meals that fit your budget and what you already have.</p>
+          <a href="{% url 'meals:timetable' %}" class="btn-solid">Plan my week</a>
+        </div>
+
+        {% endif %}
+      </section>
+
+
+      <!-- ---- 2. Budget (mobile priority #2) ---- -->
+      <section class="card col-4">
+        <div class="card-header">
+          <h2>Food budget</h2>
+          <a href="{% url 'budgets:dashboard' %}" class="card-link">View budget →</a>
+        </div>
+
+        {% if budget %}
+        <p class="budget-amount">KES {{ budget.monthly_amount }} <span class="period">monthly budget</span></p>
+
+        <div class="budget-progress {% if budget.is_over %}is-over{% elif budget.is_warning %}is-warning{% endif %}">
+          <div class="bar"><span style="width: {{ budget.percent_spent }}%;"></span></div>
+
+          <div class="budget-figures">
+            <span><strong>KES {{ budget.spent }}</strong> spent</span>
+            <span><strong>KES {{ budget.remaining }}</strong> left</span>
+          </div>
+        </div>
+
+        <p style="font-size:0.82rem;color:var(--muted);margin:0.6rem 0 0;">{{ budget.days_remaining }} days remaining this month</p>
+
+        {% if budget.is_over %}
+        <div class="budget-note" style="color:var(--error);background:var(--error-tint);">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+          You've gone over your budget this month.
+        </div>
+
+        {% elif budget.is_warning %}
+
+        <div class="budget-note">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+          You're getting close to your monthly limit.
+        </div>
+        {% endif %}
+
+        {% else %}
+
+        <div class="empty-state">
+          <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h3>No budget set</h3>
+          <p>Start by setting a food budget that works for you.</p>
+          <a href="{% url 'budgets:create' %}" class="btn-solid">Set a budget</a>
+        </div>
+
+        {% endif %}
+      </section>
+
+
+      <!-- ---- 3. Shopping (mobile priority #3) ---- -->
+      <section class="card col-4">
+        <div class="card-header">
+          <h2>Shopping for this week</h2>
+          <a href="{% url 'shopping_lists' %}" class="card-link">View list →</a>
+        </div>
+
+        {% if shopping_items %}
+        <p style="font-size:0.85rem;color:var(--muted);margin:-0.4rem 0 0.8rem;">{{ shopping_item_count }} items</p>
+
+        <div class="shop-list">
+          {% for item in shopping_items %}
+          <div class="shop-row">
+            <input type="checkbox" id="shop-{{ item.id }}" {% if item.checked %}checked{% endif %}>
+            <label for="shop-{{ item.id }}">{{ item.name }}</label>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="shop-total">
+          <span>Estimated total</span>
+          <strong>KES {{ shopping_total_estimate }}</strong>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+          <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h3>Nothing on your list yet</h3>
+          <p>Add ingredients manually or let FoodiePlug build a list from your meal plan.</p>
+          <a href="{% url 'create_list' %}" class="btn-solid">Create shopping list</a>
+        </div>
+
+        {% endif %}
+      </section>
+
+
+      <!-- ---- 4. Pantry (mobile priority #4) ---- -->
+      <section class="card col-4">
+        <div class="card-header">
+          <h2>Pantry</h2>
+          <a href="{% url 'pantry:pantry' %}" class="card-link">View pantry →</a>
+        </div>
+
+        {% if pantry_items %}
+
+        <div class="pantry-list">
+          {% for item in pantry_items %}
+          <div class="pantry-row">
+            <span class="item">{{ item.name }}</span>
+            <span class="qty {% if item.is_low %}is-low{% endif %}">{{ item.quantity }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <a href="{% url 'pantry:add' %}" class="card-link" style="display:inline-block;margin-top:0.9rem;">+ Add item</a>
+
+        {% else %}
+
+        <div class="empty-state">
+          <div class="e-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Your pantry is empty</h3>
+          <p>Add what you already have at home so FoodiePlug can make smarter recommendations.</p>
+          <a href="{% url 'pantry:add' %}" class="btn-solid">Add pantry item</a>
+        </div>
+
+        {% endif %}
+      </section>
+
+
+      <!-- ---- 5. AI Assistant (mobile priority #5) ---- -->
+      <section class="card ai-card col-4">
+        <div class="card-header">
+          <h2>Ask FoodiePlug</h2>
+        </div>
+
+        <p style="font-size:0.86rem;color:var(--muted);margin:-0.4rem 0 0.9rem;">"I have rice, beans and tomatoes. What can I cook tonight?"</p>
+
+        <form id="ai-prompt-form">
+          <div class="ai-prompt-form">
+            <textarea id="ai-prompt-input" placeholder="Ask me about meals, shopping, budgets or your pantry..."></textarea>
+
+            <button type="submit" id="ai-submit-btn">
+              <span class="btn-text">Ask FoodiePlug</span>
+              <span class="spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+
+        <div class="ai-suggestions">
+          <button type="button" class="ai-chip">What should I cook tonight?</button>
+          <button type="button" class="ai-chip">Help me stay within my budget.</button>
+          <button type="button" class="ai-chip">What can I make with my pantry?</button>
+          <button type="button" class="ai-chip">Create my shopping list.</button>
+        </div>
+
+        <p class="ai-reply" id="ai-reply" role="status"></p>
+      </section>
+
+
+      <!-- ---- Weekly overview ---- -->
+      <section class="card col-12">
+        <div class="card-header">
+          <h2>This week's food plan</h2>
+          <a href="{% url 'meals:timetable' %}" class="card-link">Open meal planner →</a>
+        </div>
+
+        <div class="week-table">
+          {% for day in week_days %}
+          <div class="week-day {% if day.is_today %}is-today{% endif %}" tabindex="0" role="button">
+            <p class="day-label">{{ day.label }}</p>
+            {% for m in day.meals %}<p class="meal-line">{{ m }}</p>{% endfor %}
+            <p class="day-cost">KES {{ day.cost }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+
+      <!-- ---- Quick actions ---- -->
+      <section class="col-12">
+
+        <div class="card-header" style="margin-bottom:0.8rem;">
+          <h2>Quick actions</h2>
+        </div>
+
+        <div class="quick-actions-row">
+
+          <a href="{% url 'meals:schedule_meal' %}" class="quick-action-btn">
+            <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/></svg></span>
+            Plan a meal
+          </a>
+
+          <a href="{% url 'pantry:add' %}" class="quick-action-btn">
+            <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            Add pantry item
+          </a>
+
+          <a href="{% url 'create_list' %}" class="quick-action-btn">
+            <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+            Create shopping list
+          </a>
+
+          {# Adding an expense needs a budget id; with no budget yet, send the user to create one first. #}
+          <a href="{% if budget.id %}{% url 'budgets:add_expense' budget.id %}{% else %}{% url 'budgets:create' %}{% endif %}" class="quick-action-btn">
+            <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/></svg></span>
+            Add food expense
+          </a>
+
+          <a href="{% url 'ai:page' %}" class="quick-action-btn">
+            <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+            Ask AI
+          </a>
+
+          <a href="{% url 'meals:timetable' %}" class="quick-action-btn">
+            <span class="qa-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+            View timetable
+          </a>
+
+        </div>
+      </section>
+
+      {% if show_gemini_key_reminder %}
+      <aside
+        class="ai-key-reminder"
+        id="ai-key-reminder"
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby="ai-key-reminder-title"
+        aria-describedby="ai-key-reminder-description"
+        data-dismiss-url="{% url 'gemini_reminder_dismiss' %}"
+        hidden
+      >
+        <div class="ai-key-reminder-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="ai-key-reminder-copy">
+          <h2 id="ai-key-reminder-title">Set up your AI Assistant</h2>
+          <p id="ai-key-reminder-description">
+            Get personalized meal-planning help, food suggestions, and smarter kitchen guidance by connecting your Gemini API key.
+          </p>
+          <div class="ai-key-reminder-actions">
+            <a class="ai-key-reminder-primary" href="{% url 'settings' %}#ai">Configure Gemini</a>
+            <button class="ai-key-reminder-later" type="button" data-dismiss-reminder>Remind me later</button>
+            <button class="ai-key-reminder-dismiss" type="button" data-dismiss-reminder>Not now</button>
+          </div>
+          <p class="ai-key-reminder-error" role="status" hidden>
+            We couldn't save that preference. Please try again.
+          </p>
+        </div>
+        <form id="ai-key-reminder-dismiss-form" hidden>
+          {% csrf_token %}
+        </form>
+      </aside>
+      {% endif %}
+
+      <!-- ---- Insights ---- -->
+      <section class="card col-8">
+
+        <div class="card-header">
+          <h2>Insights</h2>
+          <a href="#" class="card-link">See all →</a>
+        </div>
+
+        {% if insights %}
+
+        <div class="insight-grid">
+
+          {% for insight in insights %}
+
+          <div class="insight-item">
+            <p class="i-label">{{ insight.label }}</p>
+            <p>{{ insight.text }}</p>
+          </div>
+
+          {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <p style="font-size:0.87rem;color:var(--muted);">
+          Insights will show up here once you've planned a few meals.
+        </p>
+
+        {% endif %}
+
+      </section>
+
+
+      <!-- ---- Recent activity ---- -->
+      <section class="card col-4">
+
+        <div class="card-header">
+          <h2>Recent activity</h2>
+        </div>
+
+        {% if activities %}
+
+        <div class="activity-list">
+
+          {% for a in activities %}
+
+          <div class="activity-row">
+
+            <span class="a-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </span>
+
+            <div>
+              <p>{{ a.text }}</p>
+              <time>{{ a.time_display }}</time>
+            </div>
+
+          </div>
+
+          {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <p style="font-size:0.87rem;color:var(--muted);">
+          No activity yet — start by planning a meal or adding to your pantry.
+        </p>
+
+        {% endif %}
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,882 @@
+
+:root {
+    --edit-green: #16794B;
+    --edit-green-dark: #0F5C39;
+    --edit-amber: #F5A623;
+    --edit-text: #202820;
+    --edit-muted: #737D75;
+    --edit-border: #E3E9E3;
+    --edit-surface: #FFFFFF;
+    --edit-page: #FCFDFB;
+    --edit-danger: #C94444;
+    --edit-radius: 16px;
+    --edit-shadow: 0 8px 28px rgba(22, 60, 37, 0.045);
+}
+
+body {
+    background: var(--edit-page);
+}
+
+.edit-page {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+    color: var(--edit-text);
+}
+
+.edit-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 22px;
+    color: var(--edit-muted);
+    font-size: 13px;
+}
+
+.edit-breadcrumbs a {
+    color: var(--edit-green);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.edit-breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.edit-page-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+}
+
+.edit-page-heading h1 {
+    margin: 0 0 8px;
+    font-size: clamp(25px, 3vw, 32px);
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+    font-weight: 750;
+}
+
+.edit-page-heading p {
+    max-width: 620px;
+    margin: 0;
+    color: var(--edit-muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.edit-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: 1px solid #D5EBDD;
+    border-radius: 999px;
+    background: #F0F8F2;
+    color: var(--edit-green-dark);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.edit-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--edit-green);
+}
+
+.edit-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    align-items: start;
+    gap: 22px;
+}
+
+.edit-form-column {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+}
+
+.edit-card {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--edit-border);
+    border-radius: var(--edit-radius);
+    background: var(--edit-surface);
+    box-shadow: var(--edit-shadow);
+}
+
+.edit-card-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.edit-card-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #EAF5ED;
+    color: var(--edit-green);
+}
+
+.edit-card-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.edit-card-heading h2 {
+    margin: 1px 0 5px;
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 750;
+}
+
+.edit-card-heading p {
+    margin: 0;
+    color: var(--edit-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.edit-field {
+    margin-bottom: 21px;
+}
+
+.edit-field:last-child {
+    margin-bottom: 0;
+}
+
+.edit-field label,
+.edit-field-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--edit-text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.edit-required {
+    color: var(--edit-danger);
+}
+
+.edit-optional {
+    color: var(--edit-muted);
+    font-weight: 400;
+}
+
+.edit-input,
+.edit-select {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid #DCE4DC;
+    border-radius: 10px;
+    outline: none;
+    background: var(--edit-surface);
+    color: var(--edit-text);
+    font: inherit;
+    font-size: 14px;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.edit-input:focus,
+.edit-select:focus {
+    border-color: var(--edit-green);
+    box-shadow: 0 0 0 3px rgba(22, 121, 75, 0.11);
+}
+
+.edit-input::placeholder {
+    color: #A1AAA2;
+}
+
+.edit-help {
+    margin: 7px 0 0;
+    color: var(--edit-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.edit-error {
+    margin: 7px 0 0;
+    color: var(--edit-danger);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.edit-error-summary {
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    border: 1px solid #F2CDCD;
+    border-radius: 12px;
+    background: #FFF5F5;
+    color: #963737;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.edit-error-summary ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.edit-two-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.edit-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--edit-border);
+    border-radius: 12px;
+    background: #FAFCFA;
+}
+
+.edit-checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 2px 0 0;
+    accent-color: var(--edit-green);
+    cursor: pointer;
+}
+
+.edit-checkbox-copy {
+    min-width: 0;
+}
+
+.edit-checkbox-copy label {
+    display: block;
+    margin: 0 0 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.edit-checkbox-copy p {
+    margin: 0;
+    color: var(--edit-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.edit-image-preview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid var(--edit-border);
+    border-radius: 12px;
+    background: #FAFCFA;
+}
+
+.edit-image-frame {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #EDF4ED;
+    color: var(--edit-green);
+}
+
+.edit-image-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-image-placeholder {
+    display: grid;
+    place-items: center;
+    gap: 5px;
+    color: var(--edit-green);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.edit-image-placeholder svg {
+    width: 30px;
+    height: 30px;
+}
+
+.edit-image-details {
+    min-width: 0;
+}
+
+.edit-image-details strong {
+    display: block;
+    overflow-wrap: anywhere;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.edit-image-details p {
+    margin: 0;
+    color: var(--edit-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.edit-file-input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed #C9D8CB;
+    border-radius: 10px;
+    background: #FAFCFA;
+    color: var(--edit-muted);
+    font: inherit;
+    font-size: 12px;
+}
+
+.edit-clear-image {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 13px;
+    color: var(--edit-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.edit-clear-image input {
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--edit-green);
+}
+
+.edit-sidebar-column {
+    display: grid;
+    gap: 18px;
+}
+
+.edit-preview-card {
+    overflow: hidden;
+    padding: 0;
+}
+
+.edit-preview-image {
+    display: grid;
+    place-items: center;
+    height: 205px;
+    overflow: hidden;
+    background: #EDF4ED;
+    color: var(--edit-green);
+}
+
+.edit-preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-preview-image svg {
+    width: 44px;
+    height: 44px;
+}
+
+.edit-preview-body {
+    padding: 20px;
+}
+
+.edit-preview-eyebrow {
+    margin: 0 0 8px;
+    color: var(--edit-green);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.edit-preview-body h3 {
+    margin: 0 0 9px;
+    overflow-wrap: anywhere;
+    font-size: 19px;
+    font-weight: 750;
+}
+
+.edit-preview-body p {
+    margin: 0;
+    color: var(--edit-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.edit-info-card {
+    padding: 20px;
+    border: 1px solid #E6E5D9;
+    border-radius: var(--edit-radius);
+    background: #FFFCF4;
+}
+
+.edit-info-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.edit-info-heading svg {
+    width: 19px;
+    height: 19px;
+    color: #A66A08;
+}
+
+.edit-info-card p {
+    margin: 0;
+    color: #746D5C;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.edit-form-actions {
+    position: sticky;
+    bottom: 12px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px 18px;
+    border: 1px solid var(--edit-border);
+    border-radius: 14px;
+    background: var(--edit-surface);
+    box-shadow: 0 8px 30px rgba(24, 52, 31, 0.09);
+}
+
+.edit-actions-note {
+    color: var(--edit-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.edit-actions-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.edit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 43px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.edit-button:hover {
+    transform: translateY(-1px);
+}
+
+.edit-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.edit-button-primary {
+    background: var(--edit-green);
+    color: #FFFFFF;
+}
+
+.edit-button-primary:hover {
+    background: var(--edit-green-dark);
+}
+
+.edit-button-secondary {
+    border-color: var(--edit-border);
+    background: var(--edit-surface);
+    color: var(--edit-text);
+}
+
+.edit-button-secondary:hover {
+    background: #F4F7F4;
+}
+
+.edit-messages {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.edit-message {
+    padding: 13px 16px;
+    border: 1px solid #D5EBDD;
+    border-radius: 11px;
+    background: #F0F8F2;
+    color: var(--edit-green-dark);
+    font-size: 13px;
+}
+
+/* Keep the edit page usable in dark theme. */
+[data-theme="dark"] {
+    --edit-text: #EDF3ED;
+    --edit-muted: #A5B1A6;
+    --edit-border: #303C32;
+    --edit-surface: #19221B;
+    --edit-page: #111812;
+    --edit-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .edit-status,
+[data-theme="dark"] .edit-checkbox-row,
+[data-theme="dark"] .edit-image-preview,
+[data-theme="dark"] .edit-file-input {
+    background: #202D23;
+    border-color: #354638;
+    color: #DCE9DE;
+}
+
+[data-theme="dark"] .edit-card-icon {
+    background: #243C2B;
+    color: #9DD9AC;
+}
+
+[data-theme="dark"] .edit-input,
+[data-theme="dark"] .edit-select {
+    border-color: #3B4A3D;
+}
+
+[data-theme="dark"] .edit-info-card {
+    background: #29261B;
+    border-color: #49402B;
+}
+
+[data-theme="dark"] .edit-info-card p {
+    color: #C6BDA5;
+}
+
+[data-theme="dark"] .edit-button-secondary:hover {
+    background: #27332A;
+}
+
+@media (max-width: 1050px) {
+    .edit-layout {
+        grid-template-columns: minmax(0, 1fr) 250px;
+        gap: 16px;
+    }
+
+    .edit-page {
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+}
+
+@media (max-width: 800px) {
+    .edit-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .edit-sidebar-column {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .edit-preview-image {
+        height: 170px;
+    }
+}
+
+@media (max-width: 600px) {
+    .edit-page {
+        padding: 20px 15px 35px;
+    }
+
+    .edit-page-heading {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .edit-page-heading h1 {
+        font-size: 25px;
+    }
+
+    .edit-card {
+        padding: 18px;
+    }
+
+    .edit-two-columns,
+    .edit-sidebar-column {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .edit-two-columns .edit-field {
+        margin-bottom: 20px;
+    }
+
+    .edit-sidebar-column {
+        gap: 15px;
+    }
+
+    .edit-preview-image {
+        height: 190px;
+    }
+
+    .edit-form-actions {
+        position: static;
+        align-items: stretch;
+        flex-direction: column;
+        padding: 14px;
+    }
+
+    .edit-actions-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .edit-button {
+        padding: 10px 12px;
+    }
+
+    .edit-actions-note {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .edit-button,
+    .edit-input,
+    .edit-select {
+        transition: none;
+    }
+}
+
+
+/* ===== Compact, responsive desktop sidebar ===== */
+
+@media (min-width: 801px) {
+    .sidebar {
+        width: 250px;
+        padding: 20px 14px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .sidebar-section-label {
+        margin: 22px 10px 9px;
+        font-size: 10px;
+        line-height: 1.4;
+        letter-spacing: 1.1px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        width: 100%;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        padding: 10px 12px;
+        border-radius: 9px;
+        font-size: 13px;
+        line-height: 1.4;
+        box-sizing: border-box;
+    }
+
+    .sidebar-link svg {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+    }
+
+    .sidebar-link span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sidebar-brand {
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .sidebar-brand .brand-mark {
+        flex: 0 0 36px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .sidebar-brand .brand-copy strong {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    .sidebar-brand .brand-copy small {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .sidebar-bottom {
+        margin-top: 20px;
+    }
+
+    .sidebar-theme-toggle {
+        width: 100%;
+        min-height: 40px;
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .main-content {
+        min-width: 0;
+    }
+}
+
+/* Smaller desktop and tablet widths */
+@media (min-width: 801px) and (max-width: 1100px) {
+    .sidebar {
+        width: 220px;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .sidebar-section-label {
+        margin-left: 8px;
+        font-size: 9px;
+        letter-spacing: 0.9px;
+    }
+
+    .sidebar-link {
+        gap: 9px;
+        padding-right: 8px;
+        padding-left: 9px;
+        font-size: 12px;
+    }
+}
+
+
+
+/* ==========================================
+   Edit Food — compact breadcrumb and sidebar
+   ========================================== */
+
+/* Compact breadcrumb: Overview / Food Library / Edit Food */
+.edit-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 22px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.edit-breadcrumbs a {
+    color: var(--edit-muted, #737D75);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.edit-breadcrumbs a:hover {
+    color: #16794B;
+}
+
+.edit-breadcrumbs > span:last-child {
+    color: var(--edit-text, #202820);
+    font-weight: 600;
+}
+
+/* Keep sidebar section headings small and readable */
+.sidebar-section-label {
+    margin: 20px 10px 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* Compact desktop navigation */
+@media (min-width: 801px) {
+    .sidebar {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .sidebar-nav {
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .sidebar-link {
+        min-width: 0;
+        min-height: 40px;
+        padding: 9px 11px;
+        gap: 10px;
+        font-size: 13px;
+        line-height: 1.4;
+        box-sizing: border-box;
+    }
+
+    .sidebar-link svg {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+    }
+
+    .sidebar-link span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* Fit narrower desktop screens without affecting mobile navigation */
+@media (min-width: 801px) and (max-width: 1100px) {
+    .sidebar-section-label {
+        margin-left: 8px;
+        font-size: 9px;
+        letter-spacing: 0.8px;
+    }
+
+    .sidebar-link {
+        padding-right: 8px;
+        padding-left: 9px;
+        gap: 8px;
+        font-size: 12px;
+    }
+}
+

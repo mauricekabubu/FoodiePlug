@@ -1,0 +1,630 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <title>Edit {{ food.name }} — FoodiePlug</title>
+    <meta name="theme-color" content="#FCFDFB">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316794B'/%3E%3Ctext x='32' y='44' font-size='40' text-anchor='middle'%3E%F0%9F%A5%91%3C/text%3E%3C/svg%3E">
+
+    <!-- Reuse the existing FoodiePlug dashboard styles -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/library.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/edit.css' %}">    
+</head>
+
+<body>
+    <!-- Mobile header -->
+    <header class="mobile-topbar">
+        <button
+            class="sidebar-toggle"
+            type="button"
+            aria-label="Open navigation menu"
+            aria-controls="app-sidebar"
+            aria-expanded="false"
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+
+        <a href="/dashboard/" class="mobile-brand" aria-label="FoodiePlug dashboard">
+            <span class="brand-mark">F</span>
+            <span>FoodiePlug</span>
+        </a>
+
+        <button
+            class="theme-toggle"
+            type="button"
+            aria-label="Toggle theme"
+            title="Toggle theme"
+        >
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3
+                         1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42
+                         m11.3-11.3 1.42-1.42"/>
+            </svg>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" aria-hidden="true"></div>
+
+   
+
+    <!-- Dashboard content -->
+    <main class="main-content">
+        <div class="edit-page">
+
+            <nav class="edit-breadcrumbs" aria-label="Breadcrumb">
+                <a href="/dashboard/">Overview</a>
+                <span aria-hidden="true">/</span>
+                <a href="{% url 'foods:foods' %}">Food Library</a>
+                <span aria-hidden="true">/</span>
+                <span>Edit Food</span>
+            </nav>
+
+            <div class="edit-page-heading">
+                <div>
+                    <h1>Edit food</h1>
+                    <p>
+                        Update the details for {{ food.name }}.
+                        Keep your food library accurate so your pantry,
+                        meal planning, and budget tools stay useful.
+                    </p>
+                </div>
+
+                <span class="edit-status">
+                    <span class="edit-status-dot"></span>
+                    Editing food
+                </span>
+            </div>
+
+            {% if messages %}
+                <div class="edit-messages" aria-live="polite">
+                    {% for message in messages %}
+                        <div class="edit-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="edit-error-summary" role="alert">
+                    Please correct the following:
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form
+                method="post"
+                enctype="multipart/form-data"
+                action="{% url 'foods:edit' food.id %}"
+                id="edit-food-form"
+            >
+                {% csrf_token %}
+
+                <div class="edit-layout">
+                    <div class="edit-form-column">
+
+                        <!-- Basic food details -->
+                        <section class="edit-card">
+                            <div class="edit-card-heading">
+                                <div class="edit-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.8"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 21s-8-4.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.6-8 11-8 11Z"/>
+                                        <path d="M12 7c-1 3-1 7 0 10"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2>Basic information</h2>
+                                    <p>Manage the name and category of this food.</p>
+                                </div>
+                            </div>
+
+                            <div class="edit-field">
+                                <label for="id_name">
+                                    Food name <span class="edit-required">*</span>
+                                </label>
+                                <input
+                                    class="edit-input"
+                                    type="text"
+                                    name="name"
+                                    id="id_name"
+                                    value="{{ food.name }}"
+                                    placeholder="e.g. Tomatoes, Rice, Beans"
+                                    maxlength="150"
+                                    required
+                                >
+                                <p class="edit-help">
+                                    Use a clear name that is easy to recognise when
+                                    adding food to your pantry or meal plans.
+                                </p>
+                                {% if form.name.errors %}
+                                    <p class="edit-error">{{ form.name.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="edit-field">
+                                <label for="id_category">
+                                    Category <span class="edit-required">*</span>
+                                </label>
+                                <select
+                                    class="edit-select"
+                                    name="category"
+                                    id="id_category"
+                                    required
+                                >
+                                    <option value="">Choose a category</option>
+                                    {% for category in categories %}
+                                        <option
+                                            value="{{ category.id }}"
+                                            {% if food.category_id == category.id %}selected{% endif %}
+                                        >
+                                            {{ category.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.category.errors %}
+                                    <p class="edit-error">{{ form.category.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="edit-field">
+                                <label for="id_default_unit">
+                                    Default measurement unit
+                                    <span class="edit-required">*</span>
+                                </label>
+                                <select
+                                    class="edit-select"
+                                    name="default_unit"
+                                    id="id_default_unit"
+                                    required
+                                >
+                                    {% for value, label in unit_choices %}
+                                        <option
+                                            value="{{ value }}"
+                                            {% if food.default_unit == value %}selected{% endif %}
+                                        >
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <p class="edit-help">
+                                    This is the default unit used when measuring this food.
+                                </p>
+                                {% if form.default_unit.errors %}
+                                    <p class="edit-error">{{ form.default_unit.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+                        </section>
+
+                        <!-- Storage and shelf life -->
+                        <section class="edit-card">
+                            <div class="edit-card-heading">
+                                <div class="edit-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.8"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/>
+                                        <path d="m9 12 2 2 4-4"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2>Storage and freshness</h2>
+                                    <p>Help FoodiePlug estimate when this food may expire.</p>
+                                </div>
+                            </div>
+
+                            <div class="edit-field">
+                                <div class="edit-checkbox-row">
+                                    <input
+                                        type="checkbox"
+                                        name="is_perishable"
+                                        id="id_is_perishable"
+                                        value="on"
+                                        {% if food.is_perishable %}checked{% endif %}
+                                    >
+                                    <div class="edit-checkbox-copy">
+                                        <label for="id_is_perishable">
+                                            This food is perishable
+                                        </label>
+                                        <p>
+                                            Enable this for foods that can spoil,
+                                            such as vegetables, fruit, milk, and meat.
+                                        </p>
+                                    </div>
+                                </div>
+                                {% if form.is_perishable.errors %}
+                                    <p class="edit-error">{{ form.is_perishable.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="edit-field" id="shelf-life-field">
+                                <label for="id_shelf_life">
+                                    Estimated shelf life
+                                    <span class="edit-optional">(days)</span>
+                                </label>
+                                <input
+                                    class="edit-input"
+                                    type="number"
+                                    name="shelf_life"
+                                    id="id_shelf_life"
+                                    value="{{ food.shelf_life|default_if_none:'' }}"
+                                    min="1"
+                                    max="3650"
+                                    placeholder="e.g. 7"
+                                >
+                                <p class="edit-help">
+                                    Enter the approximate number of days the food
+                                    remains usable under suitable storage conditions.
+                                </p>
+                                {% if form.shelf_life.errors %}
+                                    <p class="edit-error">{{ form.shelf_life.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+                        </section>
+
+                        <!-- Food image -->
+                        <section class="edit-card">
+                            <div class="edit-card-heading">
+                                <div class="edit-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.8"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="3"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <path d="m21 15-5-5L5 21"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2>Food image</h2>
+                                    <p>Update the photo shown in your Food Library.</p>
+                                </div>
+                            </div>
+
+                            <div class="edit-image-preview">
+                                <div class="edit-image-frame" id="current-image-frame">
+                                    {% if food.image %}
+                                        <img
+                                            id="current-food-image"
+                                            src="{{ food.image.url }}"
+                                            alt="{{ food.name }}"
+                                        >
+                                    {% else %}
+                                        <div class="edit-image-placeholder" id="image-placeholder">
+                                            <svg viewBox="0 0 24 24" fill="none"
+                                                 stroke="currentColor" stroke-width="1.6"
+                                                 stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                <path d="m21 15-5-5L5 21"/>
+                                            </svg>
+                                            <span>No image</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="edit-image-details">
+                                    <strong id="image-file-name">
+                                        {% if food.image %}
+                                            Current food image
+                                        {% else %}
+                                            No image uploaded
+                                        {% endif %}
+                                    </strong>
+                                    <p>
+                                        Choose a new photo to replace the current image.
+                                        Leave this empty to keep the existing photo.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="edit-field">
+                                <label for="id_image">
+                                    Choose a new image
+                                    <span class="edit-optional">(optional)</span>
+                                </label>
+                                <input
+                                    class="edit-file-input"
+                                    type="file"
+                                    name="image"
+                                    id="id_image"
+                                    accept="image/*"
+                                >
+                                <p class="edit-help">
+                                    Use a clear food photo. Supported formats depend
+                                    on your Django image-upload configuration.
+                                </p>
+                                {% if form.image.errors %}
+                                    <p class="edit-error">{{ form.image.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+
+                            {% if food.image %}
+                                <label class="edit-clear-image" for="id_clear_image">
+                                    <input
+                                        type="checkbox"
+                                        name="clear_image"
+                                        id="id_clear_image"
+                                        value="on"
+                                    >
+                                    <span>
+                                        Remove the current image instead of uploading
+                                        a replacement.
+                                    </span>
+                                </label>
+                            {% endif %}
+                        </section>
+
+                        <!-- Form actions -->
+                        <div class="edit-form-actions">
+                            <div class="edit-actions-note">
+                                Your changes will be saved to your food library.
+                            </div>
+
+                            <div class="edit-actions-buttons">
+                                <a
+                                    href="{% url 'foods:foods' %}"
+                                    class="edit-button edit-button-secondary"
+                                >
+                                    Cancel
+                                </a>
+
+                                <button
+                                    type="submit"
+                                    class="edit-button edit-button-primary"
+                                    id="save-food-button"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12l6 6v10a2 2 0 0 1-2 2Z"/>
+                                        <path d="M17 21v-8H7v8M7 3v5h8"/>
+                                    </svg>
+                                    Save changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right-hand contextual panel -->
+                    <aside class="edit-sidebar-column" aria-label="Food information">
+                        <section class="edit-card edit-preview-card">
+                            <div class="edit-preview-image" id="food-preview-image">
+                                {% if food.image %}
+                                    <img
+                                        id="preview-food-image"
+                                        src="{{ food.image.url }}"
+                                        alt="{{ food.name }}"
+                                    >
+                                {% else %}
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.5"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 21s-8-4.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.6-8 11-8 11Z"/>
+                                        <path d="M12 7c-1 3-1 7 0 10"/>
+                                    </svg>
+                                {% endif %}
+                            </div>
+
+                            <div class="edit-preview-body">
+                                <p class="edit-preview-eyebrow">Food preview</p>
+                                <h3 id="preview-food-name">{{ food.name }}</h3>
+                                <p id="preview-food-category">
+                                    {% if food.category %}
+                                        {{ food.category.name }}
+                                    {% else %}
+                                        No category selected
+                                    {% endif %}
+                                    <span aria-hidden="true"> · </span>
+                                    {{ food.get_default_unit_display|default:food.default_unit }}
+                                </p>
+                            </div>
+                        </section>
+
+                        <section class="edit-info-card">
+                            <div class="edit-info-heading">
+                                <svg viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.8"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 11v5m0-8h.01"/>
+                                </svg>
+                                Keep your food data useful
+                            </div>
+                            <p>
+                                Accurate names, categories, and units make it easier
+                                to manage pantry quantities, plan meals, and estimate
+                                food costs. Shelf-life estimates are guidelines and
+                                should not replace food-safety guidance.
+                            </p>
+                        </section>
+                    </aside>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="{% static 'js/dashboard.js' %}" defer></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("edit-food-form");
+            const nameInput = document.getElementById("id_name");
+            const categoryInput = document.getElementById("id_category");
+            const unitInput = document.getElementById("id_default_unit");
+            const perishableInput = document.getElementById("id_is_perishable");
+            const shelfLifeField = document.getElementById("shelf-life-field");
+            const shelfLifeInput = document.getElementById("id_shelf_life");
+            const imageInput = document.getElementById("id_image");
+            const clearImageInput = document.getElementById("id_clear_image");
+            const saveButton = document.getElementById("save-food-button");
+
+            const previewName = document.getElementById("preview-food-name");
+            const previewCategory = document.getElementById("preview-food-category");
+            const previewImage = document.getElementById("preview-food-image");
+            const currentImage = document.getElementById("current-food-image");
+            const imageFileName = document.getElementById("image-file-name");
+            const currentImageFrame = document.getElementById("current-image-frame");
+
+            let uploadedImageUrl = null;
+
+            function updateFoodName() {
+                const value = nameInput.value.trim();
+                previewName.textContent = value || "Untitled food";
+            }
+
+            function updateFoodCategory() {
+                const selectedCategory =
+                    categoryInput.options[categoryInput.selectedIndex];
+                const selectedUnit =
+                    unitInput.options[unitInput.selectedIndex];
+
+                const categoryName = selectedCategory
+                    ? selectedCategory.textContent.trim()
+                    : "No category selected";
+
+                const unitName = selectedUnit
+                    ? selectedUnit.textContent.trim()
+                    : "";
+
+                previewCategory.textContent = unitName
+                    ? categoryName + " · " + unitName
+                    : categoryName;
+            }
+
+            function updateShelfLife() {
+                const enabled = perishableInput.checked;
+                shelfLifeField.style.opacity = enabled ? "1" : "0.55";
+                shelfLifeInput.disabled = !enabled;
+
+                if (!enabled) {
+                    shelfLifeInput.value = "";
+                }
+            }
+
+            function updateImagePreview(file) {
+                if (!file) {
+                    return;
+                }
+
+                if (uploadedImageUrl) {
+                    URL.revokeObjectURL(uploadedImageUrl);
+                }
+
+                uploadedImageUrl = URL.createObjectURL(file);
+
+                if (currentImage) {
+                    currentImage.src = uploadedImageUrl;
+                } else {
+                    const placeholder = document.getElementById("image-placeholder");
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+
+                    const newImage = document.createElement("img");
+                    newImage.id = "current-food-image";
+                    newImage.alt = "Selected food image";
+                    newImage.src = uploadedImageUrl;
+                    currentImageFrame.replaceChildren(newImage);
+                }
+
+                if (previewImage) {
+                    previewImage.src = uploadedImageUrl;
+                } else {
+                    const image = document.createElement("img");
+                    image.id = "preview-food-image";
+                    image.alt = "Selected food image";
+                    image.src = uploadedImageUrl;
+
+                    const previewContainer =
+                        document.getElementById("food-preview-image");
+                    previewContainer.replaceChildren(image);
+                }
+
+                imageFileName.textContent = file.name;
+
+                if (clearImageInput) {
+                    clearImageInput.checked = false;
+                }
+            }
+
+            nameInput.addEventListener("input", updateFoodName);
+            categoryInput.addEventListener("change", updateFoodCategory);
+            unitInput.addEventListener("change", updateFoodCategory);
+            perishableInput.addEventListener("change", updateShelfLife);
+
+            imageInput.addEventListener("change", function () {
+                const file = imageInput.files && imageInput.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                if (!file.type.startsWith("image/")) {
+                    imageInput.value = "";
+                    alert("Please select a valid image file.");
+                    return;
+                }
+
+                updateImagePreview(file);
+            });
+
+            if (clearImageInput) {
+                clearImageInput.addEventListener("change", function () {
+                    if (clearImageInput.checked) {
+                        imageInput.value = "";
+                        imageFileName.textContent = "Image will be removed when saved.";
+
+                        if (currentImage) {
+                            currentImage.style.opacity = "0.3";
+                        }
+
+                        if (previewImage) {
+                            previewImage.style.opacity = "0.3";
+                        }
+                    } else {
+                        imageFileName.textContent = imageInput.files.length
+                            ? imageInput.files[0].name
+                            : "Current food image";
+
+                        if (currentImage) {
+                            currentImage.style.opacity = "1";
+                        }
+
+                        if (previewImage) {
+                            previewImage.style.opacity = "1";
+                        }
+                    }
+                });
+            }
+
+            form.addEventListener("submit", function () {
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                saveButton.disabled = true;
+                saveButton.style.opacity = "0.7";
+                saveButton.style.cursor = "wait";
+                saveButton.textContent = "Saving changes…";
+            });
+
+            updateFoodName();
+            updateFoodCategory();
+            updateShelfLife();
+        });
+    </script>
+</body>
+</html>
