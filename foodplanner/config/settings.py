@@ -12,13 +12,16 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import parse_qsl, unquote, urlparse
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR.parent / ".env.local")
 load_dotenv(BASE_DIR.parent / ".env", override=False)
+load_dotenv(BASE_DIR / ".env", override=False)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -164,18 +167,59 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.getenv(
-            "SQLITE_DATABASE_PATH",
-            str(BASE_DIR / "db.sqlite3"),
-        ),
-        'OPTIONS': {
-            'timeout': 20,
-        },
+use_unpooled_database = _env_bool("NEON_USE_UNPOOLED_DATABASE")
+database_url = os.getenv("DATABASE_URL")
+
+if use_unpooled_database:
+    database_url = os.getenv("DATABASE_URL_UNPOOLED")
+    if not database_url:
+        raise ImproperlyConfigured(
+            "NEON_USE_UNPOOLED_DATABASE requires DATABASE_URL_UNPOOLED."
+        )
+
+
+
+if database_url:
+    parsed_database_url = urlparse(database_url)
+    if parsed_database_url.scheme not in {"postgres", "postgresql"}:
+        raise ImproperlyConfigured(
+            "DATABASE_URL must use the postgres or postgresql scheme."
+        )
+    if not parsed_database_url.hostname or not parsed_database_url.path.strip("/"):
+        raise ImproperlyConfigured(
+            "DATABASE_URL must include a database name and host."
+        )
+
+    database_options = dict(parse_qsl(parsed_database_url.query))
+    if parsed_database_url.hostname.endswith(".neon.tech"):
+        database_options.setdefault("sslmode", "require")
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": unquote(parsed_database_url.path.lstrip("/")),
+            "USER": unquote(parsed_database_url.username or ""),
+            "PASSWORD": unquote(parsed_database_url.password or ""),
+            "HOST": parsed_database_url.hostname,
+            "PORT": parsed_database_url.port or "",
+            "OPTIONS": database_options,
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+            "CONN_HEALTH_CHECKS": True,
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.getenv(
+                "SQLITE_DATABASE_PATH",
+                str(BASE_DIR / "db.sqlite3"),
+            ),
+            "OPTIONS": {
+                "timeout": 20,
+            },
+        }
+    }
 
 
 # Password validation
