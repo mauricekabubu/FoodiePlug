@@ -26,6 +26,17 @@ load_dotenv(BASE_DIR / ".env", override=False)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True,
+)
+
+
 FOODIEPLUG_CREDENTIALS_ENCRYPTION_KEY = os.environ.get(
     "FOODIEPLUG_CREDENTIALS_ENCRYPTION_KEY",
     "",
