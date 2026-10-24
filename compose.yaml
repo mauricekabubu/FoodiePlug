@@ -9,6 +9,8 @@ services:
         required: false
       - path: ./.env
         required: false
+      - path: ./.env.local
+        required: false
     environment:
       DEBUG: ${DEBUG:-False}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
