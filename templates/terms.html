@@ -1,0 +1,240 @@
+
+{% extends "public_base.html" %}
+{% load static %}
+
+{% block title %}Terms & Conditions | FoodiePlug{% endblock %}
+
+{% block meta_description %}
+Read FoodiePlug's Terms and Conditions covering account use, meal planning, grocery budgeting, food information, AI-generated recommendations, and your responsibilities when using the platform.
+{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/terms.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="legal-hero">
+  <h1>Terms &amp; Conditions</h1>
+  <p class="lede">Please read these terms carefully before using FoodiePlug.</p>
+  <div class="legal-meta">
+    <span><strong>Last updated:</strong> [DATE]</span>
+    <span><strong>Effective date:</strong> [DATE]</span>
+  </div>
+</section>
+
+<!-- ============ LAYOUT: TOC + DOCUMENT ============ -->
+<div class="legal-layout">
+
+  <!-- On this page -->
+  <nav class="toc" aria-label="On this page">
+    <button type="button" class="toc-toggle" aria-expanded="false">
+      On this page
+      <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <p class="toc-label">On this page</p>
+    <ul class="toc-list">
+      <li><a href="#acceptance">1. Acceptance of Terms</a></li>
+      <li><a href="#about">2. About FoodiePlug</a></li>
+      <li><a href="#eligibility">3. Eligibility</a></li>
+      <li><a href="#account">4. Creating an Account</a></li>
+      <li><a href="#using">5. Using FoodiePlug</a></li>
+      <li><a href="#meal-planning">6. Meal Planning and Food Information</a></li>
+      <li><a href="#user-info">7. User-Provided Information</a></li>
+      <li><a href="#ai-content">8. AI-Generated Recommendations</a></li>
+      <li><a href="#grocery-prices">9. Grocery and Price Information</a></li>
+      <li><a href="#acceptable-use">10. Acceptable Use</a></li>
+      <li><a href="#ip">11. Intellectual Property</a></li>
+      <li><a href="#third-party">12. Third-Party Services</a></li>
+      <li><a href="{% url 'privacy' %}">13. Privacy</a></li>
+      <li><a href="#disclaimers">14. Disclaimers</a></li>
+      <li><a href="#liability">15. Limitation of Liability</a></li>
+      <li><a href="#suspension">16. Account Suspension and Termination</a></li>
+      <li><a href="#changes">17. Changes to These Terms</a></li>
+      <li><a href="#governing-law">18. Governing Law</a></li>
+      <li><a href="{% url 'contact' %}">19. Contact Us</a></li>
+    </ul>
+  </nav>
+
+  <!-- Document -->
+  <main class="legal-doc">
+
+    <section id="acceptance">
+      <h2>1. Acceptance of Terms</h2>
+      <p>These Terms &amp; Conditions ("Terms") govern your access to and use of FoodiePlug, including our website, applications, and related services (together, the "Service"). By creating an account or otherwise using the Service, you agree to be bound by these Terms. If you do not agree, please do not use FoodiePlug.</p>
+    </section>
+
+    <section id="about">
+      <h2>2. About FoodiePlug</h2>
+      <p>FoodiePlug is a food-planning and food-decision platform designed to help people plan affordable meals, manage groceries, discover food ideas, and make smarter everyday food choices. FoodiePlug provides planning and decision-support tools — it does not sell, deliver, or prepare food on your behalf.</p>
+    </section>
+
+    <section id="eligibility">
+      <h2>3. Eligibility</h2>
+      <p>You must be able to form a legally binding contract to use FoodiePlug. By using the Service, you confirm that you meet this requirement and that any information you provide is accurate and truthful.</p>
+    </section>
+
+    <section id="account">
+      <h2>4. Creating an Account</h2>
+      <p>To use most features of FoodiePlug, you'll need to create an account. When you do, you agree to:</p>
+      <ul>
+        <li>Provide accurate, current, and complete registration information.</li>
+        <li>Keep your login credentials confidential and secure.</li>
+        <li>Not share your account or let others log in as you.</li>
+        <li>Notify FoodiePlug promptly if you believe your account has been accessed without authorization.</li>
+      </ul>
+      <p>You're responsible for all activity that happens under your account, whether or not you were the one who took the action.</p>
+    </section>
+
+    <section id="using">
+      <h2>5. Using FoodiePlug</h2>
+      <p>You may use FoodiePlug only for its intended purpose: planning meals, managing groceries, and exploring food-related ideas and information for personal, non-commercial use, unless we've agreed otherwise with you in writing. We may update, change, or discontinue features of the Service at any time.</p>
+    </section>
+
+    <section id="meal-planning">
+      <h2>6. Meal Planning and Food Information</h2>
+      <p>FoodiePlug may provide meal-planning suggestions, grocery suggestions, recipes, food ideas, budgeting tools, and related recommendations to help guide your decisions. These are suggestions, not instructions.</p>
+      <p>You remain solely responsible for deciding what food to purchase, prepare, and consume, and for confirming that any given meal, recipe, or product is right for you and the people you're cooking for.</p>
+    </section>
+
+    <section id="user-info">
+      <h2>7. User-Provided Information</h2>
+      <p>FoodiePlug's usefulness depends in part on information you choose to share — such as preferences, dietary notes, household size, or local prices. You're responsible for the accuracy of information you provide, and for keeping it up to date if your circumstances change.</p>
+
+      <div class="info-panel">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 9v4m0 4h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+          Food and nutrition information
+        </h4>
+        <p>FoodiePlug's food- and nutrition-related information is provided for general informational purposes only. FoodiePlug is not a medical, dietetic, or nutritional professional, and nothing in the Service is intended as medical or dietary advice.</p>
+        <p>If you have allergies, medical conditions, dietary restrictions, or specific nutritional requirements, please independently verify any information relevant to your situation and consult an appropriately qualified professional (such as a doctor or registered dietitian) where necessary before acting on it.</p>
+      </div>
+    </section>
+
+    <section id="ai-content">
+      <h2>8. AI-Generated Recommendations</h2>
+      <div class="info-panel">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.2 4.8L19 10l-4.8 2.2L12 17l-2.2-4.8L5 10l4.8-2.2L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          About AI in FoodiePlug
+        </h4>
+        <p>Some of the recommendations, suggestions, and responses you see in FoodiePlug may be generated or assisted by artificial intelligence. AI-generated content is produced automatically and, like any automated system, may occasionally be inaccurate, incomplete, outdated, or unsuitable for your particular situation.</p>
+        <ul>
+          <li>Please review AI-generated recommendations before relying on them, especially for anything related to health, allergies, or dietary needs.</li>
+          <li>FoodiePlug does not guarantee that any individual AI-generated recommendation is accurate or appropriate for you.</li>
+          <li>Use your own judgment, and check the underlying details (ingredients, quantities, substitutions) before shopping or cooking.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="grocery-prices">
+      <h2>9. Grocery and Price Information</h2>
+      <p>FoodiePlug may allow you and other users to enter local grocery and food prices, and may use this information to power budgeting tools and estimates. Please keep in mind:</p>
+      <ul>
+        <li>Prices can vary significantly between locations, stores, and retailers.</li>
+        <li>Prices can change over time and may not reflect current, real-time market prices.</li>
+        <li>User-provided prices are supplied by other users or by you, and FoodiePlug does not independently verify their accuracy.</li>
+        <li>Any budget calculations, totals, or savings shown in the Service are estimates only, not guarantees.</li>
+      </ul>
+      <p>FoodiePlug does not represent that its budget calculations, price estimates, or savings figures are exact or guaranteed.</p>
+    </section>
+
+    <section id="acceptable-use">
+      <h2>10. Acceptable Use</h2>
+      <p>To keep FoodiePlug safe and usable for everyone, you agree not to:</p>
+      <ul>
+        <li>Abuse, overload, or interfere with the normal operation of the Service.</li>
+        <li>Attempt to gain unauthorized access to accounts, systems, or data.</li>
+        <li>Scrape, crawl, or extract data from the Service except as permitted by us.</li>
+        <li>Upload or transmit malicious code, viruses, or harmful content.</li>
+        <li>Misuse AI features — for example, to generate harmful, abusive, or misleading content.</li>
+        <li>Impersonate another person or misrepresent your affiliation with any person or entity.</li>
+        <li>Engage in fraudulent activity of any kind on or through the Service.</li>
+        <li>Use the Service in a way that violates any applicable law or regulation.</li>
+      </ul>
+      <p>We may investigate and take appropriate action against anyone who violates this section, including suspending or terminating accounts.</p>
+    </section>
+
+    <section id="ip">
+      <h2>11. Intellectual Property</h2>
+      <p>The FoodiePlug name, logo, branding, website, application, and the original content, software, and features that make up the Service are owned by FoodiePlug or its licensors and are protected by applicable intellectual property laws.</p>
+      <p>We grant you a limited, personal, non-exclusive, non-transferable license to use FoodiePlug for its intended purpose. You may not copy, modify, distribute, sell, or reverse-engineer any part of the Service without our prior written permission, except where the law expressly allows it.</p>
+    </section>
+
+    <section id="third-party">
+      <h2>12. Third-Party Services</h2>
+      <p>FoodiePlug may link to, integrate with, or rely on third-party services (for example, sign-in providers or grocery/retail information). We don't control these third parties and aren't responsible for their content, accuracy, or practices. Your use of any third-party service is subject to that service's own terms and privacy policy.</p>
+    </section>
+
+    <section id="privacy">
+      <h2>13. Privacy</h2>
+      <p>Your use of FoodiePlug is also governed by our Privacy Policy, which explains what information we collect and how we use it.</p>
+      <p><a class="inline-link-arrow" href="{% url 'privacy' %}">Read our Privacy Policy →</a></p>
+    </section>
+
+    <section id="disclaimers">
+      <h2>14. Disclaimers</h2>
+      <div class="info-panel">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 9v4m0 4h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+          Important information
+        </h4>
+        <p>FoodiePlug provides planning and decision-support tools on an "as is" and "as available" basis. We do not guarantee:</p>
+        <ul>
+          <li>Specific food or grocery prices.</li>
+          <li>The availability of any ingredient, product, or recipe.</li>
+          <li>The accuracy or completeness of every recommendation, including AI-generated ones.</li>
+          <li>Any specific level of savings from using the Service.</li>
+          <li>Any particular individual health or nutritional outcome.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="liability">
+      <h2>15. Limitation of Liability</h2>
+      <p>To the fullest extent permitted by applicable law, FoodiePlug and its team will not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of data, savings, or goodwill, arising out of or related to your use of the Service. Our total liability for any claim relating to the Service is limited to the amount you paid us, if any, in the twelve months before the claim arose.</p>
+      <p>Nothing in these Terms is intended to limit liability that cannot be limited or excluded under applicable law.</p>
+    </section>
+
+    <section id="suspension">
+      <h2>16. Account Suspension and Termination</h2>
+      <p>We may suspend or terminate your access to FoodiePlug if you violate these Terms, misuse the Service, or if we reasonably believe doing so is necessary to protect FoodiePlug, our users, or others. You may also stop using FoodiePlug and close your account at any time.</p>
+      <p>Sections of these Terms that by their nature should survive termination — such as intellectual property, disclaimers, and limitation of liability — will continue to apply.</p>
+    </section>
+
+    <section id="changes">
+      <h2>17. Changes to These Terms</h2>
+      <p>We may update these Terms from time to time to reflect changes to FoodiePlug or for legal or operational reasons. If we make material changes, we'll take reasonable steps to let you know, such as by posting an updated "Last updated" date above or notifying you directly. Continuing to use FoodiePlug after changes take effect means you accept the updated Terms.</p>
+    </section>
+
+    <section id="governing-law">
+      <h2>18. Governing Law</h2>
+      <p>These Terms are governed by the applicable laws of [JURISDICTION], without regard to its conflict-of-laws principles.</p>
+    </section>
+
+    <section id="contact">
+      <h2>19. Contact Us</h2>
+      <p>Questions, concerns, or feedback about these Terms are always welcome.</p>
+
+      <div class="contact-panel">
+        <h3>Questions about these Terms?</h3>
+        <p>If you have questions about these Terms &amp; Conditions, contact the FoodiePlug team.</p>
+        <a class="btn-pill" href="{% url 'contact' %}">Contact FoodiePlug →</a>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/terms.js' %}" defer></script>
+{% endblock %}

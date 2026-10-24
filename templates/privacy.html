@@ -1,0 +1,298 @@
+
+
+{% extends "public_base.html" %}
+{% load static %}
+
+{% block title %}Privacy Policy | FoodiePlug{% endblock %}
+
+{% block meta_description %}
+Read the FoodiePlug Privacy Policy to understand how we handle account information, meal preferences, grocery lists, food budgets, and AI-powered features.
+{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/privacy.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<body>
+
+<main class="wrap">
+
+  <section class="intro">
+    <h1>Privacy Policy</h1>
+    <p class="lead">Your information matters to us. Here's how FoodiePlug collects, uses, protects, and manages your information.</p>
+    <div class="meta-row">
+      <span><strong>Last updated:</strong> [DATE]</span>
+      <span><strong>Effective date:</strong> [DATE]</span>
+    </div>
+  </section>
+
+  <section class="glance">
+    <div class="glance-card">
+      <h2 style="margin:0;">Privacy at a glance</h2>
+      <p class="lead-sm">A simple overview of how your information is handled on FoodiePlug.</p>
+      <div class="glance-grid">
+        <div class="glance-item">
+          <div class="glance-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+          <div><h3>Account</h3><p>We collect information needed to create and manage your account.</p></div>
+        </div>
+        <div class="glance-item">
+          <div class="glance-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M4 8l8-5 8 5M4 16l8 5 8-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><h3>Personalization</h3><p>We use what you share to personalize meal-planning and food experiences.</p></div>
+        </div>
+        <div class="glance-item">
+          <div class="glance-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+          <div><h3>Security</h3><p>We take reasonable measures designed to protect your information.</p></div>
+        </div>
+        <div class="glance-item">
+          <div class="glance-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="17" r="2" stroke="currentColor" stroke-width="1.7"/></svg></div>
+          <div><h3>Control</h3><p>You can manage certain account information and privacy choices.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="doc-layout">
+    <nav class="toc-desktop" aria-label="On this page">
+      <h4>On this page</h4>
+      <ol id="tocList">
+        <li><a href="#about">1. About This Policy</a></li>
+        <li><a href="#collect">2. Information We Collect</a></li>
+        <li><a href="#provide">3. Information You Provide</a></li>
+        <li><a href="#automatic">4. Collected Automatically</a></li>
+        <li><a href="#use">5. How We Use Information</a></li>
+        <li><a href="#personalization">6. Meal Personalization</a></li>
+        <li><a href="#ai">7. AI-Powered Features</a></li>
+        <li><a href="#grocery">8. Grocery & Price Info</a></li>
+        <li><a href="#cookies">9. Cookies</a></li>
+        <li><a href="#sharing">10. How We Share</a></li>
+        <li><a href="#thirdparty">11. Third-Party Services</a></li>
+        <li><a href="#retention">12. Data Retention</a></li>
+        <li><a href="#security">13. Data Security</a></li>
+        <li><a href="#rights">14. Your Privacy Rights</a></li>
+        <li><a href="#children">15. Children's Privacy</a></li>
+        <li><a href="#international">16. International Transfers</a></li>
+        <li><a href="#changes">17. Changes to This Policy</a></li>
+        <li><a href="{% url 'contact' %}">18. Contact Us</a></li>
+      </ol>
+    </nav>
+
+    <article class="doc">
+
+      <details class="toc-mobile">
+        <summary>On this page <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+        <ol>
+          <li><a href="#about">1. About This Policy</a></li>
+          <li><a href="#collect">2. Information We Collect</a></li>
+          <li><a href="#provide">3. Information You Provide</a></li>
+          <li><a href="#automatic">4. Collected Automatically</a></li>
+          <li><a href="#use">5. How We Use Information</a></li>
+          <li><a href="#personalization">6. Meal Personalization</a></li>
+          <li><a href="#ai">7. AI-Powered Features</a></li>
+          <li><a href="#grocery">8. Grocery & Price Info</a></li>
+          <li><a href="#cookies">9. Cookies</a></li>
+          <li><a href="#sharing">10. How We Share</a></li>
+          <li><a href="#thirdparty">11. Third-Party Services</a></li>
+          <li><a href="#retention">12. Data Retention</a></li>
+          <li><a href="#security">13. Data Security</a></li>
+          <li><a href="#rights">14. Your Privacy Rights</a></li>
+          <li><a href="#children">15. Children's Privacy</a></li>
+          <li><a href="#international">16. International Transfers</a></li>
+          <li><a href="#changes">17. Changes to This Policy</a></li>
+          <li><a href="{% url 'contact' %}">18. Contact Us</a></li>
+        </ol>
+      </details>
+
+      <section id="about">
+        <h2>1. About this Privacy Policy</h2>
+        <p>This Privacy Policy explains how FoodiePlug collects, uses, shares, and protects information in connection with our meal-planning, grocery, and food-decision services (the "Services"). It applies whenever you create an account, use the app or website, or otherwise interact with FoodiePlug.</p>
+        <p>We've tried to write this in plain language rather than dense legal jargon. If anything is unclear, or you have a question about your information, you can reach us using the contact details in <a href="#contact">Section 18</a>.</p>
+      </section>
+
+      <section id="collect">
+        <h2>2. Information We Collect</h2>
+        <p>We collect a few categories of information to run FoodiePlug: information you give us directly, information generated by your use of food-planning features, and basic technical information collected automatically.</p>
+        <div class="category-grid">
+          <div class="category-card">
+            <h4>Account information</h4>
+            <ul><li>Full name</li><li>Username</li><li>Email address</li><li>Password / authentication credentials</li><li>Account preferences</li></ul>
+          </div>
+          <div class="category-card">
+            <h4>Food information you provide</h4>
+            <ul><li>Meal preferences</li><li>Grocery items</li><li>Food choices</li><li>Ingredients</li><li>Budget information</li><li>User-entered prices</li></ul>
+          </div>
+          <div class="category-card">
+            <h4>Technical information</h4>
+            <ul><li>Browser type</li><li>Device information</li><li>Operating system</li><li>IP address</li><li>Log & usage information</li></ul>
+          </div>
+        </div>
+        <p class="subtle">This list reflects the categories FoodiePlug actually collects to provide its features — it will be finalized against the live implementation before publication.</p>
+      </section>
+
+      <section id="provide">
+        <h2>3. Information You Provide</h2>
+        <p>You may provide information directly when you:</p>
+        <ul>
+          <li>Create an account</li>
+          <li>Update your profile</li>
+          <li>Create meal plans</li>
+          <li>Enter groceries or ingredients</li>
+          <li>Enter food prices or budgets</li>
+          <li>Interact with FoodiePlug features</li>
+          <li>Contact support or submit feedback</li>
+        </ul>
+      </section>
+
+      <section id="automatic">
+        <h2>4. Information Collected Automatically</h2>
+        <p>Some information is collected automatically as part of operating the Services:</p>
+        <ul>
+          <li>Device and browser information</li>
+          <li>IP address</li>
+          <li>Pages and features accessed</li>
+          <li>Approximate usage information</li>
+          <li>Diagnostic and log information</li>
+        </ul>
+        <p class="subtle">Necessary technical information (like login sessions) is distinct from optional analytics, which is only collected where actually implemented — we do not imply tracking technologies that aren't in use.</p>
+      </section>
+
+      <section id="use">
+        <h2>5. How We Use Your Information</h2>
+        <ul>
+          <li>Create and maintain your account</li>
+          <li>Authenticate you when you log in</li>
+          <li>Provide meal-planning functionality</li>
+          <li>Personalize food recommendations</li>
+          <li>Manage grocery planning and budget estimates</li>
+          <li>Improve FoodiePlug over time</li>
+          <li>Respond to support requests</li>
+          <li>Maintain platform security and detect abuse</li>
+          <li>Communicate important service information</li>
+          <li>Analyze product usage where applicable</li>
+        </ul>
+      </section>
+
+      <section id="personalization">
+        <h2>6. Meal Planning & Personalization</h2>
+        <p>Preferences you share — like dietary needs, favorite ingredients, or budget targets — help us tailor meal suggestions, grocery recommendations, food ideas, and meal schedules to you. Personalization exists to make FoodiePlug more useful, not to build a profile beyond what's needed for that purpose.</p>
+      </section>
+
+      <section id="ai">
+        <h2>7. AI-Powered Features</h2>
+        <p>Some FoodiePlug features use AI to generate recommendations, suggestions, or responses — for example, meal ideas based on what's in your fridge.</p>
+        <div class="ai-panel">
+          <h4>About AI-powered features</h4>
+          <p>Information you provide to an AI-powered feature may be processed in order to generate that feature's output. AI-generated results may not always be accurate, so use judgment before relying on them. Avoid submitting information you don't want processed by a given feature. The specific AI provider(s) and their data-handling practices will be identified here once finalized.</p>
+        </div>
+      </section>
+
+      <section id="grocery">
+        <h2>8. Grocery & Price Information</h2>
+        <p>You may voluntarily enter grocery prices, ingredient costs, shopping lists, and food-budget information. We use this to power budget calculations, grocery planning, meal recommendations, and personalized food decisions.</p>
+        <p class="subtle">User-entered prices reflect what you or other users have logged, and may not represent current market prices.</p>
+      </section>
+
+      <section id="cookies">
+        <h2>9. Cookies & Similar Technologies</h2>
+        <p>We use cookies and similar technologies for the following purposes, where implemented:</p>
+        <table class="cookie-table">
+          <thead><tr><th>Purpose</th><th>Why it's used</th></tr></thead>
+          <tbody>
+            <tr><td>Essential</td><td>Keeps the service functioning and secure.</td></tr>
+            <tr><td>Preferences</td><td>Remembers your selected settings.</td></tr>
+            <tr><td>Analytics</td><td>Helps us understand how the service is used, where applicable.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="sharing">
+        <h2>10. How We Share Information</h2>
+        <p>We share information with service providers and third parties only where necessary to operate the Services, meet legal requirements, or for other purposes described here — never broadly or without reason. Categories may include:</p>
+        <ul>
+          <li>Hosting and infrastructure providers</li>
+          <li>Authentication providers</li>
+          <li>Email providers</li>
+          <li>AI service providers</li>
+          <li>Analytics providers</li>
+          <li>Payment providers, if applicable</li>
+        </ul>
+        <p class="subtle">Specific providers actually used by FoodiePlug will be named here rather than described generically.</p>
+      </section>
+
+      <section id="thirdparty">
+        <h2>11. Third-Party Services</h2>
+        <p>FoodiePlug may integrate with external services such as Google authentication, email delivery, AI providers, cloud hosting, or payment processors. Each provider actually used will be listed here along with what's shared and why.</p>
+        <div class="info-card">
+          <h4>A note on third parties</h4>
+          <p>Third-party services have their own privacy policies and terms, which we encourage you to review.</p>
+        </div>
+      </section>
+
+      <section id="retention">
+        <h2>12. Data Retention</h2>
+        <div class="retention-grid">
+          <div class="retention-card"><h4>Active account</h4><p>Information is retained while your account is active.</p></div>
+          <div class="retention-card"><h4>Account deletion</h4><p>What happens to your information when you request deletion will be detailed here.</p></div>
+          <div class="retention-card"><h4>Legal & security needs</h4><p>Some information may be retained where required by law, fraud prevention, or dispute resolution.</p></div>
+        </div>
+      </section>
+
+      <section id="security">
+        <h2>13. Data Security</h2>
+        <p>We use reasonable technical and organizational measures designed to protect your information, including secure authentication, password protection, access controls, encryption where applicable, and secure infrastructure.</p>
+        <p class="subtle">No method of transmitting or storing information can be guaranteed to be completely secure.</p>
+      </section>
+
+      <section id="rights">
+        <h2>14. Your Privacy Rights</h2>
+        <p>Depending on your location and applicable law, you may have rights to access, correct, delete, restrict, or object to processing of your information, request data portability, or withdraw consent where relevant.</p>
+        <p>To exercise any of these rights, contact us using the details in <a href="#contact">Section 18</a>.</p>
+      </section>
+
+      <section id="children">
+        <h2>15. Children's Privacy</h2>
+        <p>FoodiePlug is not intended for children under [AGE] unless permitted by applicable law and appropriate consent requirements are satisfied.</p>
+      </section>
+
+      <section id="international">
+        <h2>16. International Data Transfers</h2>
+        <p>Where FoodiePlug uses cloud infrastructure or third-party services that process information outside your country, your information may be handled in those jurisdictions. [INSERT RELEVANT JURISDICTIONS / SAFEGUARDS]</p>
+      </section>
+
+      <section id="changes">
+        <h2>17. Changes to This Privacy Policy</h2>
+        <p>We may update this Privacy Policy from time to time. When we make material changes, we'll update the date at the top of this page and, where appropriate, notify you directly. Continuing to use FoodiePlug after changes take effect means you accept the updated policy, where legally applicable.</p>
+      </section>
+
+      <section id="contact">
+        <h2>18. Contact Us</h2>
+        <div class="contact-block">
+          <h2>Questions about your privacy?</h2>
+          <p>We're happy to help you understand how your information is handled.</p>
+          <div class="contact-emails">
+            <div><span>Privacy</span><strong>[PRIVACY EMAIL]</strong></div>
+            <div><span>General support</span><strong>[SUPPORT EMAIL]</strong></div>
+          </div>
+          <a href="{% url 'contact' %}" class="btn btn-solid">Contact FoodiePlug →</a>
+
+          <div class="related-links">
+            <h4>Related policies</h4>
+            <a href="{% url 'terms' %}">Terms & Conditions →</a>
+            <a href="{% url 'contact' %}">Contact Us →</a>
+          </div>
+        </div>
+      </section>
+
+    </article>
+  </div>
+</main>
+
+
+<script src="{% static 'js/intro.js' %}"></script>
+
+{% endblock %}
