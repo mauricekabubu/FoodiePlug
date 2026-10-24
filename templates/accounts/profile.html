@@ -1,0 +1,479 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Settings — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<script>
+  // Set theme before first paint to avoid a light/dark flash.
+  (function () {
+    try {
+      var pref = localStorage.getItem('foodieplug-theme') || 'system';
+      var resolved = pref === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : pref;
+      document.documentElement.setAttribute('data-theme', resolved);
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- ============ MOBILE TOPBAR ============ -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main-content">
+
+    {# Optional routes: {% url ... as var %} never raises, so a missing route just hides that control #}
+    {% url 'logout' as logout_url %}
+    {% url 'password_change' as password_change_url %}
+
+    <div class="st-page" id="st-page" data-active="{{ active_section|default:'profile' }}">
+
+      <header class="st-header">
+        <h1>Settings</h1>
+        <p>Make FoodiePlug work the way you like — manage your account, preferences, privacy, and food experience.</p>
+      </header>
+
+      <div class="st-layout">
+
+        <!-- ---------- section navigation ---------- -->
+        <nav class="st-nav" aria-label="Settings sections">
+          <ul>
+            <li><a href="#profile" data-section="profile">Profile</a></li>
+            <li><a href="#account" data-section="account">Account</a></li>
+            <li><a href="#appearance" data-section="appearance">Appearance</a></li>
+            <li><a href="#language" data-section="language">Language &amp; Region</a></li>
+            <li><a href="#food" data-section="food">Food Preferences</a></li>
+            <li><a href="#ai" data-section="ai">AI Personalization</a></li>
+            <li><a href="#notifications" data-section="notifications">Notifications</a></li>
+            <li><a href="#privacy" data-section="privacy">Privacy &amp; Data</a></li>
+            <li><a href="#security" data-section="security">Security</a></li>
+          </ul>
+        </nav>
+
+        <div class="st-content">
+
+          {# ================================================== PROFILE #}
+          <section class="st-panel" id="profile" data-panel="profile" aria-labelledby="profile-title">
+            <h2 id="profile-title">Profile</h2>
+            <p class="st-lead">How you appear in FoodiePlug.</p>
+
+            <form method="post" action="{% url 'settings' %}" enctype="multipart/form-data" class="st-form" data-settings-form novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="action" value="profile">
+
+              {% if errors.profile %}
+              <div class="st-error-summary" role="alert" tabindex="-1">{{ errors.profile }}</div>
+              {% endif %}
+
+              <div class="st-field">
+                <span class="st-label" id="avatar-label">Profile photo</span>
+                <div class="st-avatar-row">
+                  <div class="st-avatar" id="st-avatar-preview">
+                    {% if avatar_url %}
+                      <img src="{{ avatar_url }}" alt="Your profile photo" id="st-avatar-img" data-current-src="{{ avatar_url }}">
+                    {% else %}
+                      <span class="st-avatar-initial" id="st-avatar-initial">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+                      <img src="" alt="Preview of the selected photo" id="st-avatar-img" hidden>
+                    {% endif %}
+                  </div>
+                  <div class="st-avatar-actions">
+                    <label for="id_avatar" class="st-btn st-btn-secondary">{% if avatar_url %}Replace photo{% else %}Choose photo{% endif %}</label>
+                    <input type="file" id="id_avatar" name="avatar" accept="image/jpeg,image/png,image/webp" hidden aria-describedby="avatar-help">
+                    {% if avatar_url %}
+                    <label class="st-check"><input type="checkbox" name="remove_avatar" value="1" id="id_remove_avatar"> Remove current photo</label>
+                    {% endif %}
+                    <p class="st-hint" id="avatar-help">JPG, PNG or WebP. The server checks the file before saving it.</p>
+                  </div>
+                </div>
+                {% if errors.avatar %}<p class="st-error">{{ errors.avatar }}</p>{% endif %}
+              </div>
+
+              <div class="st-row">
+                <div class="st-field {% if errors.first_name %}has-error{% endif %}">
+                  <label for="id_first_name">First name</label>
+                  <input type="text" id="id_first_name" name="first_name" maxlength="150" autocomplete="given-name"
+                         value="{% if values %}{{ values.first_name }}{% else %}{{ user.first_name }}{% endif %}">
+                  {% if errors.first_name %}<p class="st-error">{{ errors.first_name }}</p>{% endif %}
+                </div>
+                <div class="st-field {% if errors.last_name %}has-error{% endif %}">
+                  <label for="id_last_name">Last name</label>
+                  <input type="text" id="id_last_name" name="last_name" maxlength="150" autocomplete="family-name"
+                         value="{% if values %}{{ values.last_name }}{% else %}{{ user.last_name }}{% endif %}">
+                  {% if errors.last_name %}<p class="st-error">{{ errors.last_name }}</p>{% endif %}
+                </div>
+              </div>
+
+              <div class="st-field">
+                <label for="id_username">Username</label>
+                <input type="text" id="id_username" value="{{ user.username }}" readonly aria-describedby="username-help">
+                <p class="st-hint" id="username-help">Your username can't be changed here.</p>
+              </div>
+
+              <div class="st-field {% if errors.email %}has-error{% endif %}">
+                <label for="id_email">Email address</label>
+                <input type="email" id="id_email" name="email" autocomplete="email"
+                       value="{% if values %}{{ values.email }}{% else %}{{ user.email }}{% endif %}"
+                       {% if errors.email %}aria-invalid="true"{% endif %}>
+                <p class="st-hint">Changing your email follows FoodiePlug's verification rules.</p>
+                {% if errors.email %}<p class="st-error">{{ errors.email }}</p>{% endif %}
+              </div>
+
+              <div class="st-field {% if errors.display_name %}has-error{% endif %}">
+                <label for="id_display_name">Display name <small>(optional)</small></label>
+                <input type="text" id="id_display_name" name="display_name" maxlength="200"
+                       value="{% if values %}{{ values.display_name }}{% else %}{{ profile.display_name }}{% endif %}">
+                {% if errors.display_name %}<p class="st-error">{{ errors.display_name }}</p>{% endif %}
+              </div>
+
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-primary">Save changes</button>
+                <button type="reset" class="st-btn st-btn-secondary" data-cancel>Cancel changes</button>
+                <span class="st-status" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+          </section>
+
+          {# ================================================== ACCOUNT #}
+          <section class="st-panel" id="account" data-panel="account" aria-labelledby="account-title">
+            <h2 id="account-title">Account</h2>
+            <p class="st-lead">Basic information about your account.</p>
+
+            <dl class="st-facts">
+              <div><dt>Email</dt><dd>{{ user.email|default:"Not set" }}</dd></div>
+              <div><dt>Member since</dt><dd>{{ user.date_joined|date:"j F Y" }}</dd></div>
+              {% if email_verified is not None and email_verified != "" %}
+              <div><dt>Email verification</dt><dd>{% if email_verified %}Verified{% else %}Not verified{% endif %}</dd></div>
+              {% endif %}
+              <div><dt>Status</dt><dd>{% if user.is_active %}Active{% else %}Inactive{% endif %}</dd></div>
+            </dl>
+
+            <div class="st-note">
+              <h3>Delete account</h3>
+              <p>Account deletion isn't available in the app yet. To have your account and food records deleted, contact support through the <a href="{% url 'help' %}">Help Center</a>.</p>
+            </div>
+          </section>
+
+          {# ================================================== APPEARANCE #}
+          <section class="st-panel" id="appearance" data-panel="appearance" aria-labelledby="appearance-title">
+            <h2 id="appearance-title">Appearance</h2>
+            <p class="st-lead">Choose how FoodiePlug looks. Changes apply immediately and are remembered on this device.</p>
+
+            <div class="st-theme" role="group" aria-label="Theme">
+              <button type="button" class="st-theme-option" data-st-theme="light" aria-pressed="false">
+                <span class="st-theme-swatch is-light" aria-hidden="true"></span>
+                <span class="st-theme-name">Light</span>
+              </button>
+              <button type="button" class="st-theme-option" data-st-theme="dark" aria-pressed="false">
+                <span class="st-theme-swatch is-dark" aria-hidden="true"></span>
+                <span class="st-theme-name">Dark</span>
+              </button>
+              <button type="button" class="st-theme-option" data-st-theme="system" aria-pressed="false">
+                <span class="st-theme-swatch is-system" aria-hidden="true"></span>
+                <span class="st-theme-name">System</span>
+              </button>
+            </div>
+            <p class="st-hint" id="st-theme-status" role="status" aria-live="polite"></p>
+            <p class="st-hint">System follows your device's light or dark setting.</p>
+          </section>
+
+          {# ================================================== LANGUAGE & REGION #}
+          <section class="st-panel" id="language" data-panel="language" aria-labelledby="language-title">
+            <h2 id="language-title">Language &amp; Region</h2>
+            <p class="st-lead">Language for FoodiePlug AI, and regional formats.</p>
+
+            {% if language_choices %}
+            <form method="post" action="{% url 'settings' %}" class="st-form" data-settings-form novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="section" value="language">
+
+              <div class="st-field {% if errors.language %}has-error{% endif %}">
+                <label for="id_language">Preferred language</label>
+                <select id="id_language" name="language" aria-describedby="language-help">
+                  {% for value, label in language_choices %}
+                  <option value="{{ value }}" {% if value == language %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <p class="st-hint" id="language-help">This sets how FoodiePlug AI talks to you. The rest of the interface stays in English until it is translated.</p>
+                {% if errors.language %}<p class="st-error">{{ errors.language }}</p>{% endif %}
+              </div>
+
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-primary">Save changes</button>
+                <button type="reset" class="st-btn st-btn-secondary" data-cancel>Cancel changes</button>
+                <span class="st-status" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+            {% else %}
+            <p class="st-soon">Language preferences are coming soon.</p>
+            {% endif %}
+
+            <dl class="st-facts st-facts-spaced">
+              <div><dt>Time zone</dt><dd>Africa/Nairobi</dd></div>
+              <div><dt>Currency</dt><dd>Kenyan shilling (KES)</dd></div>
+            </dl>
+            <p class="st-hint">FoodiePlug uses Nairobi time and KES for all dates and amounts, so your plans and budgets stay consistent.</p>
+          </section>
+
+          {# ================================================== FOOD PREFERENCES #}
+          <section class="st-panel" id="food" data-panel="food" aria-labelledby="food-title">
+            <h2 id="food-title">Food Preferences</h2>
+            <p class="st-lead">Favorite foods, foods to avoid, and how you like to cook.</p>
+            <p class="st-soon">Food preferences are coming soon. Until then, your favorite meals live under <a href="{% url 'meals:favorite_meals' %}">Favorites</a> in My Meals.</p>
+          </section>
+
+          {# ================================================== AI PERSONALIZATION #}
+          <section class="st-panel" id="ai" data-panel="ai" aria-labelledby="ai-title">
+            <h2 id="ai-title">AI Personalization</h2>
+            <p class="st-lead">Choose how FoodiePlug AI talks to you and which of your data it may use.</p>
+
+            {% if ai_settings %}
+            <form method="post" action="{% url 'settings' %}" class="st-form" data-settings-form novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="section" value="ai">
+
+              <div class="st-field {% if errors.slang_level %}has-error{% endif %}">
+                <label for="id_slang">Slang level</label>
+                <select id="id_slang" name="slang_level">
+                  <option value="low" {% if ai_settings.slang_level == "low" %}selected{% endif %}>Low</option>
+                  <option value="medium" {% if ai_settings.slang_level == "medium" %}selected{% endif %}>Medium</option>
+                  <option value="high" {% if ai_settings.slang_level == "high" %}selected{% endif %}>High</option>
+                </select>
+                {% if errors.slang_level %}<p class="st-error">{{ errors.slang_level }}</p>{% endif %}
+              </div>
+
+              <fieldset class="st-fieldset">
+                <legend>Data FoodiePlug AI may use</legend>
+                <p class="st-hint">When a category is off, it isn't used to personalise AI answers.</p>
+
+                <ul class="st-toggles">
+                  <li>
+                    <div class="st-toggle-text"><label for="ai_pantry">Pantry</label><p>What you have at home and what's running low.</p></div>
+                    <span class="st-switch"><input type="checkbox" id="ai_pantry" name="use_pantry" role="switch" {% if ai_settings.use_pantry %}checked{% endif %}><span class="st-track" aria-hidden="true"></span><span class="st-state" aria-hidden="true"></span></span>
+                  </li>
+                  <li>
+                    <div class="st-toggle-text"><label for="ai_plans">Meal plans</label><p>Your planned meals for the week.</p></div>
+                    <span class="st-switch"><input type="checkbox" id="ai_plans" name="use_meal_plans" role="switch" {% if ai_settings.use_meal_plans %}checked{% endif %}><span class="st-track" aria-hidden="true"></span><span class="st-state" aria-hidden="true"></span></span>
+                  </li>
+                  <li>
+                    <div class="st-toggle-text"><label for="ai_shop">Shopping lists</label><p>What you plan to buy.</p></div>
+                    <span class="st-switch"><input type="checkbox" id="ai_shop" name="use_shopping" role="switch" {% if ai_settings.use_shopping %}checked{% endif %}><span class="st-track" aria-hidden="true"></span><span class="st-state" aria-hidden="true"></span></span>
+                  </li>
+                  <li>
+                    <div class="st-toggle-text"><label for="ai_budget">Budget and spending</label><p>Your budgets and recorded expenses.</p></div>
+                    <span class="st-switch"><input type="checkbox" id="ai_budget" name="use_budget" role="switch" {% if ai_settings.use_budget %}checked{% endif %}><span class="st-track" aria-hidden="true"></span><span class="st-state" aria-hidden="true"></span></span>
+                  </li>
+                </ul>
+              </fieldset>
+
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-primary">Save changes</button>
+                <button type="reset" class="st-btn st-btn-secondary" data-cancel>Cancel changes</button>
+                <span class="st-status" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+            {% else %}
+            <p class="st-soon">AI personalization settings are coming soon.</p>
+            {% endif %}
+          </section>
+
+          {# ================================================== NOTIFICATIONS #}
+          <section class="st-panel" id="notifications" data-panel="notifications" aria-labelledby="notifications-title">
+            <h2 id="notifications-title">Notifications</h2>
+            <p class="st-lead">Choose which reminders you'd like to receive.</p>
+
+            {% if notification_settings %}
+            <form method="post" action="{% url 'settings' %}" class="st-form" data-settings-form novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="section" value="notifications">
+
+              <ul class="st-toggles">
+                {% for n in notification_settings %}
+                <li>
+                  <div class="st-toggle-text"><label for="notif_{{ n.key }}">{{ n.label }}</label><p>{{ n.description }}</p></div>
+                  <span class="st-switch"><input type="checkbox" id="notif_{{ n.key }}" name="notif_{{ n.key }}" role="switch" {% if n.enabled %}checked{% endif %}><span class="st-track" aria-hidden="true"></span><span class="st-state" aria-hidden="true"></span></span>
+                </li>
+                {% endfor %}
+              </ul>
+
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-primary">Save changes</button>
+                <button type="reset" class="st-btn st-btn-secondary" data-cancel>Cancel changes</button>
+                <span class="st-status" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+            {% else %}
+            <p class="st-soon">Notification preferences are coming soon.</p>
+            {% endif %}
+
+            <p class="st-hint st-hint-spaced">Important account and security messages are always sent and can't be turned off.</p>
+          </section>
+
+          {# ================================================== PRIVACY & DATA #}
+          <section class="st-panel" id="privacy" data-panel="privacy" aria-labelledby="privacy-title">
+            <h2 id="privacy-title">Privacy &amp; Data</h2>
+            <p class="st-lead">What FoodiePlug keeps and how it's used.</p>
+
+            <ul class="st-plain">
+              <li>Your meals, pantry, shopping lists and budget records are stored in your account and used to power those features for you.</li>
+              <li>Your records are private to your account.</li>
+              {% if ai_settings %}<li>FoodiePlug AI only uses the data categories you allow under <a href="#ai" data-section-link="ai">AI Personalization</a>.</li>{% endif %}
+            </ul>
+
+            <div class="st-note">
+              <h3>Download your data</h3>
+              <p>Data export isn't available yet.</p>
+            </div>
+          </section>
+
+          {# ================================================== SECURITY #}
+          <section class="st-panel" id="security" data-panel="security" aria-labelledby="security-title">
+            <h2 id="security-title">Security</h2>
+            <p class="st-lead">Keep your account safe.</p>
+
+            <div class="st-note">
+              <h3>Password</h3>
+              {% if password_change_url %}
+              <p>Change your password using your current one.</p>
+              <a class="st-btn st-btn-secondary" href="{{ password_change_url }}">Change password</a>
+              {% else %}
+              <p>Password change is coming soon.</p>
+              {% endif %}
+            </div>
+
+            {% if logout_url %}
+            <div class="st-note">
+              <h3>Sign out</h3>
+              <p>Sign out of FoodiePlug on this device.</p>
+              <form method="post" action="{{ logout_url }}">
+                {% csrf_token %}
+                <button type="submit" class="st-btn st-btn-secondary">Sign out</button>
+              </form>
+            </div>
+            {% endif %}
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/toasts.js' %}"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/profile.js' %}" defer></script>
+
+</body>
+</html>

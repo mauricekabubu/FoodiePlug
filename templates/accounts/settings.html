@@ -1,0 +1,600 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Settings — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+
+<script>
+  // Set theme before first paint to avoid a light/dark flash.
+  (function () {
+    try {
+      var pref = localStorage.getItem('foodieplug-theme') || 'system';
+      var resolved = pref === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : pref;
+      document.documentElement.setAttribute('data-theme', resolved);
+    } catch (e) {}
+  })();
+</script>
+</head>
+
+<body>
+
+{# Routes that may not exist yet resolve to "" instead of raising NoReverseMatch; their links fall back to "#". #}
+{% url 'ai:page' as ai_url %}
+{% url 'insights:overview' as insights_url %}
+{% url 'logout' as logout_url %}
+
+{% include "partials/django_toasts.html" %}
+
+<!-- MOBILE TOPBAR -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="st-page" id="st-page" data-active-section="{{ active_section|default:'profile' }}">
+
+      <header class="st-header">
+        <h1>Settings</h1>
+        <p>Make FoodiePlug work the way you like — manage your account, preferences, privacy, and food experience.</p>
+      </header>
+
+      <div class="st-layout">
+
+        <!-- ============ SECTION NAV ============ -->
+        <nav class="st-nav" aria-label="Settings sections">
+
+          {# Compact selector for phones (hidden on desktop) #}
+          <div class="st-select-wrap">
+            <label for="st-select">Section</label>
+            <select id="st-select">
+              <option value="profile">Profile</option>
+              <option value="account">Account</option>
+              <option value="appearance">Appearance</option>
+              <option value="region">Language &amp; Region</option>
+              <option value="food">Food Preferences (soon)</option>
+              <option value="ai">AI Personalization</option>
+              <option value="notifications">Notifications (soon)</option>
+              <option value="privacy">Privacy &amp; Data</option>
+              <option value="security">Security</option>
+            </select>
+          </div>
+
+          <ul class="st-nav-list">
+            <li><a href="#profile" data-nav="profile">Profile</a></li>
+            <li><a href="#account" data-nav="account">Account</a></li>
+            <li><a href="#appearance" data-nav="appearance">Appearance</a></li>
+            <li><a href="#region" data-nav="region">Language &amp; Region</a></li>
+            <li><a href="#food" data-nav="food">Food Preferences <span class="st-soon-tag">Soon</span></a></li>
+            <li><a href="#ai" data-nav="ai">AI Personalization</a></li>
+            <li><a href="#notifications" data-nav="notifications">Notifications <span class="st-soon-tag">Soon</span></a></li>
+            <li><a href="#privacy" data-nav="privacy">Privacy &amp; Data</a></li>
+            <li><a href="#security" data-nav="security">Security</a></li>
+          </ul>
+        </nav>
+
+        <!-- ============ PANELS ============ -->
+        <div class="st-content">
+
+          <!-- PROFILE -->
+          <section class="st-card st-panel" id="profile" data-panel aria-labelledby="profile-title">
+            <div class="st-panel-head">
+              <h2 id="profile-title">Profile</h2>
+              <p>Your name and email address.</p>
+            </div>
+
+            <form method="post" action="{% url 'settings' %}" class="st-form" data-settings-form novalidate>
+              {% csrf_token %}
+              <input type="hidden" name="action" value="profile">
+
+              {% if profile_form.non_field_errors %}
+                <div class="st-alert st-alert-error" role="alert">{% for e in profile_form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>
+              {% endif %}
+
+              <div class="st-row">
+                <div class="st-field {% if profile_form.first_name.errors %}has-error{% endif %}">
+                  <label for="st-first-name">First name</label>
+                  <input type="text" id="st-first-name" name="first_name" maxlength="150" autocomplete="given-name"
+                         value="{{ profile_form.first_name.value|default_if_none:'' }}"
+                         {% if profile_form.first_name.errors %}aria-invalid="true" aria-describedby="err-first-name"{% endif %}>
+                  {% for e in profile_form.first_name.errors %}<p class="st-error" id="err-first-name">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="st-field {% if profile_form.last_name.errors %}has-error{% endif %}">
+                  <label for="st-last-name">Last name</label>
+                  <input type="text" id="st-last-name" name="last_name" maxlength="150" autocomplete="family-name"
+                         value="{{ profile_form.last_name.value|default_if_none:'' }}"
+                         {% if profile_form.last_name.errors %}aria-invalid="true" aria-describedby="err-last-name"{% endif %}>
+                  {% for e in profile_form.last_name.errors %}<p class="st-error" id="err-last-name">{{ e }}</p>{% endfor %}
+                </div>
+              </div>
+
+              <div class="st-field {% if profile_form.email.errors %}has-error{% endif %}">
+                <label for="st-email">Email address</label>
+                <input type="email" id="st-email" name="email" autocomplete="email" required
+                       value="{{ profile_form.email.value|default_if_none:'' }}"
+                       aria-describedby="hint-email{% if profile_form.email.errors %} err-email{% endif %}"
+                       {% if profile_form.email.errors %}aria-invalid="true"{% endif %}>
+                <p class="st-hint" id="hint-email">Make sure you can receive mail at this address.</p>
+                {% for e in profile_form.email.errors %}<p class="st-error" id="err-email">{{ e }}</p>{% endfor %}
+              </div>
+
+              <div class="st-field">
+                <label for="st-username">Username</label>
+                <input type="text" id="st-username" value="{{ account_user.username }}" disabled>
+                <p class="st-hint">Your username can't be changed here.</p>
+              </div>
+
+              <div class="st-note">
+                <strong>Profile photo and bio</strong> aren't available yet. They'll appear here once profile pictures are supported.
+                You can also see <a href="{% url 'profile' %}">your profile page</a>.
+              </div>
+
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-primary">Save changes</button>
+                <button type="reset" class="st-btn st-btn-secondary">Cancel changes</button>
+                <span class="st-status" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+          </section>
+
+          <!-- ACCOUNT -->
+          <section class="st-card st-panel" id="account" data-panel aria-labelledby="account-title">
+            <div class="st-panel-head">
+              <h2 id="account-title">Account</h2>
+              <p>The basics about your FoodiePlug account.</p>
+            </div>
+
+            <dl class="st-facts">
+              <div><dt>Username</dt><dd>{{ account_user.username }}</dd></div>
+              <div><dt>Email</dt><dd>{{ account_user.email|default:"Not set" }}</dd></div>
+              <div><dt>Member since</dt><dd>{{ account_user.date_joined|date:"j F Y" }}</dd></div>
+              <div><dt>Last sign-in</dt><dd>{% if account_user.last_login %}{{ account_user.last_login|date:"j M Y, H:i" }}{% else %}Not recorded{% endif %}</dd></div>
+              <div><dt>Status</dt><dd>{% if account_user.is_active %}Active{% else %}Inactive{% endif %}</dd></div>
+            </dl>
+
+            <div class="st-note">
+              <strong>Deleting your account</strong> isn't available in Settings yet, because it needs a safe confirmation process.
+              If you want your account removed, please <a href="{% url 'contact' %}">contact us</a>.
+            </div>
+          </section>
+
+          <!-- APPEARANCE -->
+          <section class="st-card st-panel" id="appearance" data-panel aria-labelledby="appearance-title">
+            <div class="st-panel-head">
+              <h2 id="appearance-title">Appearance</h2>
+              <p>Choose how FoodiePlug looks. The change applies straight away.</p>
+            </div>
+
+            <fieldset class="st-theme" id="st-theme">
+              <legend class="st-sr">Theme</legend>
+
+              <label class="st-theme-option">
+                <input type="radio" name="theme" value="light">
+                <span class="st-theme-card">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  <strong>Light</strong>
+                  <small>Bright and clean</small>
+                </span>
+              </label>
+
+              <label class="st-theme-option">
+                <input type="radio" name="theme" value="dark">
+                <span class="st-theme-card">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                  <strong>Dark</strong>
+                  <small>Easier on the eyes at night</small>
+                </span>
+              </label>
+
+              <label class="st-theme-option">
+                <input type="radio" name="theme" value="system">
+                <span class="st-theme-card">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  <strong>System</strong>
+                  <small>Match your device</small>
+                </span>
+              </label>
+            </fieldset>
+
+            <p class="st-status" id="st-theme-status" role="status" aria-live="polite"></p>
+            <p class="st-hint">This is saved on this device and browser. It isn't linked to your account yet, so other devices keep their own choice.</p>
+          </section>
+
+          <!-- LANGUAGE & REGION -->
+          <section class="st-card st-panel" id="region" data-panel aria-labelledby="region-title">
+            <div class="st-panel-head">
+              <h2 id="region-title">Language &amp; Region</h2>
+              <p>How currency, dates and language work in FoodiePlug.</p>
+            </div>
+
+            <dl class="st-facts">
+              <div><dt>Currency</dt><dd>Kenyan shilling (KES)</dd></div>
+              <div><dt>Time zone</dt><dd>{{ time_zone }}</dd></div>
+            </dl>
+            <p class="st-hint">All budgets and spending use KES, and dates follow the application's time zone. These aren't switchable yet.</p>
+
+            <div class="st-soon">
+              <span class="st-soon-badge">Coming soon</span>
+              <h3>Language preference</h3>
+              <p>Choosing English, Kiswahili, Sheng or Kenyan Mix will arrive once language support is built into the app.</p>
+            </div>
+          </section>
+
+          <!-- FOOD PREFERENCES (placeholder) -->
+          <section class="st-card st-panel" id="food" data-panel aria-labelledby="food-title">
+            <div class="st-panel-head">
+              <h2 id="food-title">Food Preferences</h2>
+              <p>Personalise the meals and foods FoodiePlug suggests.</p>
+            </div>
+
+            <div class="st-soon">
+              <span class="st-soon-badge">Coming soon</span>
+              <h3>Not available yet</h3>
+              <p>You'll be able to save favourite and disliked foods, preferred meal types, and cooking effort here. Preferences will always be kept separate from allergies or medical dietary needs.</p>
+            </div>
+          </section>
+
+          <!-- AI PERSONALIZATION -->
+          <section class="st-card st-panel" id="ai" data-panel aria-labelledby="ai-title">
+            <div class="st-panel-head">
+              <h2 id="ai-title">AI Personalization</h2>
+              <p>Connect your own Google Gemini API key and manage the model FoodiePlug AI uses for your account.</p>
+            </div>
+
+            <div class="st-note">
+              <strong>Your key, your usage.</strong>
+              FoodiePlug uses the Gemini API key saved for your account. Your key is stored encrypted on the server and is never displayed again after saving.
+              Keep it private and check your usage and limits in Google AI Studio.
+            </div>
+
+            <dl class="st-facts">
+              <div>
+                <dt>Provider</dt>
+                <dd>Google Gemini</dd>
+              </div>
+              <div>
+                <dt>API key</dt>
+                <dd>
+                  {% if ai_config.has_api_key %}
+                    Saved — hidden for security
+                  {% else %}
+                    No API key saved
+                  {% endif %}
+                </dd>
+              </div>
+              <div>
+                <dt>Connection status</dt>
+                <dd>
+                  {% if ai_config.connection_status == "success" %}
+                    Connected
+                  {% elif ai_config.connection_status == "failed" %}
+                    Last test failed
+                  {% elif ai_config.connection_status == "untested" %}
+                    Not tested
+                  {% else %}
+                    Not tested
+                  {% endif %}
+                </dd>
+              </div>
+              {% if ai_config.connection_tested_at %}
+              <div>
+                <dt>Last connection test</dt>
+                <dd>{{ ai_config.connection_tested_at|date:"j M Y, H:i" }}</dd>
+              </div>
+              {% endif %}
+            </dl>
+
+            <form method="post" action="{% url 'settings' %}" class="st-form" autocomplete="off">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="gemini_save">
+
+              <div class="st-field">
+                <label for="gemini-model">Gemini model</label>
+                <select id="gemini-model" name="model_name" required>
+                  {% for model_value, model_label in gemini_models.items %}
+                    <option value="{{ model_value }}" {% if ai_config.model_name == model_value %}selected{% endif %}>{{ model_label }}</option>
+                  {% empty %}
+                    <option value="{{ ai_config.model_name }}" selected>{{ ai_config.model_name }}</option>
+                  {% endfor %}
+                </select>
+                <p class="st-hint">Choose a model available to your Google AI Studio API key. Availability and quotas depend on your Google account.</p>
+              </div>
+
+              <div class="st-field">
+                <label for="gemini-api-key">Gemini API key</label>
+                <input
+                  type="password"
+                  id="gemini-api-key"
+                  name="gemini_api_key"
+                  autocomplete="new-password"
+                  maxlength="500"
+                  spellcheck="false"
+                  placeholder="{% if ai_config.has_api_key %}Saved key — enter a new key only to replace it{% else %}Paste your Gemini API key{% endif %}"
+                >
+                <p class="st-hint">
+                  {% if ai_config.has_api_key %}
+                    Your saved key cannot be viewed here. Leave this blank only when testing the existing saved key.
+                  {% else %}
+                    Create an API key in Google AI Studio and paste it here. Never share your key with anyone.
+                  {% endif %}
+                </p>
+              </div>
+
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-primary">Save API key</button>
+                <button
+                  type="submit"
+                  class="st-btn st-btn-secondary"
+                  onclick="this.form.querySelector('[name=action]').value='gemini_test'"
+                >Save &amp; test</button>
+                <span class="st-status" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+
+            {% if ai_config.has_api_key %}
+              <hr class="st-rule">
+
+              <h3 class="st-h3">Manage saved key</h3>
+              <p class="st-hint st-hint-block">Test the key already saved to your account without entering it again.</p>
+
+              <form method="post" action="{% url 'settings' %}" class="st-form" style="margin-top:1rem;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="gemini_test">
+                <input type="hidden" name="model_name" value="{{ ai_config.model_name }}">
+                <div class="st-actions">
+                  <button type="submit" class="st-btn st-btn-secondary">Test saved key</button>
+                </div>
+              </form>
+
+              <form method="post" action="{% url 'settings' %}" class="st-form" style="margin-top:.75rem;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="gemini_remove">
+                <div class="st-actions">
+                  <button
+                    type="submit"
+                    class="st-btn st-btn-secondary"
+                    onclick="return confirm('Remove your saved Gemini API key? FoodiePlug AI will stop working for your account until you add another key.')"
+                  >Remove API key</button>
+                </div>
+              </form>
+            {% endif %}
+          </section>
+
+          <!-- NOTIFICATIONS (placeholder) -->
+          <section class="st-card st-panel" id="notifications" data-panel aria-labelledby="notifications-title">
+            <div class="st-panel-head">
+              <h2 id="notifications-title">Notifications</h2>
+              <p>Decide which reminders and alerts you receive.</p>
+            </div>
+
+            <div class="st-soon">
+              <span class="st-soon-badge">Coming soon</span>
+              <h3>Not available yet</h3>
+              <p>Notification preferences for pantry expiry, low stock, budget limits, meal plans and shopping will be added when reminders can be delivered. Nothing is switched on or off here today.</p>
+            </div>
+          </section>
+
+          <!-- PRIVACY & DATA -->
+          <section class="st-card st-panel" id="privacy" data-panel aria-labelledby="privacy-title">
+            <div class="st-panel-head">
+              <h2 id="privacy-title">Privacy &amp; Data</h2>
+              <p>What FoodiePlug keeps, and where to learn more.</p>
+            </div>
+
+            <ul class="st-points">
+              <li>FoodiePlug stores the meals, pantry items, shopping lists and budgets you add, so those features can work for your account.</li>
+              <li>Your records are shown only when you're signed in to your own account.</li>
+              <li>For the full details of how information is handled, read our privacy policy.</li>
+            </ul>
+
+            <div class="st-actions st-actions-links">
+              <a class="st-btn st-btn-secondary" href="{% url 'privacy' %}">Privacy policy</a>
+              <a class="st-btn st-btn-secondary" href="{% url 'terms' %}">Terms</a>
+            </div>
+
+            <div class="st-note">
+              <strong>Downloading your data</strong> and <strong>deleting your account</strong> aren't self-service yet.
+              To ask for either, please <a href="{% url 'contact' %}">contact us</a>.
+            </div>
+          </section>
+
+          <!-- SECURITY -->
+          <section class="st-card st-panel" id="security" data-panel aria-labelledby="security-title">
+            <div class="st-panel-head">
+              <h2 id="security-title">Security</h2>
+              <p>Keep your account safe.</p>
+            </div>
+
+            {% if password_form %}
+              <h3 class="st-h3">Change password</h3>
+
+              <form method="post" action="{% url 'settings' %}" class="st-form" data-settings-form novalidate autocomplete="off">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="password">
+
+                {% if password_form.non_field_errors %}
+                  <div class="st-alert st-alert-error" role="alert">{% for e in password_form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>
+                {% endif %}
+
+                <div class="st-field {% if password_form.old_password.errors %}has-error{% endif %}">
+                  <label for="st-old-password">Current password</label>
+                  <input type="password" id="st-old-password" name="old_password" autocomplete="current-password" required
+                         {% if password_form.old_password.errors %}aria-invalid="true" aria-describedby="err-old-password"{% endif %}>
+                  {% for e in password_form.old_password.errors %}<p class="st-error" id="err-old-password">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="st-field {% if password_form.new_password1.errors %}has-error{% endif %}">
+                  <label for="st-new-password1">New password</label>
+                  <input type="password" id="st-new-password1" name="new_password1" autocomplete="new-password" required
+                         aria-describedby="hint-password{% if password_form.new_password1.errors %} err-new-password1{% endif %}"
+                         {% if password_form.new_password1.errors %}aria-invalid="true"{% endif %}>
+                  <div class="st-hint st-help" id="hint-password">{{ password_form.new_password1.help_text|safe }}</div>
+                  {% for e in password_form.new_password1.errors %}<p class="st-error" id="err-new-password1">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="st-field {% if password_form.new_password2.errors %}has-error{% endif %}">
+                  <label for="st-new-password2">Confirm new password</label>
+                  <input type="password" id="st-new-password2" name="new_password2" autocomplete="new-password" required
+                         {% if password_form.new_password2.errors %}aria-invalid="true" aria-describedby="err-new-password2"{% endif %}>
+                  {% for e in password_form.new_password2.errors %}<p class="st-error" id="err-new-password2">{{ e }}</p>{% endfor %}
+                </div>
+
+                <div class="st-actions">
+                  <button type="submit" class="st-btn st-btn-primary">Update password</button>
+                  <button type="reset" class="st-btn st-btn-secondary">Cancel changes</button>
+                  <span class="st-status" role="status" aria-live="polite"></span>
+                </div>
+              </form>
+            {% else %}
+              <div class="st-note">
+                <strong>No password on this account.</strong> It doesn't use a FoodiePlug password, so there's nothing to change here.
+                Manage your password with the service you use to sign in.
+              </div>
+            {% endif %}
+
+            <hr class="st-rule">
+
+            <h3 class="st-h3">Sessions</h3>
+            <p class="st-hint st-hint-block">Viewing active sessions and signing out other devices aren't available yet. You can sign out of this device below.</p>
+
+            <form method="post" action="{{ logout_url|default:'#' }}" class="st-form">
+              {% csrf_token %}
+              <div class="st-actions">
+                <button type="submit" class="st-btn st-btn-secondary">Sign out of this device</button>
+              </div>
+            </form>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/settings.js' %}" defer></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+
+</body>
+</html>
