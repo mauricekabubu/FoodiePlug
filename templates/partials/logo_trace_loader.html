@@ -1,0 +1,59 @@
+<span
+    class="foodieplug-logo-trace-loader {{ class_name|default:'' }}"
+    data-foodieplug-logo-trace-loader
+    data-loading="{% if loading == False %}false{% else %}true{% endif %}"
+    data-is-complete="{% if is_complete %}true{% else %}false{% endif %}"
+    data-loop-duration-seconds="{{ loop_duration_seconds|default:1.8 }}"
+    data-fill-fade-seconds="{{ fill_fade_seconds|default:0.45 }}"
+    data-stroke-width="{{ stroke_width|default:2.5 }}"
+>
+    <svg
+        class="foodieplug-logo-trace-loader__svg"
+        width="{{ size|default:64 }}"
+        height="{{ size|default:64 }}"
+        viewBox="0 0 64 64"
+        role="status"
+        aria-label="{{ aria_label|default:'Loading FoodiePlug' }}"
+        xmlns="http://www.w3.org/2000/svg"
+        focusable="false"
+    >
+        <g aria-hidden="true" focusable="false">
+            <path
+                class="foodieplug-logo-trace-loader__outline"
+                d="M32 1a31 31 0 1 1 0 62 31 31 0 1 1 0-62Z"
+            />
+            <path
+                class="foodieplug-logo-trace-loader__outline"
+                d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z"
+            />
+            <path
+                class="foodieplug-logo-trace-loader__outline"
+                d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5z"
+            />
+        </g>
+        <g aria-hidden="true" focusable="false">
+            <path
+                class="foodieplug-logo-trace-loader__trace"
+                pathLength="1"
+                d="M32 1a31 31 0 1 1 0 62 31 31 0 1 1 0-62Z"
+            />
+            <path
+                class="foodieplug-logo-trace-loader__trace"
+                pathLength="1"
+                d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z"
+            />
+            <path
+                class="foodieplug-logo-trace-loader__trace"
+                pathLength="1"
+                d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5z"
+            />
+        </g>
+        <path
+            class="foodieplug-logo-trace-loader__fill"
+            d="M32 1a31 31 0 1 1 0 62 31 31 0 1 1 0-62Z M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5z"
+            fill-rule="evenodd"
+            aria-hidden="true"
+            focusable="false"
+        />
+    </svg>
+</span>

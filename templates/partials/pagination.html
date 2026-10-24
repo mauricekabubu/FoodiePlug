@@ -1,0 +1,27 @@
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+<nav class="app-pagination" aria-label="{{ pagination_label|default:'Pages' }}">
+  {% if page_obj.has_previous %}
+    <a href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">Previous</a>
+  {% else %}
+    <span aria-disabled="true">Previous</span>
+  {% endif %}
+
+  <ol>
+    {% for page in page_links %}
+      {% if page.gap %}
+        <li><span aria-hidden="true">…</span></li>
+      {% elif page.current %}
+        <li><span aria-current="page">{{ page.number }}</span></li>
+      {% else %}
+        <li><a href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.number }}" aria-label="Page {{ page.number }}">{{ page.number }}</a></li>
+      {% endif %}
+    {% endfor %}
+  </ol>
+
+  {% if page_obj.has_next %}
+    <a href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">Next</a>
+  {% else %}
+    <span aria-disabled="true">Next</span>
+  {% endif %}
+</nav>
+{% endif %}
