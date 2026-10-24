@@ -1,0 +1,650 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Insights — FoodiePlug</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+<link rel="stylesheet" href="{% static 'css/insights.css' %}">
+<noscript><style>.in-custom[hidden] { display: flex; }</style></noscript>
+
+<script>
+(function () {
+  try {
+    var pref = localStorage.getItem('foodieplug-theme') || 'system';
+    var resolved = pref === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : pref;
+    document.documentElement.setAttribute('data-theme', resolved);
+  } catch (e) {}
+})();
+</script>
+</head>
+
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- MOBILE TOPBAR -->
+<header class="mobile-topbar">
+  <button type="button" class="icon-btn" id="drawer-open" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+    <span>FoodiePlug</span>
+  </a>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" fill="#16794B"/><path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/><path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/></svg>
+      <span>FoodiePlug</span>
+      <button type="button" class="icon-btn" id="drawer-close" aria-label="Close navigation" style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Overview
+      </a>
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        My Meals
+      </a>
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Meal Planner
+      </a>
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+        Pantry
+      </a>
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7a4 4 0 0 1 8 0" stroke="currentColor" stroke-width="1.6"/></svg>
+        Shopping
+      </a>
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="14" r="1.3" fill="currentColor"/></svg>
+        Budget
+      </a>
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Food Library
+      </a>
+      <a href="{% url 'ai:page' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Insights
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Settings
+      </a>
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Help
+      </a>
+
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Light
+        </button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Dark
+        </button>
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M9 20h6M12 16.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Auto
+        </button>
+      </div>
+
+      <div class="sidebar-user">
+        <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="in-page" id="in-page">
+
+      <!-- ============ HEADER ============ -->
+      <header class="in-header">
+        <div>
+          <h1>Insights</h1>
+          <p>Understand your food habits, discover spending patterns, and make smarter decisions with FoodiePlug.</p>
+        </div>
+        {% if ask_url %}
+        <div class="in-header-actions">
+          <a class="in-btn in-btn-primary" href="{{ ask_url }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            Ask FoodiePlug AI
+          </a>
+        </div>
+        {% endif %}
+      </header>
+
+      <!-- ============ PERIOD CONTROLS ============ -->
+      <form method="get" class="in-controls" id="in-period-form" aria-label="Reporting period">
+        <div class="in-field">
+          <label for="in-period">Reporting period</label>
+          <select id="in-period" name="period">
+            {% for key, label in periods %}
+              <option value="{{ key }}" {% if key == period.key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="in-custom" id="in-custom" {% if period.key != "custom" %}hidden{% endif %}>
+          <div class="in-field">
+            <label for="in-start">From</label>
+            <input type="date" id="in-start" name="start" value="{{ period.custom_start }}">
+          </div>
+          <div class="in-field">
+            <label for="in-end">To</label>
+            <input type="date" id="in-end" name="end" value="{{ period.custom_end }}">
+          </div>
+        </div>
+
+        <button type="submit" class="in-btn in-btn-secondary">Apply</button>
+      </form>
+
+      <p class="in-period-line">
+        Showing <strong>{{ period.label }}</strong>:
+        {{ period.start|date:"j M Y" }} – {{ period.end|date:"j M Y" }}
+        <span class="in-muted">· compared with {{ period.prev_start|date:"j M Y" }} – {{ period.prev_end|date:"j M Y" }}</span>
+      </p>
+
+      {% if period.error %}
+        <div class="in-notice in-notice-warn" role="status">{{ period.error }}</div>
+      {% endif %}
+
+      {% if unavailable %}
+        <div class="in-notice" role="status">
+          Some sections couldn't be loaded right now ({{ unavailable|join:", " }}). Everything else is shown below.
+        </div>
+      {% endif %}
+
+      <!-- ============ 1. EXECUTIVE OVERVIEW ============ -->
+      <section aria-labelledby="in-overview-title">
+        <h2 class="in-sr" id="in-overview-title">Overview</h2>
+
+        <div class="in-cards">
+          {% for c in overview %}
+            <article class="in-card in-metric" data-metric="{{ c.key }}">
+              <h3>{{ c.title }}</h3>
+
+              {% if c.value %}
+                <p class="in-value">{{ c.value }}</p>
+                <p class="in-caption">{{ c.caption }}</p>
+
+                {% if c.compare %}
+                  <p class="in-trend in-trend-{{ c.compare.direction }}">
+                    <span aria-hidden="true">{% if c.compare.direction == "up" %}↑{% elif c.compare.direction == "down" %}↓{% else %}→{% endif %}</span>
+                    {{ c.compare.text }}
+                  </p>
+                {% endif %}
+
+                {% if c.note %}<p class="in-note">{{ c.note }}</p>{% endif %}
+              {% else %}
+                <p class="in-empty-text">{{ c.empty }}</p>
+              {% endif %}
+
+              {% if c.link %}<a class="in-link" href="{{ c.link.url }}">{{ c.link.label }} →</a>{% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- ============ 2. FOOD SPENDING ============ -->
+      <section class="in-card in-section" id="spending" aria-labelledby="in-spend-title">
+        <div class="in-section-head">
+          <div>
+            <h2 id="in-spend-title">Food spending</h2>
+            <p class="in-sub">Actual recorded expenses, grouped by {{ spending.granularity_label|default:"period" }}.</p>
+          </div>
+          <a class="in-link" href="{% url 'budgets:dashboard' %}">Open Budget →</a>
+        </div>
+
+        {% if spending and spending.has_expenses %}
+          <p class="in-summary">
+            You recorded <strong>KES {{ spending.total|floatformat:"0g" }}</strong>
+            across {{ spending.count }} expense{{ spending.count|pluralize }}.
+            {% if spending.compare %}{{ spending.compare.text }}.{% endif %}
+          </p>
+
+          <div class="in-chart" id="spending-chart"
+               data-granularity="{{ spending.granularity }}"
+               data-total="{{ spending.total }}">
+            <div class="in-tip" id="spending-tip" role="status" hidden></div>
+          </div>
+          {{ spending.series|json_script:"spending-series" }}
+
+          {% if spending.has_untracked_buckets %}
+            <p class="in-hint">
+              Hollow markers mean no budget was active in that {{ spending.granularity_label }}, so spending couldn't be tracked.
+              That is not the same as spending nothing.
+            </p>
+          {% endif %}
+
+          <details class="in-data">
+            <summary>View chart data</summary>
+            <div class="in-table-wrap">
+              <table>
+                <thead><tr><th scope="col">{{ spending.granularity_label|title }} starting</th><th scope="col">Spent (KES)</th></tr></thead>
+                <tbody>
+                  {% for s in spending.series %}
+                    <tr>
+                      <th scope="row">{{ s.label }}</th>
+                      <td>{% if s.tracked %}{{ s.amount|floatformat:"0g" }}{% else %}Not tracked{% endif %}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+        {% elif spending and spending.tracked %}
+          <div class="in-empty">
+            <p><strong>No expenses recorded in this period.</strong></p>
+            <p>A budget was active, but nothing was added to it. If you did spend on food, add the expense so it shows up here.</p>
+          </div>
+        {% else %}
+          <div class="in-empty">
+            <p><strong>Spending can't be shown yet.</strong></p>
+            <p>No expenses were recorded in this period and no budget was active. Set a budget and add expenses to start tracking.</p>
+            <a class="in-btn in-btn-secondary in-btn-sm" href="{% url 'budgets:dashboard' %}">Go to Budget</a>
+          </div>
+        {% endif %}
+
+        {% if spending and spending.has_expenses %}
+          <div class="in-two in-spaced">
+            <div>
+              <h3 class="in-h3">Spending by category</h3>
+              {% if spending.categories %}
+                <ul class="in-bars">
+                  {% for cat in spending.categories %}
+                    <li>
+                      <div class="in-bar-row"><span>{{ cat.name }}</span><span>KES {{ cat.amount|floatformat:"0g" }} · {{ cat.pct }}%</span></div>
+                      <div class="in-bar"><span style="width: {{ cat.pct }}%"></span></div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="in-empty-text">
+                  A category breakdown isn't available yet because expenses don't have a category.
+                  Once expenses are categorised, this will show where your money goes, with uncategorised spending listed separately.
+                </p>
+              {% endif %}
+            </div>
+
+            <div>
+              <h3 class="in-h3">Largest expenses</h3>
+              <ul class="in-list">
+                {% for e in spending.largest %}
+                  <li>
+                    <span class="in-list-main">
+                      {% if e.url %}<a href="{{ e.url }}">{{ e.description|default:"Expense" }}</a>{% else %}{{ e.description|default:"Expense" }}{% endif %}
+                      <small>{{ e.date|date:"j M" }}</small>
+                    </span>
+                    <strong>KES {{ e.amount|floatformat:"0g" }}</strong>
+                  </li>
+                {% endfor %}
+              </ul>
+
+              {% if spending.repeated %}
+                <h3 class="in-h3 in-spaced-top">Repeated purchases</h3>
+                <ul class="in-list">
+                  {% for r in spending.repeated %}
+                    <li>
+                      <span class="in-list-main">{{ r.name }} <small>{{ r.count }} times</small></span>
+                      <strong>KES {{ r.total|floatformat:"0g" }}</strong>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <!-- ============ 3. KEY INSIGHTS ============ -->
+      <section class="in-section" id="key-insights" aria-labelledby="in-feed-title">
+        <div class="in-section-head">
+          <div>
+            <h2 id="in-feed-title">Your Key Insights</h2>
+            <p class="in-sub">Each one shows the figures behind it. “Measured” is recorded data, “Estimate” is calculated from a pace, and “Suggestion” is an idea to consider.</p>
+          </div>
+        </div>
+
+        {% if insights %}
+          <div class="in-filters" id="in-filters" role="group" aria-label="Filter insights" hidden>
+            <button type="button" class="in-chip is-active" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="in-chip" data-filter="budget" aria-pressed="false">Budget</button>
+            <button type="button" class="in-chip" data-filter="shopping" aria-pressed="false">Shopping</button>
+            <button type="button" class="in-chip" data-filter="pantry" aria-pressed="false">Pantry</button>
+            <button type="button" class="in-chip" data-filter="meals" aria-pressed="false">Meals</button>
+          </div>
+
+          <ul class="in-feed" id="in-feed">
+            {% for i in insights %}
+              <li class="in-card in-insight" data-category="{{ i.category }}">
+                <div class="in-insight-meta">
+                  <span class="in-badge in-badge-{{ i.category }}">{{ i.category_label }}</span>
+                  <span class="in-kind in-kind-{{ i.kind }}">{{ i.kind_label }}</span>
+                </div>
+
+                <h3>{{ i.title }}</h3>
+                <p>{{ i.detail }}</p>
+
+                {% if i.evidence %}
+                  <ul class="in-evidence">
+                    {% for line in i.evidence %}<li>{{ line }}</li>{% endfor %}
+                  </ul>
+                {% endif %}
+
+                {% if i.action or i.ask %}
+                  <div class="in-actions">
+                    {% if i.action %}<a class="in-btn in-btn-secondary in-btn-sm" href="{{ i.action.url }}">{{ i.action.label }}</a>{% endif %}
+                    {% if i.ask %}<a class="in-btn in-btn-quiet in-btn-sm" href="{{ i.ask }}">Ask FoodiePlug AI</a>{% endif %}
+                  </div>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+
+          <p class="in-empty-text" id="in-feed-empty" hidden>No insights in this category right now.</p>
+        {% else %}
+          <div class="in-card in-empty">
+            <p><strong>No insights to show right now.</strong></p>
+            <p>Insights appear when there's enough recorded data to support them: expenses against a budget, pantry items with expiry dates, shopping lists, and planned meals. Nothing here is guessed.</p>
+          </div>
+        {% endif %}
+      </section>
+
+      <!-- ============ 4. BUDGET + PANTRY ============ -->
+      <div class="in-two">
+
+        <section class="in-card in-section" id="budget-vs-actual" aria-labelledby="in-budget-title">
+          <div class="in-section-head">
+            <div>
+              <h2 id="in-budget-title">Budget vs actual</h2>
+              <p class="in-sub">Allocated, actual and estimated amounts are shown separately.</p>
+            </div>
+          </div>
+
+          {% if budgets and budgets.rows %}
+            <ul class="in-budget-list">
+              {% for r in budgets.rows %}
+                <li>
+                  <div class="in-bar-row">
+                    <span>
+                      {% if r.url %}<a href="{{ r.url }}">{{ r.name }}</a>{% else %}{{ r.name }}{% endif %}
+                      {% if r.is_current %}<span class="in-kind in-kind-measured">Current</span>{% endif %}
+                      <small class="in-muted">{{ r.start|date:"j M" }} – {{ r.end|date:"j M" }}</small>
+                    </span>
+                    <span>{{ r.usage|floatformat:"0" }}% used</span>
+                  </div>
+
+                  <div class="in-stack" role="img"
+                       aria-label="{{ r.name }}: budget KES {{ r.amount|floatformat:'0g' }}, spent KES {{ r.spent|floatformat:'0g' }}{% if r.projected %}, estimated KES {{ r.projected|floatformat:'0g' }} at this pace{% endif %}">
+                    <div class="in-stack-row"><span class="in-stack-label">Budget</span><div class="in-track"><span class="in-fill in-fill-budget" style="width: {{ r.allocated_pct|stringformat:'d' }}%"></span></div><span class="in-stack-val">KES {{ r.amount|floatformat:"0g" }}</span></div>
+                    <div class="in-stack-row"><span class="in-stack-label">Actual</span><div class="in-track"><span class="in-fill in-fill-actual {% if r.usage >= 100 %}is-over{% endif %}" style="width: {{ r.actual_pct|stringformat:'d' }}%"></span></div><span class="in-stack-val">KES {{ r.spent|floatformat:"0g" }}</span></div>
+                    {% if r.projected %}
+                      <div class="in-stack-row"><span class="in-stack-label">Estimate</span><div class="in-track"><span class="in-fill in-fill-projected" style="width: {{ r.projected_pct|stringformat:'d' }}%"></span></div><span class="in-stack-val">KES {{ r.projected|floatformat:"0g" }}</span></div>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+
+            <p class="in-hint">
+              “Estimate” is a straight-line projection from your recorded spending and appears only after a week of data.
+              Planned shopping isn't counted as spending, and upcoming costs can't be estimated because FoodiePlug doesn't store prices yet.
+            </p>
+          {% else %}
+            <div class="in-empty">
+              <p><strong>No budget overlaps this period.</strong></p>
+              <p>Create a budget to compare what you planned to spend with what you actually spent.</p>
+              <a class="in-btn in-btn-secondary in-btn-sm" href="{% url 'budgets:dashboard' %}">Open Budget</a>
+            </div>
+          {% endif %}
+        </section>
+
+        <section class="in-card in-section" id="pantry" aria-labelledby="in-pantry-title">
+          <div class="in-section-head">
+            <div>
+              <h2 id="in-pantry-title">Pantry &amp; expiry</h2>
+              <p class="in-sub">A snapshot as of today, not limited to the reporting period.</p>
+            </div>
+            <a class="in-link" href="{% url 'pantry:pantry' %}">Open Pantry →</a>
+          </div>
+
+          {% if pantry and pantry.has_data %}
+            <dl class="in-stats">
+              <div><dt>Items</dt><dd>{{ pantry.item_count }}</dd></div>
+              <div class="in-stat-bad"><dt>Expired</dt><dd>{{ pantry.expired|length }}</dd></div>
+              <div class="in-stat-warn"><dt>Expiring soon</dt><dd>{{ pantry.expiring|length }}</dd></div>
+              <div><dt>Running low</dt><dd>{{ pantry.low|length }}</dd></div>
+            </dl>
+
+            {% if pantry.expired %}
+              <h3 class="in-h3">Past expiry date</h3>
+              <ul class="in-list">
+                {% for item in pantry.expired|slice:":5" %}
+                  <li><span class="in-list-main">{{ item.name }}</span><span class="in-chip-status in-status-expired">Expired {{ item.expires_at|date:"j M" }}</span></li>
+                {% endfor %}
+              </ul>
+              <p class="in-hint">Expired items aren't counted as food waste unless a disposal is recorded.</p>
+            {% endif %}
+
+            {% if pantry.expiring %}
+              <h3 class="in-h3">Use soon</h3>
+              <ul class="in-list">
+                {% for item in pantry.expiring|slice:":6" %}
+                  <li>
+                    <span class="in-list-main">{{ item.name }} <small>{{ item.quantity|floatformat:"-2" }} {{ item.unit }}</small></span>
+                    <span class="in-chip-status {% if item.days_left <= 3 %}in-status-soon{% else %}in-status-ok{% endif %}">
+                      {% if item.days_left == 0 %}Today{% elif item.days_left == 1 %}Tomorrow{% else %}In {{ item.days_left }} days{% endif %}
+                    </span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
+            {% if not pantry.expired and not pantry.expiring %}
+              <p class="in-empty-text">Nothing is expired or expiring within 7 days. Items without an expiry date aren't included.</p>
+            {% endif %}
+          {% else %}
+            <div class="in-empty">
+              <p><strong>Your pantry is empty.</strong></p>
+              <p>Add what you have at home to see expiry risks and which planned meals you can already make.</p>
+              <a class="in-btn in-btn-secondary in-btn-sm" href="{% url 'pantry:pantry' %}">Add pantry items</a>
+            </div>
+          {% endif %}
+        </section>
+      </div>
+
+      <!-- ============ 5. SHOPPING + MEALS ============ -->
+      <div class="in-two">
+
+        <section class="in-card in-section" id="shopping" aria-labelledby="in-shop-title">
+          <div class="in-section-head">
+            <div>
+              <h2 id="in-shop-title">Shopping</h2>
+              <p class="in-sub">A snapshot of your lists. Items don't record a purchase date, so this isn't limited to the period.</p>
+            </div>
+            {% if shopping and shopping.url %}<a class="in-link" href="{{ shopping.url }}">Open Shopping →</a>{% endif %}
+          </div>
+
+          {% if shopping and shopping.has_data %}
+            <dl class="in-stats">
+              <div><dt>Lists</dt><dd>{{ shopping.list_count }}</dd></div>
+              <div><dt>Fully purchased lists</dt><dd>{{ shopping.completed_lists }}</dd></div>
+              <div><dt>Items listed</dt><dd>{{ shopping.item_count }}</dd></div>
+              <div><dt>Items purchased</dt><dd>{{ shopping.purchased_count }}</dd></div>
+            </dl>
+
+            {% if shopping.frequent_foods %}
+              <h3 class="in-h3">Most purchased foods</h3>
+              {% with top=shopping.frequent_foods.0.count %}
+                <ul class="in-bars">
+                  {% for f in shopping.frequent_foods %}
+                    <li>
+                      <div class="in-bar-row"><span>{{ f.name }}</span><span>{{ f.count }}×</span></div>
+                      <div class="in-bar"><span style="width: {% widthratio f.count top 100 %}%"></span></div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endwith %}
+            {% else %}
+              <p class="in-empty-text">Mark items as purchased on your lists and your most-bought foods will appear here.</p>
+            {% endif %}
+
+            <p class="in-hint">Estimated vs actual costs, price changes and shopping activity over time need purchase dates and prices, which FoodiePlug doesn't store yet.</p>
+          {% else %}
+            <div class="in-empty">
+              <p><strong>No shopping lists yet.</strong></p>
+              <p>Create a list, or add what a planned meal is missing from the Meal Planner.</p>
+              {% if shopping and shopping.url %}<a class="in-btn in-btn-secondary in-btn-sm" href="{{ shopping.url }}">Start a list</a>{% endif %}
+            </div>
+          {% endif %}
+        </section>
+
+        <section class="in-card in-section" id="meals" aria-labelledby="in-meals-title">
+          <div class="in-section-head">
+            <div>
+              <h2 id="in-meals-title">Meal planning</h2>
+              <p class="in-sub">Meals scheduled in this period. Scheduled isn't the same as eaten.</p>
+            </div>
+            {% if meals and meals.url %}<a class="in-link" href="{{ meals.url }}">Open Planner →</a>{% endif %}
+          </div>
+
+          {% if meals and meals.has_any %}
+            <dl class="in-stats">
+              <div><dt>Scheduled</dt><dd>{{ meals.planned }}</dd></div>
+              <div><dt>Different meals</dt><dd>{{ meals.variety }}</dd></div>
+              <div><dt>Saved in library</dt><dd>{{ meals.saved }}</dd></div>
+            </dl>
+
+            {% if meals.distribution %}
+              <h3 class="in-h3">By meal type</h3>
+              <ul class="in-bars">
+                {% for d in meals.distribution %}
+                  <li>
+                    <div class="in-bar-row"><span>{{ d.type }}</span><span>{{ d.count }} · {{ d.pct }}%</span></div>
+                    <div class="in-bar"><span style="width: {{ d.pct }}%"></span></div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
+            {% if meals.top %}
+              <h3 class="in-h3">Most scheduled</h3>
+              <ul class="in-list">
+                {% for t in meals.top %}
+                  <li><span class="in-list-main">{{ t.name }}</span><strong>{{ t.count }}×</strong></li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
+            <h3 class="in-h3">Next 7 days</h3>
+            {% if meals.upcoming %}
+              <ul class="in-list">
+                {% for u in meals.upcoming %}
+                  <li>
+                    <span class="in-list-main">
+                      {{ u.meal }}
+                      <small>{{ u.date|date:"D j M" }} · {{ u.meal_type|title }}</small>
+                    </span>
+                    {% if not u.has_ingredients %}
+                      <span class="in-chip-status in-status-ok">No ingredients added</span>
+                    {% elif u.missing %}
+                      <span class="in-chip-status in-status-soon" title="{{ u.missing|join:', ' }}">Missing {{ u.missing|length }}</span>
+                    {% else %}
+                      <span class="in-chip-status in-status-good">Ready from pantry</span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+              <p class="in-hint">Compared with your pantry quantities. Meals with no ingredients can't be checked.</p>
+            {% else %}
+              <p class="in-empty-text">Nothing is scheduled for the next 7 days.</p>
+            {% endif %}
+          {% else %}
+            <div class="in-empty">
+              <p><strong>No meals scheduled yet.</strong></p>
+              <p>Plan meals from your library to see patterns and check them against your pantry.</p>
+              {% if meals and meals.url %}<a class="in-btn in-btn-secondary in-btn-sm" href="{{ meals.url }}">Plan a meal</a>{% endif %}
+            </div>
+          {% endif %}
+
+          {% if meals and meals.library_url %}
+            <a class="in-link in-spaced-top" href="{{ meals.library_url }}">Open My Meals →</a>
+          {% endif %}
+        </section>
+      </div>
+
+      <!-- ============ ABOUT THE NUMBERS ============ -->
+      <details class="in-card in-about">
+        <summary>How these numbers are calculated</summary>
+        <ul>
+          <li><strong>Spending</strong> adds up expenses you recorded in your budgets. Planned or listed items are never counted as spending.</li>
+          <li><strong>Comparisons</strong> use the previous period of the same length, and only appear when that period has recorded expenses.</li>
+          <li><strong>Estimates</strong> (such as the pace estimate) are labelled and are calculations, not forecasts.</li>
+          <li><strong>Pantry checks</strong> compare quantities in the same unit. If units differ, an ingredient counts as available when you hold any of that food.</li>
+          <li><strong>Not available yet:</strong> spending by category, meal and shopping costs, price changes, and food-waste totals. These need categories on expenses, prices, purchase dates and recorded disposals.</li>
+        </ul>
+      </details>
+
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/insights.js' %}" defer></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>
