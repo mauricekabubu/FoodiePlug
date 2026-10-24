@@ -2,19 +2,17 @@
 
 ## Run FoodiePlug with Docker
 
-The Django project is in `foodplanner/` and uses `config.settings`. The
-container runs the existing SQLite database; it does not migrate the database
-to PostgreSQL. On the first Compose run, the app copies the original
-`foodplanner/db.sqlite3` to a persistent Docker volume using SQLite's online
-backup API and copies `foodplanner/media/` to that volume. Both original
-directories are mounted read-only and are not modified by the container.
-Subsequent starts use the persistent volume, so changes made in the container
-are retained independently of the original files.
+The Django project is in `foodplanner/` and uses `config.settings`. It uses
+SQLite for local development when `DATABASE_URL` is unset and PostgreSQL when
+`DATABASE_URL` is configured. Neon supplies a pooled `DATABASE_URL` for web
+requests and `DATABASE_URL_UNPOOLED` for migrations. Docker Compose loads
+Neon's generated `.env.local` when present. In SQLite mode, the first Compose
+run copies the original `foodplanner/db.sqlite3` to a persistent Docker volume
+using SQLite's online backup API and copies `foodplanner/media/` to that volume.
+In PostgreSQL mode, it does not seed or use the SQLite database.
 
-The unused `mysqlclient` driver was removed from the Linux dependency set:
-the active Django configuration uses SQLite and the application does not
-import or configure MySQL. No MySQL server or native database build tools are
-needed.
+The application uses psycopg 3 for PostgreSQL. SQLite remains available for
+local development; MySQL is not configured.
 
 ### Initial setup
 
@@ -93,10 +91,20 @@ volumes.
 
 The root `.env.example` lists the supported environment variables. At minimum,
 set a strong `SECRET_KEY`, `DEBUG=False`, and an appropriate comma-separated
-`ALLOWED_HOSTS`. SQLite needs a file path but has no database username or
-password. Existing `DB_USER`, `DB_PASSWORD`, `DB_HOST`, and `DB_PORT` values
-are not used by the current SQLite settings. `SQLITE_DATABASE_PATH` selects
-the SQLite file; it defaults to the project's existing `db.sqlite3`.
+`ALLOWED_HOSTS`. Neon CLI writes the pooled `DATABASE_URL` and direct
+`DATABASE_URL_UNPOOLED` connection strings to `.env.local` when there is no
+root `.env`, or to `.env` otherwise. Keep these files private and uncommitted.
+Normal application requests use the pooled URL. Run schema migrations through
+the direct URL:
+
+```powershell
+docker compose run --rm -e NEON_USE_UNPOOLED_DATABASE=True web python manage.py migrate
+```
+
+When running Django directly, set `NEON_USE_UNPOOLED_DATABASE=True` in the
+environment for migration commands and remove it afterwards. Without a
+`DATABASE_URL`, Django uses the existing SQLite file selected by
+`SQLITE_DATABASE_PATH` (default `foodplanner/db.sqlite3`).
 
 Gemini configuration is optional; set `GEMINI_API_KEY` and the model settings
 to enable the provider. Google sign-in requires `GOOGLE_OAUTH_CLIENT_ID` and
