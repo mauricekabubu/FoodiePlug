@@ -1,0 +1,695 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>FoodiePlug AI — FoodiePlug</title>
+  <meta name="theme-color" content="#FCFDFB">
+  <meta name="description" content="Your personal FoodiePlug food decision assistant. Plan meals, manage your pantry, shopping and food budget.">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2316794B'/%3E%3Cpath d='M18 30c0-9 6-16 14-16s14 7 14 16c0 9-6 17-14 17s-14-8-14-17z' fill='%23FCFDFB'/%3E%3Cpath d='M32 14c3-4 8-5 11-3-1 4-5 7-9 7' fill='%23F5A623'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  <link rel="stylesheet" href="{% static 'css/ai.css' %}">
+  <link rel="stylesheet" href="{% static 'css/toasts.css' %}">
+
+  <script>
+    (function () {
+      try {
+        var preference = localStorage.getItem('foodieplug-theme') || 'system';
+        var resolved = preference === 'system'
+          ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : preference;
+
+        if (resolved !== 'dark' && resolved !== 'light') {
+          resolved = 'light';
+        }
+
+        document.documentElement.setAttribute('data-theme', resolved);
+      } catch (error) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+
+<body>
+
+{% include "partials/django_toasts.html" %}
+
+<!-- =====================================================
+     MOBILE TOPBAR
+====================================================== -->
+<header class="mobile-topbar">
+
+  <button type="button"
+          class="icon-btn"
+          id="drawer-open"
+          aria-label="Open navigation"
+          aria-expanded="false"
+          aria-controls="primary-sidebar">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <a href="{% url 'dashboard' %}" class="brand-mini">
+    <svg viewBox="0 0 64 64" role="img" aria-hidden="true">
+      <circle cx="32" cy="32" r="31" fill="#16794B"/>
+      <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+      <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+    </svg>
+    <span>FoodiePlug</span>
+  </a>
+
+  <div class="mobile-topbar-actions">
+
+    <div class="dropdown">
+      <button type="button"
+              class="icon-btn"
+              aria-label="Notifications"
+              aria-haspopup="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"/>
+          <path d="M10 19a2 2 0 0 0 4 0"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="dropdown-panel" role="menu">
+        <h4>Notifications</h4>
+        <p style="font-size:0.85rem;color:var(--muted);padding:0.5rem;">
+          You're all caught up.
+        </p>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button type="button"
+              class="icon-btn"
+              aria-label="Account menu"
+              aria-haspopup="true">
+        <span class="avatar" style="width:30px;height:30px;font-size:0.72rem;">
+          {{ user.first_name|default:user.username|slice:":1"|upper }}
+        </span>
+      </button>
+
+      <div class="dropdown-panel" role="menu">
+        <a href="{% url 'profile' %}" class="profile-menu-item">Profile</a>
+        <a href="{% url 'settings' %}" class="profile-menu-item">Settings</a>
+        <a href="{% url 'help' %}" class="profile-menu-item">Help Center</a>
+        <div class="profile-menu-divider"></div>
+        <a href="{% url 'logout' %}" class="profile-menu-item">Log out</a>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<div class="drawer-scrim" id="drawer-scrim"></div>
+
+<div class="app-shell">
+
+  <!-- ===================================================
+       SIDEBAR
+  ==================================================== -->
+  <aside class="sidebar" id="primary-sidebar" aria-label="Primary navigation">
+
+    <div class="sidebar-brand">
+
+      <svg viewBox="0 0 64 64" role="img" aria-hidden="true">
+        <circle cx="32" cy="32" r="31" fill="#16794B"/>
+        <path d="M17 29c0-10 6.5-18 15-18s15 8 15 18c0 11-6.5 19-15 19s-15-8-15-19z" fill="#FCFDFB"/>
+        <path d="M32 11c3.5-4.5 9-6 12.5-3.5-1 4.5-5.5 7.5-10 7.5" fill="#F5A623"/>
+      </svg>
+
+      <span>FoodiePlug</span>
+
+      <button type="button"
+              class="icon-btn"
+              id="drawer-close"
+              aria-label="Close navigation"
+              style="margin-left:auto;">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a href="{% url 'dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8z"
+                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        Overview
+      </a>
+
+      <a href="{% url 'meals:meal_library' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        My Meals
+      </a>
+
+      <a href="{% url 'meals:timetable' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Meal Planner
+      </a>
+
+      <a href="{% url 'pantry:pantry' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 8h12l-1.2 10a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z"
+                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9 8V6a3 3 0 0 1 6 0v2"
+                stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+        Pantry
+      </a>
+
+      <a href="{% url 'shopping_lists' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z"
+                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M8 7a4 4 0 0 1 8 0"
+                stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+        Shopping
+      </a>
+
+      <a href="{% url 'budgets:dashboard' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3.5" y="6" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M3.5 10h17" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="16" cy="14" r="1.3" fill="currentColor"/>
+        </svg>
+        Budget
+      </a>
+
+      <a href="{% url 'foods:foods' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16H6.5A2.5 2.5 0 0 0 4 21.5v-16z"
+                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        Food Library
+      </a>
+
+      <a href="{% url 'ai:page' %}" class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z"
+                stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        AI Assistant
+      </a>
+
+      <p class="nav-label">More</p>
+
+      <a href="{% url 'insights:overview' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 19V9M10 19V5M16 19v-7M22 19H2"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Insights
+      </a>
+
+      <a href="{% url 'settings' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Settings
+      </a>
+
+      <a href="{% url 'help' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.4v.3M12 17h.01"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Help
+      </a>
+
+      <a href="{% url 'logout' %}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M10 17l5-5-5-5M15 12H3"
+                stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"
+                stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+
+      <div class="theme-toggle" role="group" aria-label="Theme">
+
+        <button type="button" data-theme-value="light" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Light
+        </button>
+
+        <button type="button" data-theme-value="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+          Dark
+        </button>
+
+        <button type="button" data-theme-value="system" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="4.5" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M9 20h6M12 16.5V20"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Auto
+        </button>
+
+      </div>
+
+      <div class="sidebar-user">
+
+        <span class="avatar">
+          {{ user.first_name|default:user.username|slice:":1"|upper }}
+        </span>
+
+        <div class="sidebar-user-text">
+          <p class="name">{{ user.get_full_name|default:user.username }}</p>
+          <p class="handle">{{ user.email|default:user.username }}</p>
+        </div>
+
+        <a href="{% url 'profile' %}" class="icon-btn" aria-label="Account settings">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2L5.6 5.6"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </a>
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================================================
+       MAIN CONTENT
+  ==================================================== -->
+  <main class="main-content ai-page" id="ai-page">
+
+    <div class="ai-header">
+
+      <div>
+        <h1>FoodiePlug AI</h1>
+
+        <p>
+          Your personal food decision assistant — powered by your meals,
+          pantry, shopping and budget.
+        </p>
+
+        <p class="ai-status" id="ai-status" role="status">
+          <span class="ai-status-dot" aria-hidden="true"></span>
+          <span id="ai-status-text">FoodiePlug AI is ready</span>
+        </p>
+      </div>
+
+      <div class="ai-header-actions">
+
+        <button type="button"
+                class="btn-outline ai-context-toggle"
+                id="ai-context-open"
+                aria-controls="ai-context"
+                aria-expanded="false">
+          Your data
+        </button>
+
+        <button type="button" class="btn-solid" id="ai-new">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          New conversation
+        </button>
+
+      </div>
+    </div>
+
+    <div class="ai-layout">
+
+      <!-- CONVERSATION -->
+      <section class="ai-chat" aria-label="Conversation with FoodiePlug AI">
+
+        <div class="ai-log"
+             id="ai-log"
+             role="log"
+             aria-live="polite"
+             aria-relevant="additions"
+             tabindex="0">
+
+          <div class="ai-welcome" id="ai-welcome">
+
+            <span class="ai-mark">
+              <svg viewBox="0 0 24 24"
+                   width="28"
+                   height="28"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="1.6"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   aria-hidden="true"
+                   focusable="false">
+                <path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z"/>
+                <path d="M18 14l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>
+              </svg>
+            </span>
+
+            <h2>What are we solving today?</h2>
+
+            <p>
+              Tell me what you need help with and I'll use your FoodiePlug
+              data to help you make a smarter food decision.
+            </p>
+
+            <p class="ai-intro">
+              Hi, I'm FoodiePlug AI. I can help you plan meals, manage your
+              food budget, use what you already have, optimize your shopping
+              list, and make smarter food decisions.
+            </p>
+
+            {% if suggested_prompts %}
+            <ul class="ai-prompts" aria-label="Suggested questions">
+              {% for p in suggested_prompts %}
+              <li>
+                <button type="button"
+                        class="ai-prompt"
+                        data-prompt="{{ p.prompt }}">
+                  {% include "Ai/_ai_icon.html" with name=p.icon %}
+                  <span>
+                    {{ p.label }}
+                    {% if p.prompt != p.label %}
+                      <small>{{ p.prompt }}</small>
+                    {% endif %}
+                  </span>
+                </button>
+              </li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+
+          </div>
+        </div>
+
+        <!-- QUICK PROMPTS -->
+        <div class="ai-chips"
+             id="ai-chips"
+             hidden
+             role="group"
+             aria-label="Quick prompts">
+          {% for p in suggested_prompts|slice:":4" %}
+            <button type="button" class="ai-chip" data-prompt="{{ p.prompt }}">
+              {{ p.label }}
+            </button>
+          {% endfor %}
+        </div>
+
+        <!-- MESSAGE COMPOSER -->
+        <form class="ai-composer" id="ai-form" method="post" novalidate>
+          {% csrf_token %}
+
+          <label for="ai-input" class="ai-sr">Ask FoodiePlug AI</label>
+
+          <textarea id="ai-input"
+                    name="message"
+                    rows="1"
+                    maxlength="2000"
+                    placeholder="Ask FoodiePlug AI..."
+                    autocomplete="off"
+                    required></textarea>
+
+          <button type="submit"
+                  class="ai-send"
+                  id="ai-send"
+                  aria-label="Send message"
+                  disabled>
+            <svg viewBox="0 0 24 24"
+                 width="20"
+                 height="20"
+                 fill="none"
+                 aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <p class="ai-footnote">
+          FoodiePlug AI gives estimates and suggestions from your data.
+          Changes to your shopping list or meal plan require your confirmation.
+        </p>
+
+      </section>
+
+      <!-- DATA PANEL AND CONVERSATION HISTORY -->
+      <aside class="ai-context"
+             id="ai-context"
+             aria-labelledby="ai-context-title">
+
+        <div class="ai-context-head">
+
+          <h2 id="ai-context-title">Your FoodiePlug data</h2>
+
+          <button type="button"
+                  class="icon-btn ai-context-close"
+                  id="ai-context-close"
+                  aria-label="Close your data panel">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"/>
+            </svg>
+          </button>
+
+        </div>
+
+        <p class="ai-context-note">
+          FoodiePlug AI only uses the sources switched on below.
+          Turn a source off to prevent its data from being used in future questions.
+        </p>
+
+        <ul class="ai-sources">
+          {% for src in sources %}
+          <li class="ai-source {% if not src.available %}is-unavailable{% endif %}">
+
+            <div>
+              <strong>{{ src.label }}</strong>
+              <span class="ai-source-sum">{{ src.summary }}</span>
+            </div>
+
+            <label class="ai-switch">
+              <input type="checkbox"
+                     role="switch"
+                     data-source="{{ src.key }}"
+                     {% if src.available %}checked{% else %}disabled{% endif %}>
+
+              <span class="ai-switch-track" aria-hidden="true"></span>
+
+              <span class="ai-sr">
+                Use my {{ src.label|lower }} data
+                {% if not src.available %}(not available yet){% endif %}
+              </span>
+            </label>
+
+          </li>
+          {% empty %}
+          <li class="ai-history-empty">
+            Data-source settings are not available yet.
+          </li>
+          {% endfor %}
+        </ul>
+
+        <!-- CONVERSATION HISTORY -->
+        <h3>Conversations</h3>
+
+        <div id="ai-history">
+
+          {% for group in conversation_groups %}
+
+          <p class="ai-history-group">{{ group.label }}</p>
+
+          <ul class="ai-history">
+
+            {% for c in group.items %}
+            <li data-conversation-id="{{ c.id }}">
+
+              <a href="#"
+                 data-open-conversation="{{ c.id }}">
+                {{ c.title }}
+              </a>
+
+              <button type="button"
+                      class="icon-btn"
+                      data-rename-conversation="{{ c.id }}"
+                      data-title="{{ c.title }}"
+                      aria-label="Rename {{ c.title }}">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                  <path d="M4 20l1-4 11-11 3 3-11 11-4 1z"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <button type="button"
+                      class="icon-btn"
+                      data-delete-conversation="{{ c.id }}"
+                      data-title="{{ c.title }}"
+                      aria-label="Delete {{ c.title }}">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                  <path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+            </li>
+            {% endfor %}
+
+          </ul>
+
+          {% empty %}
+          <p class="ai-history-empty" id="ai-history-empty">
+            Your conversations will appear here.
+          </p>
+          {% endfor %}
+
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+</div>
+
+<div class="ai-scrim" id="ai-scrim"></div>
+
+<!-- =====================================================
+     BACKEND CONFIGURATION
+====================================================== -->
+
+<div
+  id="ai-config"
+  hidden
+  data-chat-url="{% url 'ai:chat' %}"
+  data-conversation-url="{% url 'ai:conversation_detail' '00000000000000000000000000000000' %}"
+  data-confirm-action-url="{% url 'ai:confirm_action' %}"
+></div>
+
+
+<!-- =====================================================
+     CONFIRM ACTION / DELETE MODAL
+====================================================== -->
+<div class="ai-modal" id="ai-confirm-modal" aria-hidden="true">
+
+  <div class="ai-panel"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="ai-confirm-title">
+
+    <h2 id="ai-confirm-title">Confirm</h2>
+
+    <p id="ai-confirm-text"></p>
+
+    <div class="ai-panel-actions">
+      <button type="button" class="btn-outline" data-close-modal>
+        Cancel
+      </button>
+
+      <button type="button" class="btn-solid" id="ai-confirm-ok">
+        Confirm
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =====================================================
+     RENAME CONVERSATION MODAL
+====================================================== -->
+<div class="ai-modal" id="ai-rename-modal" aria-hidden="true">
+
+  <div class="ai-panel"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="ai-rename-title">
+
+    <h2 id="ai-rename-title">Rename conversation</h2>
+
+    <label for="ai-rename-input" class="ai-sr">
+      Conversation name
+    </label>
+
+    <input type="text"
+           id="ai-rename-input"
+           maxlength="120"
+           autocomplete="off">
+
+    <div class="ai-panel-actions">
+      <button type="button" class="btn-outline" data-close-modal>
+        Cancel
+      </button>
+
+      <button type="button" class="btn-solid" id="ai-rename-ok">
+        Save name
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/ai.js' %}"></script>
+<script src="{% static 'js/toasts.js' %}"></script>
+
+</body>
+</html>

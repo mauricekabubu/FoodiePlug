@@ -1,0 +1,14 @@
+{% comment %}
+  Small line icons for AI prompts. Usage: {% include "Ai/_ai_icon.html" with name=p.icon %}
+  Names: cook, money, cart, leaf, calendar, chart, spark (anything else -> spark)
+{% endcomment %}
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{% if name == "cook" %}<path d="M5 10h14v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-6z"/><path d="M3 10h18M9 6c0-1 1-1.5 1-3M14 6c0-1 1-1.5 1-3"/>
+{% elif name == "money" %}<circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M9.5 9.5c0-1 1-1.5 2.5-1.5s2.5.7 2.5 1.8c0 2.2-5 1.2-5 3.5 0 1.1 1 1.7 2.5 1.7s2.5-.6 2.5-1.5"/>
+{% elif name == "cart" %}<path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z"/><path d="M8 7a4 4 0 0 1 8 0"/>
+{% elif name == "leaf" %}<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19c3-4 6-7 10-9"/>
+{% elif name == "calendar" %}<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v3.5M16 3v3.5"/>
+{% elif name == "chart" %}<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>
+{% else %}<path d="M12 3l1.4 3.6L17 8l-3.6 1.4L12 13l-1.4-3.6L7 8l3.6-1.4L12 3z"/><path d="M18 14l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>
+{% endif %}
+</svg>
