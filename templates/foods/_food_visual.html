@@ -1,0 +1,38 @@
+{% comment %}
+  Food visual: category-based fallback icon, with the real photo layered on top when one exists.
+  Usage: {% include "foods/_food_visual.html" with item=f %}
+         {% include "foods/_food_visual.html" with item=food eager=True %}
+  Render this inside a container with class "food-card-media" or "food-detail-media".
+
+  The fallback is always rendered underneath. If the image is missing or the file 404s,
+  the <img> removes itself and the fallback stays visible, so no broken-image icon appears.
+{% endcomment %}
+{% with cat=item.category.name|default:""|lower %}
+<span class="food-visual-fallback" aria-hidden="true">
+  {% if "fruit" in cat %}
+  <span class="food-visual-icon is-fruit"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 7c-1.5-1-5-1.2-6.5 2C4 12.5 6 19 8.5 19.5c1.2.3 2-.5 3.5-.5s2.3.8 3.5.5c2.5-.5 4.5-7 3-10.5C17 5.8 13.5 6 12 7z"/><path d="M12 7c0-2 1-3.5 3-4"/></svg></span>
+  {% elif "veg" in cat or "leaf" in cat or "green" in cat %}
+  <span class="food-visual-icon is-vegetable"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19c3-4 6-7 10-9"/></svg></span>
+  {% elif "grain" in cat or "cereal" in cat or "wheat" in cat or "flour" in cat or "staple" in cat or "maize" in cat or "starch" in cat %}
+  <span class="food-visual-icon is-grain"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21V8"/><path d="M12 8c-2-.5-3-2-3-4 2 .5 3 2 3 4zM12 8c2-.5 3-2 3-4-2 .5-3 2-3 4zM12 13c-2-.5-3-2-3-4 2 .5 3 2 3 4zM12 13c2-.5 3-2 3-4-2 .5-3 2-3 4zM12 18c-2-.5-3-2-3-4 2 .5 3 2 3 4zM12 18c2-.5 3-2 3-4-2 .5-3 2-3 4z"/></svg></span>
+  {% elif "legume" in cat or "bean" in cat or "pulse" in cat or "lentil" in cat %}
+  <span class="food-visual-icon is-legume"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><ellipse cx="9" cy="9" rx="3.2" ry="5" transform="rotate(-35 9 9)"/><ellipse cx="15" cy="15" rx="3.2" ry="5" transform="rotate(-35 15 15)"/></svg></span>
+  {% elif "protein" in cat or "meat" in cat or "fish" in cat or "poultry" in cat or "egg" in cat or "beef" in cat or "chicken" in cat %}
+  <span class="food-visual-icon is-protein"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 8c1-3 6-4.5 10-2.5 3.5 1.8 4 6 2 9.5-2 3.5-7 4.5-10.5 3C4 16.5 4.5 11 6 8z"/><circle cx="14" cy="12" r="2.2"/></svg></span>
+  {% elif "dairy" in cat or "milk" in cat or "cheese" in cat or "yog" in cat %}
+  <span class="food-visual-icon is-dairy"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3h8l1 4v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V7l1-4z"/><path d="M7 7h10"/><path d="M10 12h4v4h-4z"/></svg></span>
+  {% elif "pantry" in cat or "other" in cat or "spice" in cat or "oil" in cat or "condiment" in cat %}
+  <span class="food-visual-icon is-pantry"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3h8v3H8z"/><path d="M7 6h10a1 1 0 0 1 1 1v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a1 1 0 0 1 1-1z"/><path d="M9 12h6M9 16h6"/></svg></span>
+  {% else %}
+  <span class="food-visual-icon is-neutral"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 12h17a8.5 8.5 0 0 1-17 0z"/><path d="M8 20.5h8"/><path d="M9 8c0-1.2 1-1.5 1-3M13 8c0-1.2 1-1.5 1-3"/></svg></span>
+  {% endif %}
+</span>
+{% endwith %}
+{% if item.image %}
+<img class="food-visual-img"
+     src="{{ item.image.url }}"
+     alt="{{ item.name }}"
+     loading="{% if eager %}eager{% else %}lazy{% endif %}"
+     decoding="async"
+     onerror="this.remove()">
+{% endif %}
