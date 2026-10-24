@@ -53,11 +53,23 @@ SECRET_KEY = os.getenv(
     "django-insecure-local-development-only",
 )
 DEBUG = _env_bool("DEBUG", False)
+import os
+
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if host.strip()
+    "foodieplug.vercel.app",
+    "foodieplug-kny9vh3ii-codex-labs2.vercel.app",
+    "localhost",
+    "127.0.0.1",
 ]
+
+extra_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+
+ALLOWED_HOSTS.extend(
+    host.strip()
+    for host in extra_hosts.split(",")
+    if host.strip()
+)
+
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
