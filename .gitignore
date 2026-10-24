@@ -3,3 +3,5 @@
 !.env.example
 backups/
 foodplanner/*.sqlite3.backup
+.neon
+node_modules/
